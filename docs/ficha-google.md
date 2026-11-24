@@ -54,6 +54,9 @@ Esta tarifa sustituye a la de la issue M2.2.
 | 3 splits | 210 € | 260 € |
 | Cada split adicional | +55 € | +55 € |
 | Fuera de los 8 municipios | +18 € | +15 € |
+| Unidad exterior accesible sin altura | +20 € | +20 € |
+
+**Precio de lanzamiento:** 1 split en casa a 59 € (IVA incluido), sin pedir reseña a cambio. Fecha de fin pendiente (M2.2). En la ficha se publica como *Oferta* con esa fecha de fin, no en la descripción del servicio.
 
 Sin IVA, la tarifa de casa es 69 / 125 / 175 / +45 € (+15 € de desplazamiento). En la ficha y en la web, a los particulares se les muestra siempre el precio con IVA (obligatorio por la normativa de consumidores).
 
