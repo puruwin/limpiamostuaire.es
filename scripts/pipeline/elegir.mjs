@@ -19,7 +19,7 @@ output('log', log.number);
 const pkg = existsSync('package.json') ? JSON.parse(readFileSync('package.json', 'utf8')) : {};
 const missing = cfg.requiredScripts.filter((s) => !pkg.scripts?.[s]);
 if (missing.length) {
-  await commentOnce(log.number, `⛔ No arranco: al gate le faltan scripts en \`${cfg.baseBranch}\`: ${missing.map((s) => `\`${s}\``).join(', ')}. Se hacen de día, con revisión (ver docs/pipeline-nocturna.md).`);
+  await commentOnce(log.number, `⛔ No arranco: al gate le faltan scripts en \`${cfg.baseBranch}\`: ${missing.map((s) => `\`${s}\``).join(', ')}. Se hacen de día, con revisión (ver docs/desarrollo-autonomo.md).`);
   output('issue', '');
   process.exit(0);
 }
