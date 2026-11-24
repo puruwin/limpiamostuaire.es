@@ -15,7 +15,7 @@ VPS: `187.124.51.152` (sin IPv6).
 | `@` | A | `187.124.51.152` | ✅ |
 | `www` | CNAME | `limpiamostuaire.es.` | ✅ |
 | `staging` | A | `187.124.51.152` | ✅ |
-| `@` | CAA | `0 issue "letsencrypt.org"` | ⏳ Opcional, recomendado |
+| `@` | CAA | `0 issue "letsencrypt.org"` | ✅ |
 
 El CAA hace que solo Let's Encrypt pueda emitir certificados para el dominio. Si el VPS usa otra CA, hay que cambiar el valor.
 Si algún día el VPS tiene IPv6, hay que añadir registros AAAA para `@` y `staging`.
@@ -33,7 +33,7 @@ Si algún día el VPS tiene IPv6, hay que añadir registros AAAA para `@` y `sta
 | `_dmarc` | TXT | `v=DMARC1; p=none; rua=mailto:dmarc@limpiamostuaire.es; adkim=r; aspf=r; fo=1` | ✅ |
 
 - Solo puede haber **un** TXT que empiece por `v=spf1` en `@`. Resend no se añade aquí, porque envía desde su propio subdominio.
-- `dmarc@limpiamostuaire.es` es un **alias de correo** de `hola@`: lo que llega a `dmarc@` acaba en el buzón `hola@`, sin crear otro buzón. Si el alias no existe, los informes DMARC rebotan. Se crea en hPanel → *Correos* → el dominio → *Alias de correo* (o *Reenvíos*).
+- `dmarc@limpiamostuaire.es` es un **alias de correo** de `hola@`: lo que llega a `dmarc@` acaba en el buzón `hola@`, sin crear otro buzón. Creado el 2026-11-24. Se gestiona en hPanel → *Correos* → el dominio → *Alias de correo* (o *Reenvíos*).
 - Empezamos con `p=none` para recoger informes. Cuando lleven 2–4 semanas sin fallos de SPF/DKIM, pasar a `p=quarantine`.
 
 ### Envíos del formulario (Resend, subdominio avisos.)
@@ -78,3 +78,4 @@ Prueba de envío (hay que ver `SPF: PASS`, `DKIM: PASS` y `DMARC: PASS`):
 |---|---|
 | 2026-11-24 | Estado inicial: `@` en la página de aparcamiento de Hostinger, DMARC sin `rua`, sin `staging.` ni `avisos.`. |
 | 2026-11-24 | `@` y `staging` apuntan al VPS (`187.124.51.152`). DMARC con `rua`. Buzón `hola@` creado. Dominio `avisos.` verificado en Resend. Prueba de envío hecha. |
+| 2026-11-24 | CAA para Let's Encrypt publicado. Alias `dmarc@` → `hola@` creado. |
