@@ -13,7 +13,12 @@ const sh = (c) => execSync(c, { stdio: 'inherit' });
 const tail = (s, n = 60) => s.split('\n').slice(-n).join('\n');
 
 let line;
-if (result === 'ok') {
+let stop = false;
+if (result === 'limite') {
+  await comment(LOG, `⏸️ #${ISSUE} ${TITLE}: Claude ha llegado al límite de uso de la suscripción. Se para la noche; la issue sigue en la cola.`);
+  line = null;
+  stop = true;
+} else if (result === 'ok') {
   const branch = `noche/${ISSUE}-${CODE.replace('.', '-')}`;
   sh(`git switch -c ${branch}`);
   sh(`git add -A -- . ':!.noche' ':!.lighthouseci'`);
@@ -38,13 +43,15 @@ if (result === 'ok') {
   await comment(ISSUE, `El gate falló ${cfg.attempts} veces. No se ha fusionado nada.\n\n<details><summary>Final del registro</summary>\n\n\`\`\`\n${tail(gate)}\n\`\`\`\n</details>\n\nEjecución: ${RUN_URL}\nPara reintentar, quita la etiqueta \`auto:bloqueada\`.`);
   line = `❌ #${ISSUE} ${TITLE}: bloqueada (${tail(gate, 1)})`;
 }
-await comment(LOG, line);
+if (line) await comment(LOG, line);
 
 // Encadenar: otra ejecución con staging ya actualizado, mientras dure la noche.
 const n = Number(COUNT || 1);
 const hour = new Date().getUTCHours();
 const nightActive = hour >= 20 || hour < cfg.nightEndsUtcHour;
-if (n < cfg.maxIssuesPerNight && nightActive && !process.env.NO_CHAIN) {
+if (stop) {
+  console.log('Límite de uso: no se encadena.');
+} else if (n < cfg.maxIssuesPerNight && nightActive && !process.env.NO_CHAIN) {
   await gh(`{repo}/actions/workflows/noche.yml/dispatches`, {
     method: 'POST',
     body: { ref: process.env.DEFAULT_BRANCH, inputs: { count: String(n + 1), night: nightOf() } },

@@ -2,7 +2,7 @@
   "$comment": "Configuración de la pipeline nocturna (docs/pipeline-nocturna.md). Para otra web: copiar .github/workflows/noche.yml, scripts/pipeline/ y este fichero, y ajustar los valores.",
   "owner": "puruwin",
   "baseBranch": "staging",
-  "maxIssuesPerNight": 6,
+  "maxIssuesPerNight": 3,
   "nightEndsUtcHour": 5,
   "attempts": 2,
   "claudeTimeoutMinutes": 45,

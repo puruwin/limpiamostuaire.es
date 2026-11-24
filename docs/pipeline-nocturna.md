@@ -27,11 +27,11 @@ Claude desarrolla issues de noche, una detrás de otra, y las fusiona en `stagin
 1. Fusionar este PR en `main` y crear `staging` desde `main` (si no existe).
 2. Hacer de día, con revisión, M1.1, M1.5 y M1.8: son los que definen el gate.
 3. Elegir **un** secreto de Anthropic en Settings → Secrets and variables → Actions:
-   - `CLAUDE_CODE_OAUTH_TOKEN`: sale de `claude setup-token` y gasta de tu suscripción Pro/Max.
+   - `CLAUDE_CODE_OAUTH_TOKEN`: sale de `claude setup-token` y gasta de tu suscripción Pro/Max. Con Pro, la noche comparte cuota con lo que uses de día; si se llega al límite, la noche se para sin etiquetar la issue (⏸️ en el resumen) y sigue al día siguiente.
    - o `ANTHROPIC_API_KEY`: pago por uso. En ese caso pon también `NOCHE_PRESUPUESTO_USD` (p. ej. `5`, por intento).
 4. Variables del repositorio:
    - `NOCHE_ACTIVA=true`: el interruptor. Sin ella no corre nada.
-   - `NOCHE_MODELO` (opcional): alias del modelo, p. ej. `opus` o `sonnet`.
+   - `NOCHE_MODELO` (opcional, por defecto `sonnet`): alias del modelo.
    - `STAGING_URL` (opcional): sale en el resumen.
 5. Settings → Actions → General → Workflow permissions: «Read and write» y «Allow GitHub Actions to create and approve pull requests».
 6. Protección de `main`: exigir PR, el CI en verde y tu aprobación. `staging` no se protege: la pipeline fusiona con `GITHUB_TOKEN`.

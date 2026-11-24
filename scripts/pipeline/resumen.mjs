@@ -14,7 +14,7 @@ const comments = await gh(`{repo}/issues/${log.number}/comments?per_page=100`);
 const lines = comments.map((c) => c.body.split('\n')[0]);
 const done = lines.filter((l) => l.startsWith('✅'));
 const blocked = lines.filter((l) => l.startsWith('❌') || l.startsWith('🙋'));
-const other = lines.filter((l) => l.startsWith('⛔') || l.startsWith('🌙'));
+const other = lines.filter((l) => l.startsWith('⛔') || l.startsWith('🌙') || l.startsWith('⏸️'));
 
 const body = [
   `## Resumen de la noche ${night}`,

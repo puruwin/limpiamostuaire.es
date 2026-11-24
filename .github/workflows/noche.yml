@@ -79,7 +79,8 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          CLAUDE_MODEL: ${{ vars.NOCHE_MODELO }}
+          # Con Pro, Sonnet: Opus agota la cuota en una o dos issues.
+          CLAUDE_MODEL: ${{ vars.NOCHE_MODELO || 'sonnet' }}
           CLAUDE_MAX_BUDGET_USD: ${{ vars.NOCHE_PRESUPUESTO_USD }}
         run: bash scripts/pipeline/trabajar.sh
       - name: Fusionar o bloquear, y encadenar
