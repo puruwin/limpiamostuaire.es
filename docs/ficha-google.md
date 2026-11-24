@@ -31,17 +31,61 @@ La descripción no lleva precios, enlaces ni teléfono, porque Google lo desacon
 
 ## Servicios
 
-### Limpieza de aire acondicionado en casa (249/300)
+Google no admite tablas: cada fila de la tarifa es un **servicio personalizado** con su precio. En el panel: *Editar perfil* → *Servicios* → *Añadir servicio personalizado* → nombre, precio («Fijo») y descripción (máx. 300 caracteres). Los suplementos no son servicios: van al final de cada descripción.
 
-Precio en la ficha: **desde 85 €**
+| Servicio | Precio (fijo) | Caracteres |
+|---|---|---|
+| Limpieza de 1 split en vivienda | 85 € | 236/300 |
+| Limpieza de 2 splits en vivienda | 150 € | 236/300 |
+| Limpieza de 3 splits en vivienda | 210 € | 236/300 |
+| Split adicional en vivienda | 55 € | 170/300 |
+| Limpieza de 1 split en negocio (+ IVA) | 110 € | 251/300 |
+| Limpieza de 2 splits en negocio (+ IVA) | 200 € | 251/300 |
+| Limpieza de 3 splits en negocio (+ IVA) | 260 € | 251/300 |
+| Split adicional en negocio (+ IVA) | 55 € | 202/300 |
 
-> Limpieza en profundidad de split mural en casa: desmontaje, lavado a presión de batería y turbina con funda de recogida y fotos del antes y el después. Unos 60 min por equipo. 1 split 85 €, 2 por 150 €, 3 por 210 € y 55 € cada uno más, IVA incluido.
+### Descripciones
 
-### Limpieza de aire acondicionado para negocios (228/300)
+**Limpieza de 1 split en vivienda — 85 €**
 
-Precio en la ficha: **desde 110 € + IVA**
+> Limpieza en profundidad: desmontaje, lavado a presión de batería y turbina con funda de recogida y fotos del antes y el después. Unos 60 min por equipo. IVA incluido. Unidad exterior sin altura +20 €. Fuera de nuestros municipios +18 €.
 
-> Limpieza en profundidad de splits en oficinas, locales, restaurantes y alojamientos turísticos, con factura. 1 split 110 €, 2 por 200 €, 3 por 260 € y 55 € cada uno más (+ IVA). Presupuesto por WhatsApp con fotos de los equipos.
+**Limpieza de 2 splits en vivienda — 150 €**
+
+> Limpieza en profundidad: desmontaje, lavado a presión de batería y turbina con funda de recogida y fotos del antes y el después. Unos 60 min por equipo. IVA incluido. Unidad exterior sin altura +20 €. Fuera de nuestros municipios +18 €.
+
+**Limpieza de 3 splits en vivienda — 210 €**
+
+> Limpieza en profundidad: desmontaje, lavado a presión de batería y turbina con funda de recogida y fotos del antes y el después. Unos 60 min por equipo. IVA incluido. Unidad exterior sin altura +20 €. Fuera de nuestros municipios +18 €.
+
+**Split adicional en vivienda — 55 €**
+
+> Cada split más a partir del cuarto, en la misma visita. Misma limpieza en profundidad. IVA incluido. Unidad exterior sin altura +20 €. Fuera de nuestros municipios +18 €.
+
+**Limpieza de 1 split en negocio (+ IVA) — 110 €**
+
+> Limpieza en profundidad: desmontaje, lavado a presión de batería y turbina con funda de recogida y fotos del antes y el después. Unos 60 min por equipo. Precio sin IVA, con factura. Unidad exterior sin altura +20 €. Fuera de nuestros municipios +15 €.
+
+**Limpieza de 2 splits en negocio (+ IVA) — 200 €**
+
+> Limpieza en profundidad: desmontaje, lavado a presión de batería y turbina con funda de recogida y fotos del antes y el después. Unos 60 min por equipo. Precio sin IVA, con factura. Unidad exterior sin altura +20 €. Fuera de nuestros municipios +15 €.
+
+**Limpieza de 3 splits en negocio (+ IVA) — 260 €**
+
+> Limpieza en profundidad: desmontaje, lavado a presión de batería y turbina con funda de recogida y fotos del antes y el después. Unos 60 min por equipo. Precio sin IVA, con factura. Unidad exterior sin altura +20 €. Fuera de nuestros municipios +15 €.
+
+**Split adicional en negocio (+ IVA) — 55 €**
+
+> Cada split más a partir del cuarto, en la misma visita. Oficinas, locales, restaurantes y alojamientos. Precio sin IVA, con factura. Unidad exterior sin altura +20 €. Fuera de nuestros municipios +15 €.
+
+### Precio de lanzamiento (Oferta)
+
+No se pone como servicio: se publica en *Añadir actualización* → *Oferta*, con fecha de inicio y de fin.
+
+- Título: `Lanzamiento: 1 split a 59 €`
+- Detalles: `Limpieza en profundidad de un split en vivienda a 59 € IVA incluido. Desmontaje, lavado a presión y fotos del antes y el después.`
+- Botón: *Llamar* o *Más información* (web con UTM).
+- Fecha de fin: la que se fije en M2.2.
 
 ## Tarifa (24-11-2026)
 
