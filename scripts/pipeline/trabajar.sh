@@ -22,7 +22,7 @@ claude_run() {
       ${CLAUDE_MAX_BUDGET_USD:+--max-budget-usd "$CLAUDE_MAX_BUDGET_USD"} \
       --output-format json > ".noche/claude-$2.json"
   local status=$?
-  node -e "const r=require('./.noche/claude-$2.json');console.log('Claude:',r.subtype??'', 'coste', r.total_cost_usd??'?','USD,', r.num_turns??'?','turnos')" 2>/dev/null || true
+  node -e "const fs=require('fs');const r=require('./.noche/claude-$2.json');console.log('Claude:',r.subtype??'', 'coste', r.total_cost_usd??'?','USD,', r.num_turns??'?','turnos');const prev=Number(fs.existsSync('.noche/coste')?fs.readFileSync('.noche/coste','utf8'):0);fs.writeFileSync('.noche/coste',String(prev+(r.total_cost_usd??0)))" 2>/dev/null || true
   return $status
 }
 

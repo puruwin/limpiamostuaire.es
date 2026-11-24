@@ -12,7 +12,7 @@ Claude desarrolla issues de noche, una detrás de otra, y las fusiona en `stagin
 6. **Si falla**, Claude recibe el final del registro y lo intenta otra vez. Si falla dos veces, la issue se etiqueta `auto:bloqueada` y se comenta el error. Sus dependientes quedan fuera solas, porque su dependencia sigue abierta.
 7. **Si pasa**, se abre un PR contra `staging`, se fusiona (squash), se cierra la issue con `en-staging` y se lanza la siguiente ejecución sobre el `staging` ya actualizado.
 8. **Si Claude ve que necesita algo de David**, no hace la issue a medias: la etiqueta `auto:necesita-david` y explica qué falta.
-9. Para cuando llega a `maxIssuesPerNight` o a las 05:00 UTC.
+9. Para a las 05:00 UTC, al llegar al límite de uso de Claude o al superar `weeklyBudgetUsd` (coste equivalente de los últimos 7 días; es la aproximación al 90 % del uso semanal, porque Claude Code no expone ese porcentaje a scripts). `maxIssuesPerNight` es opcional.
 10. **07:00**: el resumen se escribe en la issue «Noche AAAA-MM-DD», que se asigna a David (le llega el aviso entonces, no de madrugada), y se lanza el despliegue de staging (`deploy.yml` o `ci.yml` con `workflow_dispatch`), porque los push hechos con `GITHUB_TOKEN` no disparan workflows.
 
 ## Qué hace David

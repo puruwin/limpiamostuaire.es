@@ -71,6 +71,11 @@ export function nightOf(date = new Date()) {
   return d.toISOString().slice(0, 10);
 }
 
+// Suma las marcas «[coste:1.23]» de los comentarios de registro.
+export function sumCosts(bodies) {
+  return bodies.reduce((t, b) => t + [...(b ?? '').matchAll(/\[coste:([\d.]+)\]/g)].reduce((s, m) => s + Number(m[1]), 0), 0);
+}
+
 // ---------- red ----------
 
 const REPO = process.env.GITHUB_REPOSITORY;
@@ -123,6 +128,18 @@ export async function nightLog(night = nightOf(), { create = true } = {}) {
     method: 'POST',
     body: { title, labels: ['resumen-nocturno'], body: `Registro de la pipeline nocturna. El resumen llega a las 7:00.\n` },
   });
+}
+
+// Coste equivalente gastado en los últimos 7 días, sacado de los registros de noche.
+export async function weeklyCost() {
+  const since = new Date(Date.now() - 7 * 86400 * 1000).toISOString();
+  const logs = await gh(`{repo}/issues?labels=resumen-nocturno&state=all&since=${since}&per_page=20`);
+  const bodies = [];
+  for (const l of logs) {
+    const cs = await gh(`{repo}/issues/${l.number}/comments?since=${since}&per_page=100`);
+    bodies.push(...cs.map((c) => c.body));
+  }
+  return sumCosts(bodies);
 }
 
 export const comment = (number, body) =>

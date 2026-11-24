@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseCode, parseDeps, depSatisfied, eligible, isProtected, nightOf } from './lib.mjs';
+import { parseCode, parseDeps, depSatisfied, eligible, isProtected, nightOf, sumCosts } from './lib.mjs';
 
 const cfg = {
   owner: 'puruwin',
@@ -68,4 +68,8 @@ test('nightOf: la madrugada es de la noche anterior', () => {
   assert.equal(nightOf(new Date('2026-11-25T23:00:00Z')), '2026-11-25');
   assert.equal(nightOf(new Date('2026-11-26T04:30:00Z')), '2026-11-25');
   assert.equal(nightOf(new Date('2026-11-26T06:00:00Z')), '2026-11-25');
+});
+
+test('sumCosts', () => {
+  assert.equal(sumCosts(['✅ #9 M1.3 [coste:1.50]', '❌ #13 M1.7 [coste:0.25]', 'sin marca', null]), 1.75);
 });

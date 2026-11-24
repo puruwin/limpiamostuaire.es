@@ -43,7 +43,8 @@ if (result === 'limite') {
   await comment(ISSUE, `El gate falló ${cfg.attempts} veces. No se ha fusionado nada.\n\n<details><summary>Final del registro</summary>\n\n\`\`\`\n${tail(gate)}\n\`\`\`\n</details>\n\nEjecución: ${RUN_URL}\nPara reintentar, quita la etiqueta \`auto:bloqueada\`.`);
   line = `❌ #${ISSUE} ${TITLE}: bloqueada (${tail(gate, 1)})`;
 }
-if (line) await comment(LOG, line);
+const cost = Number(read('.noche/coste') || 0);
+if (line) await comment(LOG, `${line} [coste:${cost.toFixed(2)}]`);
 
 // Encadenar: otra ejecución con staging ya actualizado, mientras dure la noche.
 const n = Number(COUNT || 1);
@@ -51,12 +52,12 @@ const hour = new Date().getUTCHours();
 const nightActive = hour >= 20 || hour < cfg.nightEndsUtcHour;
 if (stop) {
   console.log('Límite de uso: no se encadena.');
-} else if (n < cfg.maxIssuesPerNight && nightActive && !process.env.NO_CHAIN) {
+} else if (n < (cfg.maxIssuesPerNight ?? Infinity) && nightActive && !process.env.NO_CHAIN) {
   await gh(`{repo}/actions/workflows/noche.yml/dispatches`, {
     method: 'POST',
     body: { ref: process.env.DEFAULT_BRANCH, inputs: { count: String(n + 1), night: nightOf() } },
   });
   console.log(`Encadenada la ejecución ${n + 1}`);
 } else {
-  await comment(LOG, `🌅 Fin de la noche tras ${n} issue(s)${nightActive ? ` (límite de ${cfg.maxIssuesPerNight})` : ' (fuera de horario)'}.`);
+  await comment(LOG, `🌅 Fin de la noche tras ${n} issue(s)${nightActive ? (process.env.NO_CHAIN ? ' (issue suelta)' : ` (límite de ${cfg.maxIssuesPerNight})`) : ' (fuera de horario)'}.`);
 }

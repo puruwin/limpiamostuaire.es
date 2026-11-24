@@ -2,7 +2,7 @@
 // Salidas: issue (número o vacío), code, title, log (issue de registro de la noche).
 // Con ISSUE=<n> fuerza esa issue (workflow_dispatch manual), si es elegible.
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
-import { config, allIssues, eligible, ensureLabels, nightLog, comment, output } from './lib.mjs';
+import { config, allIssues, eligible, ensureLabels, nightLog, comment, output, weeklyCost } from './lib.mjs';
 
 const cfg = config();
 await ensureLabels();
@@ -15,6 +15,15 @@ if (missing.length) {
   await comment(log.number, `⛔ No arranco: al gate le faltan scripts en \`${cfg.baseBranch}\`: ${missing.map((s) => `\`${s}\``).join(', ')}. Se hacen de día, con revisión (ver docs/pipeline-nocturna.md).`);
   output('issue', '');
   process.exit(0);
+}
+
+if (cfg.weeklyBudgetUsd) {
+  const spent = await weeklyCost();
+  if (spent >= cfg.weeklyBudgetUsd) {
+    await comment(log.number, `⏸️ Tope semanal alcanzado: ${spent.toFixed(2)} de ${cfg.weeklyBudgetUsd} USD equivalentes en 7 días. Se para la noche.`);
+    output('issue', '');
+    process.exit(0);
+  }
 }
 
 const issues = await allIssues();
