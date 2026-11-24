@@ -1,0 +1,57 @@
+{
+  "$comment": "Configuración de la pipeline nocturna (docs/pipeline-nocturna.md). Para otra web: copiar .github/workflows/noche.yml, scripts/pipeline/ y este fichero, y ajustar los valores.",
+  "owner": "puruwin",
+  "baseBranch": "staging",
+  "maxIssuesPerNight": 6,
+  "nightEndsUtcHour": 5,
+  "attempts": 2,
+  "claudeTimeoutMinutes": 45,
+  "excludedLabels": [
+    "fuera-de-codigo",
+    "decision",
+    "bloqueado:negocio",
+    "fase-posterior",
+    "auto:bloqueada",
+    "auto:necesita-david"
+  ],
+  "excludedMilestonePrefixes": ["M0"],
+  "excludedCodes": {
+    "M1.1": "Crea el proyecto y el gate: se hace de día, con revisión.",
+    "M1.2": "VPS, SSH y secretos: necesita a David.",
+    "M1.5": "Define check:seo, que forma parte del gate.",
+    "M1.8": "Define check:claims, que forma parte del gate.",
+    "M5.2": "Producción, Search Console y Bing: necesita a David."
+  },
+  "requiredScripts": [
+    "build",
+    "check",
+    "test",
+    "lint",
+    "format:check",
+    "check:seo",
+    "check:links",
+    "check:claims"
+  ],
+  "gate": [
+    "npm run format:check",
+    "npm run lint",
+    "npm run check",
+    "npm test",
+    "npm run build",
+    "npm run check:seo",
+    "npm run check:links",
+    "npm run check:claims",
+    "node scripts/pipeline/lighthouse-todas.mjs"
+  ],
+  "protectedPaths": [
+    ".github/",
+    "scripts/pipeline/",
+    "pipeline.config.json",
+    "lighthouserc.json",
+    "scripts/check-*.mjs",
+    "eslint.config.js",
+    ".prettierrc*",
+    "tsconfig.json"
+  ],
+  "lighthouseMinScore": 0.95
+}

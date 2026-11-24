@@ -1,0 +1,117 @@
+# Pipeline nocturna: una issue por ejecución, en serie, contra staging.
+# Cada ejecución encadena la siguiente con staging ya actualizado.
+# Cómo funciona y cómo activarla: docs/pipeline-nocturna.md
+name: Noche
+
+on:
+  schedule:
+    - cron: '0 23 * * *' # 00:00 en Madrid (invierno), 01:00 (verano)
+    - cron: '0 6 * * *' # resumen: 07:00 en Madrid (invierno), 08:00 (verano)
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: 'Número de una issue concreta (opcional, sin encadenar)'
+        required: false
+      count:
+        description: 'Uso interno: posición en la noche'
+        required: false
+        default: '1'
+      night:
+        description: 'Uso interno: noche'
+        required: false
+      resumen:
+        description: 'Generar el resumen de la mañana'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: write
+
+concurrency:
+  group: noche
+  cancel-in-progress: false
+
+env:
+  CLAUDE_CODE_VERSION: '2.1.331'
+
+jobs:
+  issue:
+    # Interruptor: variable de repositorio NOCHE_ACTIVA=true.
+    if: vars.NOCHE_ACTIVA == 'true' && github.event.schedule != '0 6 * * *' && !inputs.resumen
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SITE_ENV: staging
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: staging
+          fetch-depth: 0
+          # Sin credenciales en .git/config: Claude no puede hacer push.
+          persist-credentials: false
+      # Los scripts de la pipeline salen siempre de main: una rama no puede cambiar su propio gate.
+      - name: Pipeline y gate desde main
+        # Se superponen en un commit local que sirve de base: el gate compara contra él.
+        run: |
+          git fetch -q "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" ${{ github.event.repository.default_branch }}
+          git checkout -q FETCH_HEAD -- scripts/pipeline pipeline.config.json
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -q -m "Pipeline nocturna sincronizada desde main" || true
+      - name: Elegir issue
+        id: pick
+        env:
+          ISSUE: ${{ inputs.issue }}
+        run: node scripts/pipeline/elegir.mjs
+      - uses: actions/setup-node@v7
+        if: steps.pick.outputs.issue != ''
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - name: Instalar dependencias
+        if: steps.pick.outputs.issue != ''
+        run: npm ci
+      - name: Claude + gate (hasta 2 intentos)
+        if: steps.pick.outputs.issue != ''
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          CLAUDE_MODEL: ${{ vars.NOCHE_MODELO }}
+          CLAUDE_MAX_BUDGET_USD: ${{ vars.NOCHE_PRESUPUESTO_USD }}
+        run: bash scripts/pipeline/trabajar.sh
+      - name: Fusionar o bloquear, y encadenar
+        if: steps.pick.outputs.issue != '' && !cancelled()
+        env:
+          ISSUE: ${{ steps.pick.outputs.issue }}
+          CODE: ${{ steps.pick.outputs.code }}
+          TITLE: ${{ steps.pick.outputs.title }}
+          LOG: ${{ steps.pick.outputs.log }}
+          COUNT: ${{ inputs.count || '1' }}
+          NO_CHAIN: ${{ inputs.issue }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: node scripts/pipeline/cerrar.mjs
+      - uses: actions/upload-artifact@v7
+        if: always() && steps.pick.outputs.issue != ''
+        with:
+          name: noche-${{ steps.pick.outputs.issue }}
+          path: |
+            .noche/
+            .lighthouseci/
+          include-hidden-files: true
+          retention-days: 14
+
+  resumen:
+    if: github.event.schedule == '0 6 * * *' || inputs.resumen
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      STAGING_URL: ${{ vars.STAGING_URL }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - run: node scripts/pipeline/resumen.mjs
