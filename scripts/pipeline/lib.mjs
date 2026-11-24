@@ -29,7 +29,7 @@ export function depSatisfied(dep, issues) {
   return matches.every((i) => i.state === 'closed');
 }
 
-// Devuelve las issues que se pueden hacer esta noche, en orden, y por qué se
+// Devuelve las issues que se pueden hacer ahora, en orden, y por qué se
 // descarta cada una de las demás.
 export function eligible(issues, cfg) {
   const ok = [];
@@ -65,9 +65,10 @@ export function isProtected(path, patterns) {
   });
 }
 
-// Noche a la que pertenece una fecha: lo que pasa antes de las 12:00 UTC es de la noche anterior.
-export function nightOf(date = new Date()) {
-  const d = new Date(date.getTime() - 12 * 3600 * 1000);
+// Día de registro: va de 06:00 a 06:00 UTC, para que el resumen de la mañana
+// recoja todo lo de la noche anterior.
+export function dayOf(date = new Date()) {
+  const d = new Date(date.getTime() - 6 * 3600 * 1000);
   return d.toISOString().slice(0, 10);
 }
 
@@ -108,7 +109,7 @@ const LABELS = {
   'auto:bloqueada': ['b60205', 'La pipeline nocturna falló dos veces con esta issue'],
   'auto:necesita-david': ['fbca04', 'La pipeline nocturna necesita información de David'],
   'en-staging': ['0e8a16', 'Hecha por la pipeline nocturna, fusionada en staging'],
-  'resumen-nocturno': ['ededed', 'Registro de una noche de la pipeline'],
+  'registro-autonomo': ['ededed', 'Registro diario del desarrollo autónomo'],
 };
 
 export async function ensureLabels() {
@@ -118,22 +119,22 @@ export async function ensureLabels() {
   }
 }
 
-// Issue que hace de registro de la noche. Se crea sin asignar para no avisar de madrugada.
-export async function nightLog(night = nightOf(), { create = true } = {}) {
-  const title = `Noche ${night}`;
-  const open = await gh(`{repo}/issues?labels=resumen-nocturno&state=all&per_page=20`);
+// Issue que hace de registro del día. Se crea sin asignar para no avisar a deshoras.
+export async function dayLog(day = dayOf(), { create = true } = {}) {
+  const title = `Registro ${day}`;
+  const open = await gh(`{repo}/issues?labels=registro-autonomo&state=all&per_page=20`);
   const found = open.find((i) => i.title === title);
   if (found || !create) return found ?? null;
   return gh('{repo}/issues', {
     method: 'POST',
-    body: { title, labels: ['resumen-nocturno'], body: `Registro de la pipeline nocturna. El resumen llega a las 7:00.\n` },
+    body: { title, labels: ['registro-autonomo'], body: `Registro del desarrollo autónomo. El resumen llega a las 7:00.\n` },
   });
 }
 
-// Coste equivalente gastado en los últimos 7 días, sacado de los registros de noche.
+// Coste equivalente gastado en los últimos 7 días, sacado de los registros.
 export async function weeklyCost() {
   const since = new Date(Date.now() - 7 * 86400 * 1000).toISOString();
-  const logs = await gh(`{repo}/issues?labels=resumen-nocturno&state=all&since=${since}&per_page=20`);
+  const logs = await gh(`{repo}/issues?labels=registro-autonomo&state=all&since=${since}&per_page=20`);
   const bodies = [];
   for (const l of logs) {
     const cs = await gh(`{repo}/issues/${l.number}/comments?since=${since}&per_page=100`);
@@ -144,6 +145,39 @@ export async function weeklyCost() {
 
 export const comment = (number, body) =>
   gh(`{repo}/issues/${number}/comments`, { method: 'POST', body: { body } });
+
+// Primeras líneas de los últimos comentarios del registro.
+export async function lastEntries(number, k = 10) {
+  const all = await gh(`{repo}/issues/${number}/comments?per_page=100`);
+  return all.slice(-k).map((c) => c.body.split('\n')[0]);
+}
+
+// No repetir el mismo aviso cada vez que el cron reintenta.
+export async function commentOnce(number, body) {
+  const [last] = await lastEntries(number, 1);
+  if (last && last.slice(0, 2) === body.slice(0, 2) && last.split(':')[0] === body.split(':')[0]) return;
+  await comment(number, body);
+}
+
+// Último aviso de los registros recientes (el de hoy puede estar vacío).
+export async function lastLogEntry() {
+  const logs = await gh(`{repo}/issues?labels=registro-autonomo&state=all&sort=created&direction=desc&per_page=3`);
+  for (const l of logs) {
+    const [last] = await lastEntries(l.number, 1);
+    if (last) return last;
+  }
+  return null;
+}
+
+// N fallos de gate seguidos apuntan a algo roto en general, no a una issue.
+export function consecutiveFailures(lines) {
+  let n = 0;
+  for (const l of [...lines].reverse()) {
+    if (l.startsWith('❌')) n++;
+    else if (l.startsWith('✅') || l.startsWith('🙋')) break;
+  }
+  return n;
+}
 
 export function output(key, value) {
   if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `${key}=${value}\n`);

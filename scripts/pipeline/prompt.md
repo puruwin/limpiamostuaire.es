@@ -1,4 +1,4 @@
-Trabajas sin supervisión, de noche, en el repositorio de limpiamostuaire.es. Nadie va a responder preguntas hasta mañana.
+Trabajas sin supervisión en el repositorio de limpiamostuaire.es. Nadie va a responder preguntas mientras trabajas.
 
 Tu tarea es implementar UNA issue, la de `.noche/issue.md`. Léela entera, y lee también `CLAUDE.md` y `docs/` antes de empezar.
 

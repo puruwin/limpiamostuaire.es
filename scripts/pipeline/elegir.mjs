@@ -1,18 +1,25 @@
 // Comprueba que el gate está completo y elige la siguiente issue.
-// Salidas: issue (número o vacío), code, title, log (issue de registro de la noche).
+// Salidas: issue (número o vacío), code, title, log (issue de registro del día).
 // Con ISSUE=<n> fuerza esa issue (workflow_dispatch manual), si es elegible.
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
-import { config, allIssues, eligible, ensureLabels, nightLog, comment, output, weeklyCost } from './lib.mjs';
+import { config, allIssues, eligible, ensureLabels, dayLog, commentOnce, output, weeklyCost, lastLogEntry } from './lib.mjs';
 
 const cfg = config();
 await ensureLabels();
-const log = await nightLog();
+
+// Tras un 🛑 el cron no rearranca: hace falta lanzarlo a mano (Run workflow).
+if (process.env.EVENT === 'schedule' && (await lastLogEntry())?.startsWith('🛑')) {
+  console.log('Parado por fallos seguidos; esperando arranque manual.');
+  output('issue', '');
+  process.exit(0);
+}
+const log = await dayLog();
 output('log', log.number);
 
 const pkg = existsSync('package.json') ? JSON.parse(readFileSync('package.json', 'utf8')) : {};
 const missing = cfg.requiredScripts.filter((s) => !pkg.scripts?.[s]);
 if (missing.length) {
-  await comment(log.number, `⛔ No arranco: al gate le faltan scripts en \`${cfg.baseBranch}\`: ${missing.map((s) => `\`${s}\``).join(', ')}. Se hacen de día, con revisión (ver docs/pipeline-nocturna.md).`);
+  await commentOnce(log.number, `⛔ No arranco: al gate le faltan scripts en \`${cfg.baseBranch}\`: ${missing.map((s) => `\`${s}\``).join(', ')}. Se hacen de día, con revisión (ver docs/pipeline-nocturna.md).`);
   output('issue', '');
   process.exit(0);
 }
@@ -20,7 +27,7 @@ if (missing.length) {
 if (cfg.weeklyBudgetUsd) {
   const spent = await weeklyCost();
   if (spent >= cfg.weeklyBudgetUsd) {
-    await comment(log.number, `⏸️ Tope semanal alcanzado: ${spent.toFixed(2)} de ${cfg.weeklyBudgetUsd} USD equivalentes en 7 días. Se para la noche.`);
+    await commentOnce(log.number, `⏸️ Tope semanal: ${spent.toFixed(2)} de ${cfg.weeklyBudgetUsd} USD equivalentes en 7 días. Parado.`);
     output('issue', '');
     process.exit(0);
   }
@@ -35,7 +42,7 @@ if (!next) {
   const why = process.env.ISSUE
     ? `#${process.env.ISSUE} no es elegible: ${skipped.find((s) => s.number === Number(process.env.ISSUE))?.why ?? 'cerrada o sin código'}.`
     : 'No queda ninguna issue elegible.';
-  await comment(log.number, `🌙 ${why}\n\n<details><summary>Descartadas</summary>\n\n${skipped.map((s) => `- #${s.number} ${s.code}: ${s.why}`).join('\n')}\n</details>`);
+  await commentOnce(log.number, `🌙 ${why}\n\n<details><summary>Descartadas</summary>\n\n${skipped.map((s) => `- #${s.number} ${s.code}: ${s.why}`).join('\n')}\n</details>`);
   output('issue', '');
   process.exit(0);
 }

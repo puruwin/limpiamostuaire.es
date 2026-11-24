@@ -18,7 +18,7 @@ execSync('git reset -q');
 
 const touched = changes.map((c) => c.at(-1)).filter((p) => isProtected(p, cfg.protectedPaths));
 if (touched.length) {
-  say(`FALLO: has tocado rutas protegidas (el gate no se cambia de noche): ${touched.join(', ')}. Deshaz esos cambios.`);
+  say(`FALLO: has tocado rutas protegidas (el gate no se cambia sin supervisión): ${touched.join(', ')}. Deshaz esos cambios.`);
   process.exit(1);
 }
 const deletedTests = changes.filter(([s, p]) => s === 'D' && /(\.test\.|\/tests?\/)/.test(p)).map((c) => c[1]);

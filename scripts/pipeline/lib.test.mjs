@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseCode, parseDeps, depSatisfied, eligible, isProtected, nightOf, sumCosts } from './lib.mjs';
+import { parseCode, parseDeps, depSatisfied, eligible, isProtected, dayOf, sumCosts, consecutiveFailures } from './lib.mjs';
 
 const cfg = {
   owner: 'puruwin',
@@ -64,10 +64,16 @@ test('isProtected', () => {
   assert.equal(isProtected('src/pages/index.astro', p), false);
 });
 
-test('nightOf: la madrugada es de la noche anterior', () => {
-  assert.equal(nightOf(new Date('2026-11-25T23:00:00Z')), '2026-11-25');
-  assert.equal(nightOf(new Date('2026-11-26T04:30:00Z')), '2026-11-25');
-  assert.equal(nightOf(new Date('2026-11-26T06:00:00Z')), '2026-11-25');
+test('dayOf: el día va de 06:00 a 06:00 UTC', () => {
+  assert.equal(dayOf(new Date('2026-11-25T23:00:00Z')), '2026-11-25');
+  assert.equal(dayOf(new Date('2026-11-26T04:30:00Z')), '2026-11-25');
+  assert.equal(dayOf(new Date('2026-11-26T06:00:00Z')), '2026-11-26');
+});
+
+test('consecutiveFailures', () => {
+  assert.equal(consecutiveFailures(['✅ a', '❌ b', '⏸️ c', '❌ d', '❌ e']), 3);
+  assert.equal(consecutiveFailures(['❌ a', '🙋 b', '❌ c']), 1);
+  assert.equal(consecutiveFailures(['✅ a']), 0);
 });
 
 test('sumCosts', () => {

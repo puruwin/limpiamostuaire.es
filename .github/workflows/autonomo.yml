@@ -1,11 +1,14 @@
-# Pipeline nocturna: una issue por ejecución, en serie, contra staging.
-# Cada ejecución encadena la siguiente con staging ya actualizado.
-# Cómo funciona y cómo activarla: docs/pipeline-nocturna.md
-name: Noche
+# Desarrollo autónomo: una issue por ejecución, en serie, contra staging.
+# Cada ejecución encadena la siguiente con staging ya actualizado, hasta un
+# bloqueo importante o hasta que se apague AUTO_ACTIVO.
+# Cómo funciona y cómo activarlo: docs/desarrollo-autonomo.md
+name: Desarrollo autónomo
 
 on:
   schedule:
-    - cron: '0 23 * * *' # 00:00 en Madrid (invierno), 01:00 (verano)
+    # Rearranque: si la cadena se paró por el límite de uso o por falta de
+    # issues, vuelve a intentarlo. Si ya hay una ejecución, espera en cola.
+    - cron: '17 */2 * * *'
     - cron: '0 6 * * *' # resumen: 07:00 en Madrid (invierno), 08:00 (verano)
   workflow_dispatch:
     inputs:
@@ -13,12 +16,9 @@ on:
         description: 'Número de una issue concreta (opcional, sin encadenar)'
         required: false
       count:
-        description: 'Uso interno: posición en la noche'
+        description: 'Uso interno: posición en la cadena'
         required: false
         default: '1'
-      night:
-        description: 'Uso interno: noche'
-        required: false
       resumen:
         description: 'Generar el resumen de la mañana'
         type: boolean
@@ -31,7 +31,7 @@ permissions:
   actions: write
 
 concurrency:
-  group: noche
+  group: autonomo
   cancel-in-progress: false
 
 env:
@@ -39,8 +39,9 @@ env:
 
 jobs:
   issue:
-    # Interruptor: variable de repositorio NOCHE_ACTIVA=true.
-    if: vars.NOCHE_ACTIVA == 'true' && github.event.schedule != '0 6 * * *' && !inputs.resumen
+    # Interruptor: variable de repositorio AUTO_ACTIVO=true. Ponerla a false
+    # para la cadena al terminar la issue en curso.
+    if: vars.AUTO_ACTIVO == 'true' && github.event.schedule != '0 6 * * *' && !inputs.resumen
     runs-on: ubuntu-latest
     timeout-minutes: 120
     env:
@@ -60,11 +61,12 @@ jobs:
           git fetch -q "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" ${{ github.event.repository.default_branch }}
           git checkout -q FETCH_HEAD -- scripts/pipeline pipeline.config.json
           git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
-            commit -q -m "Pipeline nocturna sincronizada desde main" || true
+            commit -q -m "Pipeline sincronizada desde main" || true
       - name: Elegir issue
         id: pick
         env:
           ISSUE: ${{ inputs.issue }}
+          EVENT: ${{ github.event_name }}
         run: node scripts/pipeline/elegir.mjs
       - uses: actions/setup-node@v7
         if: steps.pick.outputs.issue != ''
@@ -80,8 +82,8 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           # Con Pro, Sonnet: Opus agota la cuota en una o dos issues.
-          CLAUDE_MODEL: ${{ vars.NOCHE_MODELO || 'sonnet' }}
-          CLAUDE_MAX_BUDGET_USD: ${{ vars.NOCHE_PRESUPUESTO_USD }}
+          CLAUDE_MODEL: ${{ vars.AUTO_MODELO || 'sonnet' }}
+          CLAUDE_MAX_BUDGET_USD: ${{ vars.AUTO_PRESUPUESTO_USD }}
         run: bash scripts/pipeline/trabajar.sh
       - name: Fusionar o bloquear, y encadenar
         if: steps.pick.outputs.issue != '' && !cancelled()
@@ -98,7 +100,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: always() && steps.pick.outputs.issue != ''
         with:
-          name: noche-${{ steps.pick.outputs.issue }}
+          name: auto-${{ steps.pick.outputs.issue }}
           path: |
             .noche/
             .lighthouseci/
@@ -106,7 +108,7 @@ jobs:
           retention-days: 14
 
   resumen:
-    if: github.event.schedule == '0 6 * * *' || inputs.resumen
+    if: (github.event.schedule == '0 6 * * *' && vars.AUTO_ACTIVO == 'true') || inputs.resumen
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}

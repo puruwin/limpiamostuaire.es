@@ -1,5 +1,5 @@
 // Lighthouse sobre TODAS las páginas de dist/, no sobre una lista fija: una
-// página nueva hecha de noche también tiene que pasar el umbral.
+// página nueva hecha sin supervisión también tiene que pasar el umbral.
 import { readdirSync, statSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { spawnSync } from 'node:child_process';

@@ -1,23 +1,23 @@
-// Resumen de la mañana: junta el registro de la noche, lo deja en la issue,
+// Resumen de la mañana: junta el registro de las últimas 24 h, lo deja en la issue,
 // la asigna a David (así le llega el aviso a una hora normal) y lanza el
 // despliegue de staging si existe.
-import { gh, nightLog, nightOf, config } from './lib.mjs';
+import { gh, dayLog, dayOf, config } from './lib.mjs';
 
 const cfg = config();
-const night = nightOf(new Date(Date.now() - 2 * 3600 * 1000));
-const log = await nightLog(night, { create: false });
+const night = dayOf(new Date(Date.now() - 2 * 3600 * 1000));
+const log = await dayLog(night, { create: false });
 if (!log) {
-  console.log(`No hubo noche ${night}.`);
+  console.log(`Sin registro ${night}.`);
   process.exit(0);
 }
 const comments = await gh(`{repo}/issues/${log.number}/comments?per_page=100`);
 const lines = comments.map((c) => c.body.split('\n')[0]);
 const done = lines.filter((l) => l.startsWith('✅'));
 const blocked = lines.filter((l) => l.startsWith('❌') || l.startsWith('🙋'));
-const other = lines.filter((l) => l.startsWith('⛔') || l.startsWith('🌙') || l.startsWith('⏸️'));
+const other = lines.filter((l) => l.startsWith('⛔') || l.startsWith('🌙') || l.startsWith('⏸️') || l.startsWith('🛑') || l.startsWith('🌅'));
 
 const body = [
-  `## Resumen de la noche ${night}`,
+  `## Resumen ${night} (hasta las 7:00)`,
   '',
   `**Hechas y fusionadas en \`${cfg.baseBranch}\` (${done.length}):**`,
   ...(done.length ? done.map((l) => `- ${l.slice(2)}`) : ['- Ninguna']),

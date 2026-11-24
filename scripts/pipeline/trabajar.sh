@@ -45,7 +45,7 @@ Corrige la causa. Tus cambios anteriores siguen en el árbol de trabajo." "$i"
   echo "::endgroup::"
 
   # Límite de uso de la suscripción (Pro: ventana de 5 h y tope semanal). No es
-  # culpa de la issue: se para la noche sin etiquetarla y se reintenta mañana.
+  # culpa de la issue: se para sin etiquetarla y el cron reintenta.
   if node -e "const r=require('./.noche/claude-$i.json');process.exit(r.is_error&&/limit|quota|rate|429|overloaded/i.test(String(r.result))?0:1)" 2>/dev/null; then
     echo limite > .noche/resultado
     exit 0

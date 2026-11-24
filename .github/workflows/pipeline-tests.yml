@@ -2,10 +2,10 @@ name: Tests de la pipeline
 
 on:
   pull_request:
-    paths: ['scripts/pipeline/**', 'pipeline.config.json', '.github/workflows/noche.yml']
+    paths: ['scripts/pipeline/**', 'pipeline.config.json', '.github/workflows/autonomo.yml']
   push:
     branches: [main]
-    paths: ['scripts/pipeline/**', 'pipeline.config.json', '.github/workflows/noche.yml']
+    paths: ['scripts/pipeline/**', 'pipeline.config.json', '.github/workflows/autonomo.yml']
 
 jobs:
   test:
