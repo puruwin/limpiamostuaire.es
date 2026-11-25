@@ -40,7 +40,7 @@ if (result === "limite") {
 } else if (result === "ok") {
   const branch = `auto/${ISSUE}-${CODE.replace(".", "-")}`;
   sh(`git switch -c ${branch}`);
-  sh(`git add -A -- . ':!.noche' ':!.lighthouseci'`);
+  sh(`git add -A`);
   sh(
     `git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -q -m ${JSON.stringify(`${TITLE} (#${ISSUE})\n\nHecha por el desarrollo autónomo: ${RUN_URL}`)}`,
   );

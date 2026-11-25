@@ -16,7 +16,7 @@ const say = (s) => {
 // HEAD = staging + la pipeline de main (commit local del workflow).
 const base = process.env.GATE_BASE ?? "HEAD";
 const changes = execSync(
-  `git add -A -- . ':!.noche' ':!.lighthouseci' && git diff --cached --name-status ${base}`,
+  `git add -A && git diff --cached --name-status ${base}`,
   { encoding: "utf8" },
 )
   .trim()
