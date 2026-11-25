@@ -19,25 +19,33 @@ Sitio estático en español e inglés hecho con [Astro](https://astro.build), Ty
 | `npm run preview`      | Sirve `dist/` en local para revisarlo                          |
 | `npm run check`        | Tipos de Astro y TypeScript (`astro check`), claves de `ui.ts` |
 | `npm test`             | Tests con `node --test` (`src/**/*.test.ts`)                   |
+| `npm run check:robots` | Meta robots de `dist/` según `SITE_ENV`                        |
+| `npm run check:csp`    | CSP de cada página de `dist/`: hashes, sin `unsafe-inline`     |
+| `npm run check:caddy`  | `deploy/Caddyfile` con Caddy real: cabeceras, caché y 301      |
 | `npm run lint`         | ESLint (TypeScript, Astro y accesibilidad)                     |
 | `npm run format`       | Formatea con Prettier (incluye el orden de clases de Tailwind) |
 | `npm run format:check` | Comprueba el formato sin tocar ficheros                        |
 
-El CI (`.github/workflows/ci.yml`) ejecuta `format:check`, `lint`, `check`, `test` y `build` en cada PR y en cada push a `main`. Antes de abrir un PR, pásalos en local.
+Los `check:*` van después de `npm run build`. `check:caddy` necesita el binario de Caddy (`caddy` en el `PATH` o `CADDY=/ruta/caddy`).
 
-Hasta M1.2 todas las páginas llevan `noindex, nofollow`.
+El CI (`.github/workflows/ci.yml`) ejecuta todo lo anterior en cada PR y en cada push a `main`, y despliega: cada PR en `staging.limpiamostuaire.es` (con contraseña) y `main` en `limpiamostuaire.es`. Antes de abrir un PR, pásalos en local.
+
+Solo `SITE_ENV=production` genera páginas indexables; sin variable, el build lleva `noindex`. Hasta el lanzamiento (M5.2), `main` se construye con `provisional`. Detalles, cabeceras de seguridad y puesta en marcha del VPS: [`docs/despliegue.md`](docs/despliegue.md).
 
 ## Estructura
 
 ```text
-astro.config.mjs           site, trailingSlash 'always', build.format 'directory', i18n y fuente Figtree
+astro.config.mjs           site, trailingSlash 'always', build.format 'directory', i18n, fuente Figtree, SITE_ENV y CSP
 src/
   i18n/locales.ts          Idiomas: es en la raíz, en en /en/
   i18n/ui.ts               Cadenas de interfaz de los 2 idiomas
-  layouts/BaseLayout.astro Esqueleto HTML común: fuente, favicon, salto al contenido y <main>
+  layouts/BaseLayout.astro Esqueleto HTML común: fuente, favicon, robots, salto al contenido y <main>
+  lib/site-env.ts          SITE_ENV e isIndexable
   pages/                   Páginas en español; pages/en/, las inglesas
   styles/global.css        Entrada de Tailwind con los colores de DESIGN.md
 public/                    Ficheros que se copian tal cual a dist/ (favicon)
+scripts/                   Comprobaciones check:* sobre dist/ y deploy/
+deploy/Caddyfile           Sitios de producción, www y staging en el VPS
 brand/                     Logos y fuentes (ver DESIGN.md)
 docs/                      Negocio, SEO y decisiones
 ```
