@@ -1,0 +1,39 @@
+---
+import "../styles/global.css";
+import { Font } from "astro:assets";
+import type { Locale } from "../i18n/locales";
+import { useTranslations } from "../i18n/ui";
+
+interface Props {
+  lang: Locale;
+  title: string;
+}
+
+const { lang, title } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Nada es indexable hasta que M1.2 añada SITE_ENV. -->
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <Font cssVariable="--font-figtree" preload />
+    <title>{title}</title>
+  </head>
+  <body class="bg-fondo font-sans text-tinta antialiased">
+    <a
+      href="#contenido"
+      class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:rounded focus:bg-papel focus:px-4 focus:py-2"
+    >
+      {t("a11y.skipToContent")}
+    </a>
+    <main id="contenido">
+      <slot />
+    </main>
+  </body>
+</html>
