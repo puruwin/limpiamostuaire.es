@@ -117,6 +117,6 @@ Sin IVA, la tarifa de casa es 69 / 125 / 175 / +45 € (+15 € de desplazamient
 
 ## Seguimiento
 
-- [x] Ficha creada: fecha 24/11/26 · cuenta ____
-- [ ] Ficha verificada: método ____ · fecha ____
+- [x] Ficha creada: fecha 24/11/26 · cuenta: Google personal de David (correo fuera del repo, que es público)
+- [x] Ficha verificada: método: automática, Google no pidió verificación · fecha 25/11/26
 - [x] Logo cuadrado (avatar redondo de Ti&Di) y portada subidos
