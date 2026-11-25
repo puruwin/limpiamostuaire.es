@@ -17,7 +17,8 @@
     "check:caddy": "node scripts/check-caddy.mjs",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "check:links": "node scripts/check-links.mjs"
   },
   "dependencies": {
     "@fontsource-variable/figtree": "^5.3.0",

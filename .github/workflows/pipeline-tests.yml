@@ -1,0 +1,30 @@
+name: Tests de la pipeline
+
+on:
+  pull_request:
+    paths:
+      [
+        "scripts/pipeline/**",
+        "pipeline.config.json",
+        ".github/workflows/autonomo.yml",
+      ]
+  push:
+    branches: [main]
+    paths:
+      [
+        "scripts/pipeline/**",
+        "pipeline.config.json",
+        ".github/workflows/autonomo.yml",
+      ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: node --test "scripts/pipeline/*.test.mjs"
+      - run: bash -n scripts/pipeline/trabajar.sh
+      - run: node -e "JSON.parse(require('fs').readFileSync('pipeline.config.json','utf8'))"

@@ -1,0 +1,70 @@
+{
+  "$comment": "Configuración del desarrollo autónomo (docs/desarrollo-autonomo.md). Para otra web: copiar .github/workflows/autonomo.yml, scripts/pipeline/ y este fichero, y ajustar los valores.",
+  "owner": "puruwin",
+  "baseBranch": "staging",
+  "maxIssuesPerRun": null,
+  "stopAfterConsecutiveFailures": 3,
+  "weeklyBudgetUsd": null,
+  "$weeklyBudgetUsd": "Aproximación al 90 % del uso semanal: suma del coste equivalente que informa Claude Code en los últimos 7 días. Calibrar con /usage tras unas noches. null = sin tope.",
+  "attempts": 2,
+  "claudeTimeoutMinutes": 45,
+  "excludedLabels": [
+    "fuera-de-codigo",
+    "decision",
+    "bloqueado:negocio",
+    "fase-posterior",
+    "auto:bloqueada",
+    "auto:necesita-david"
+  ],
+  "excludedMilestonePrefixes": ["M0"],
+  "excludedCodes": {
+    "M1.5": "Define check:seo, que forma parte del gate.",
+    "M1.8": "Define check:claims, que forma parte del gate.",
+    "M5.2": "Producción, Search Console y Bing: necesita a David."
+  },
+  "requiredScripts": [
+    "build",
+    "check",
+    "test",
+    "lint",
+    "format:check",
+    "check:robots",
+    "check:csp",
+    "check:caddy",
+    "check:links",
+    "check:seo",
+    "check:claims"
+  ],
+  "gate": [
+    "npm run format:check",
+    "npm run lint",
+    "npm run check",
+    "npm test",
+    "npm run build",
+    "npm run check:robots",
+    "npm run check:csp",
+    "npm run check:caddy",
+    "npm run check:links",
+    "npm run check:seo",
+    "npm run check:claims",
+    "node scripts/pipeline/lighthouse-todas.mjs"
+  ],
+  "protectedPaths": [
+    ".github/",
+    "scripts/pipeline/",
+    "pipeline.config.json",
+    "lighthouserc.json",
+    "scripts/check-*.mjs",
+    "eslint.config.js",
+    ".prettierrc*",
+    ".prettierignore",
+    "tsconfig.json",
+    ".node-version",
+    "deploy/",
+    "src/integrations/",
+    "src/lib/site-env.ts",
+    "src/lib/pendientes.ts"
+  ],
+  "lighthouseMinScore": 0.95,
+  "$protectedPaths": "Además, gate.mjs falla si cambia o desaparece un script de package.json: el gate los ejecuta por nombre."
+}

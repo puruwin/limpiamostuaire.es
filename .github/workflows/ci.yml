@@ -4,6 +4,10 @@ on:
   pull_request:
   push:
     branches: [main]
+  # El desarrollo autónomo lo lanza sobre staging tras cada fusión: lo que
+  # fusiona con GITHUB_TOKEN no dispara workflows (docs/desarrollo-autonomo.md).
+  # Un dispatch siempre despliega staging, nunca producción.
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -13,10 +17,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # PR → staging. main → vars.SITE_ENV (provisional hasta el lanzamiento,
-      # M5.2; production después). Sin la variable, provisional: un olvido nunca
-      # da un build indexable.
-      SITE_ENV: ${{ github.event_name == 'pull_request' && 'staging' || vars.SITE_ENV || 'provisional' }}
+      # Push a main → vars.SITE_ENV (provisional hasta el lanzamiento, M5.2;
+      # production después). Sin la variable, provisional: un olvido nunca da
+      # un build indexable. PR y dispatch → staging.
+      SITE_ENV: ${{ github.event_name == 'push' && (vars.SITE_ENV || 'provisional') || 'staging' }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -31,6 +35,7 @@ jobs:
       - run: npm run build
       - run: npm run check:robots
       - run: npm run check:csp
+      - run: npm run check:links
       # Cabeceras, caché y redirecciones de deploy/Caddyfile, con Caddy real.
       # Versión fijada y verificada con el checksums.txt de la release.
       - name: Instalar Caddy
@@ -58,17 +63,17 @@ jobs:
     needs: build
     if: >-
       vars.DEPLOY_HOST != '' &&
-      (github.event_name == 'push' ||
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch' ||
        github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
     environment:
-      name: ${{ github.event_name == 'pull_request' && 'staging' || 'production' }}
-      url: ${{ github.event_name == 'pull_request' && 'https://staging.limpiamostuaire.es/' || 'https://limpiamostuaire.es/' }}
+      name: ${{ github.event_name == 'push' && 'production' || 'staging' }}
+      url: ${{ github.event_name == 'push' && 'https://limpiamostuaire.es/' || 'https://staging.limpiamostuaire.es/' }}
     concurrency:
-      group: deploy-${{ github.event_name == 'pull_request' && 'staging' || 'production' }}
-      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+      group: deploy-${{ github.event_name == 'push' && 'production' || 'staging' }}
+      cancel-in-progress: ${{ github.event_name != 'push' }}
     env:
-      TARGET: ${{ github.event_name == 'pull_request' && 'staging' || 'production' }}
+      TARGET: ${{ github.event_name == 'push' && 'production' || 'staging' }}
     steps:
       - uses: actions/download-artifact@v8
         with:
