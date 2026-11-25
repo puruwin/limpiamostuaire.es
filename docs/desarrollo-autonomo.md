@@ -8,9 +8,9 @@ Claude resuelve issues una detrás de otra, sin supervisión, y fusiona en `stag
 2. **Comprueba el gate.** Si en `staging` falta alguno de los scripts de `requiredScripts`, no hace nada y lo anota.
 3. **Elige la siguiente issue** (`scripts/pipeline/elegir.mjs`): abierta, creada por `puruwin`, con código `Mx.y` en el título, sin etiquetas excluidas, fuera de `M0` y de `excludedCodes`, y con todas sus dependencias (línea «Depende de:») cerradas. Va por orden de milestone y código.
 4. **Claude la implementa** (`trabajar.sh` + `prompt.md`) en el runner de GitHub, sin token de GitHub: no puede hacer push, fusionar ni tocar issues.
-5. **Gate** (`gate.mjs`): falla si se tocan rutas protegidas, si se borran tests o si no hay cambios. Después ejecuta en orden los comandos de `gate`. Lighthouse se pasa sobre todas las páginas de `dist/`, con un mínimo de 95 en las cuatro categorías.
+5. **Gate** (`gate.mjs`): falla si se tocan rutas protegidas, si se cambia o se quita un script de `package.json` (añadir sí se puede), si se borran tests o si no hay cambios. Después ejecuta en orden los comandos de `gate`. Lighthouse se pasa sobre todas las páginas de `dist/`, con un mínimo de 95 en las cuatro categorías. El build es de staging, con `noindex`: la auditoría `is-crawlable` se salta y `check:robots` comprueba el `noindex`.
 6. **Si falla**, Claude recibe el final del registro y lo intenta otra vez. Si vuelve a fallar, la issue se etiqueta `auto:bloqueada`, se comenta el error y se pasa a la siguiente. Sus dependientes se quedan fuera solas.
-7. **Si pasa**, se abre un PR contra `staging`, se fusiona (squash), se cierra la issue con `en-staging` y se encadena la siguiente ejecución sobre el `staging` ya actualizado.
+7. **Si pasa**, se abre un PR contra `staging`, se fusiona (squash), se cierra la issue con `en-staging`, se lanza el CI sobre `staging` (que despliega la preview en `staging.limpiamostuaire.es`) y se encadena la siguiente ejecución sobre el `staging` ya actualizado.
 8. **Si Claude necesita algo de David**, no hace la issue a medias: la etiqueta `auto:necesita-david` y explica qué falta.
 
 ## Cuándo se para
@@ -22,7 +22,7 @@ Claude resuelve issues una detrás de otra, sin supervisión, y fusiona en `stag
 | `weeklyBudgetUsd` superado (opcional) | ⏸️ en el registro | Al bajar el gasto de los últimos 7 días |
 | No quedan issues elegibles | 🌙 con la lista de descartadas | El cron lo reintenta. Cierra issues de M0 para desbloquear |
 | 3 fallos de gate seguidos (`stopAfterConsecutiveFailures`) | 🛑. Suele ser algo roto en staging o en el gate | Solo a mano, tras revisar |
-| Falta el gate | ⛔ | Hacer M1.1, M1.5 y M1.8 |
+| Falta el gate | ⛔ | Hacer M1.5 (`check:seo`) y M1.8 (`check:claims`) |
 
 Para pararlo ya, cancela la ejecución en curso en Actions y pon `AUTO_ACTIVO=false`.
 
@@ -35,15 +35,15 @@ Para pararlo ya, cancela la ejecución en curso en Actions y pon `AUTO_ACTIVO=fa
 
 ## Activarlo
 
-1. Fusionar este PR en `main`. `staging` ya existe.
-2. Hacer de día, con revisión, M1.1, M1.5 y M1.8, que son los que definen el gate.
+1. Fusionar este PR en `main` y llevar `staging` a `main` (`git push origin origin/main:staging`). `staging` tiene que salir siempre de `main`: si se queda atrás, Claude trabaja sobre código viejo.
+2. Hacer de día, con revisión, M1.5 y M1.8, que crean `check:seo` y `check:claims`. El resto del gate (`check:robots`, `check:csp`, `check:caddy`, `check:links`) ya existe.
 3. Secreto en Settings → Secrets and variables → Actions:
    - `CLAUDE_CODE_OAUTH_TOKEN`: sale de `claude setup-token` y gasta de tu suscripción. Con Pro comparte cuota con lo que uses tú.
    - o `ANTHROPIC_API_KEY`: pago por uso. Pon también `AUTO_PRESUPUESTO_USD` (tope por intento).
 4. Variables del repositorio:
    - `AUTO_ACTIVO=true`: el interruptor.
    - `AUTO_MODELO` (opcional, por defecto `sonnet`).
-   - `STAGING_URL` (opcional): sale en el resumen.
+   - `STAGING_URL` (opcional, por defecto `https://staging.limpiamostuaire.es/`): sale en el resumen.
 5. Settings → Actions → General → Workflow permissions: «Read and write» y «Allow GitHub Actions to create and approve pull requests».
 6. Protección de `main`: exigir PR, el CI en verde y tu aprobación. `staging` no se protege, porque la pipeline fusiona con `GITHUB_TOKEN`.
 
@@ -56,7 +56,8 @@ Claude Code no expone a scripts el porcentaje de uso semanal: `/usage` es intera
 - **El gate decide solo.** Si los checks son flojos, se fusiona código malo. Cada fallo que encuentres en staging debería acabar en un check nuevo, no solo en un arreglo.
 - **El gate no valida el contenido.** Que un texto sea bueno, cierto y convierta solo lo ves tú en la preview. Por eso el prompt prohíbe inventar datos del negocio.
 - **El aislamiento es parcial.** Claude no tiene el token de GitHub, pero sí la clave de Anthropic, red y `node`. La lista de herramientas limita errores, no a un atacante. Por eso solo se leen issues escritas por `owner`, nunca comentarios.
-- **Rutas protegidas por diff.** Los scripts de la pipeline se toman siempre de `main`: una rama no puede cambiar su propio gate.
+- **Rutas protegidas por diff.** Los scripts de la pipeline se toman siempre de `main`: una rama no puede cambiar su propio gate. `astro.config.mjs` no está protegido porque muchas issues lo necesitan (sitemap, CSP de Umami…); lo que importa de él lo vigilan `check:csp` y `check:robots`.
+- **La preview es una sola.** Si abres o actualizas un PR de día, sobrescribe staging con esa rama hasta la siguiente fusión de la pipeline.
 
 ## Reutilizar en otra web
 

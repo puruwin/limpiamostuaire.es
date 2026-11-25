@@ -18,8 +18,6 @@
   ],
   "excludedMilestonePrefixes": ["M0"],
   "excludedCodes": {
-    "M1.1": "Crea el proyecto y el gate: se hace de día, con revisión.",
-    "M1.2": "VPS, SSH y secretos: necesita a David.",
     "M1.5": "Define check:seo, que forma parte del gate.",
     "M1.8": "Define check:claims, que forma parte del gate.",
     "M5.2": "Producción, Search Console y Bing: necesita a David."
@@ -30,8 +28,11 @@
     "test",
     "lint",
     "format:check",
-    "check:seo",
+    "check:robots",
+    "check:csp",
+    "check:caddy",
     "check:links",
+    "check:seo",
     "check:claims"
   ],
   "gate": [
@@ -40,8 +41,11 @@
     "npm run check",
     "npm test",
     "npm run build",
-    "npm run check:seo",
+    "npm run check:robots",
+    "npm run check:csp",
+    "npm run check:caddy",
     "npm run check:links",
+    "npm run check:seo",
     "npm run check:claims",
     "node scripts/pipeline/lighthouse-todas.mjs"
   ],
@@ -53,7 +57,14 @@
     "scripts/check-*.mjs",
     "eslint.config.js",
     ".prettierrc*",
-    "tsconfig.json"
+    ".prettierignore",
+    "tsconfig.json",
+    ".node-version",
+    "deploy/",
+    "src/integrations/",
+    "src/lib/site-env.ts",
+    "src/lib/pendientes.ts"
   ],
-  "lighthouseMinScore": 0.95
+  "lighthouseMinScore": 0.95,
+  "$protectedPaths": "Además, gate.mjs falla si cambia o desaparece un script de package.json: el gate los ejecuta por nombre."
 }

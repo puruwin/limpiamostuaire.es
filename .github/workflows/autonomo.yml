@@ -8,19 +8,19 @@ on:
   schedule:
     # Rearranque: si la cadena se paró por el límite de uso o por falta de
     # issues, vuelve a intentarlo. Si ya hay una ejecución, espera en cola.
-    - cron: '17 */2 * * *'
-    - cron: '0 6 * * *' # resumen: 07:00 en Madrid (invierno), 08:00 (verano)
+    - cron: "17 */2 * * *"
+    - cron: "0 6 * * *" # resumen: 07:00 en Madrid (invierno), 08:00 (verano)
   workflow_dispatch:
     inputs:
       issue:
-        description: 'Número de una issue concreta (opcional, sin encadenar)'
+        description: "Número de una issue concreta (opcional, sin encadenar)"
         required: false
       count:
-        description: 'Uso interno: posición en la cadena'
+        description: "Uso interno: posición en la cadena"
         required: false
-        default: '1'
+        default: "1"
       resumen:
-        description: 'Generar el resumen de la mañana'
+        description: "Generar el resumen de la mañana"
         type: boolean
         default: false
 
@@ -35,7 +35,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  CLAUDE_CODE_VERSION: '2.1.331'
+  CLAUDE_CODE_VERSION: "2.1.331"
 
 jobs:
   issue:
@@ -76,6 +76,20 @@ jobs:
       - name: Instalar dependencias
         if: steps.pick.outputs.issue != ''
         run: npm ci
+      # Para check:caddy, como en ci.yml: versión fijada y checksum verificado.
+      - name: Instalar Caddy
+        if: steps.pick.outputs.issue != ''
+        env:
+          CADDY_VERSION: 2.11.7
+        run: |
+          base="https://github.com/caddyserver/caddy/releases/download/v$CADDY_VERSION"
+          tarball="caddy_${CADDY_VERSION}_linux_amd64.tar.gz"
+          curl -fsSLO "$base/$tarball"
+          curl -fsSL "$base/caddy_${CADDY_VERSION}_checksums.txt" | grep " $tarball\$" | sha512sum -c
+          mkdir -p "$RUNNER_TEMP/caddy"
+          tar -xzf "$tarball" -C "$RUNNER_TEMP/caddy" caddy
+          rm "$tarball"
+          echo "CADDY=$RUNNER_TEMP/caddy/caddy" >> "$GITHUB_ENV"
       - name: Claude + gate (hasta 2 intentos)
         if: steps.pick.outputs.issue != ''
         env:

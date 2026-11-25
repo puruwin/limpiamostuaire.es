@@ -9,10 +9,12 @@ Es el mismo VPS que rqpbioclean.es (`187.124.51.152`, Hostinger), con el mismo C
 | Evento | `SITE_ENV` | Destino en el VPS | URL |
 |---|---|---|---|
 | Push a un PR (no forks) | `staging` | `/srv/limpiamostuaire/staging/` | `https://staging.limpiamostuaire.es/` (con contraseña) |
+| Run workflow (`workflow_dispatch`), en cualquier rama | `staging` | `/srv/limpiamostuaire/staging/` | `https://staging.limpiamostuaire.es/` |
 | Merge a `main` | variable `SITE_ENV` del repo (`provisional` hasta M5.2, luego `production`) | `/srv/limpiamostuaire/production/` | `https://limpiamostuaire.es/` (`www.` → 301) |
 
-- El job `build` de [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) pasa format, lint, check, tests y build con su `SITE_ENV`, y después `check:robots`, `check:csp` y `check:caddy`. Guarda `dist/` como artefacto y el job `deploy` lo sube por SSH con `rsync --delete`.
-- Staging es uno solo: el último PR que recibe un push lo sobrescribe. GitHub enlaza el despliegue desde el PR.
+- El job `build` de [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) pasa format, lint, check, tests y build con su `SITE_ENV`, y después `check:robots`, `check:csp`, `check:links` y `check:caddy`. Guarda `dist/` como artefacto y el job `deploy` lo sube por SSH con `rsync --delete`.
+- Staging es uno solo: el último PR que recibe un push (o el último Run workflow) lo sobrescribe. GitHub enlaza el despliegue desde el PR.
+- Solo un push a `main` va a producción. El desarrollo autónomo lanza el CI con `workflow_dispatch` sobre la rama `staging` tras cada fusión ([desarrollo-autonomo.md](desarrollo-autonomo.md)), porque lo que fusiona con `GITHUB_TOKEN` no dispara workflows.
 - `deploy` se salta mientras no exista la variable `DEPLOY_HOST`, así el CI sigue en verde antes de configurar el VPS.
 - El CI no despliega [`deploy/Caddyfile`](../deploy/Caddyfile): cuando cambia, se copia a mano ([paso 3](#paso-3--añadir-los-sitios-a-caddy)).
 
