@@ -85,7 +85,7 @@ No se pone como servicio: se publica en *Añadir actualización* → *Oferta*, c
 - Título: `Lanzamiento: 1 split a 59 €`
 - Detalles: `Limpieza en profundidad de un split en vivienda a 59 € IVA incluido. Desmontaje, lavado a presión y fotos del antes y el después.`
 - Botón: *Llamar* o *Más información* (web con UTM).
-- Fecha de fin: la que se fije en M2.2.
+- Fecha de fin: 23/12/26. Publicada el 25/11/26.
 
 ## Tarifa (24-11-2026)
 
@@ -100,7 +100,7 @@ Esta tarifa sustituye a la de la issue M2.2.
 | Fuera de los 8 municipios | +18 € | +15 € |
 | Unidad exterior accesible sin altura | +20 € | +20 € |
 
-**Precio de lanzamiento:** 1 split en casa a 59 € (IVA incluido), sin pedir reseña a cambio. Fecha de fin pendiente (M2.2). En la ficha se publica como *Oferta* con esa fecha de fin, no en la descripción del servicio.
+**Precio de lanzamiento:** 1 split en casa a 59 € (IVA incluido), sin pedir reseña a cambio. Válido hasta el 23/12/26. En la ficha está publicado como *Oferta* con esa fecha de fin, no en la descripción del servicio.
 
 Sin IVA, la tarifa de casa es 69 / 125 / 175 / +45 € (+15 € de desplazamiento). En la ficha y en la web, a los particulares se les muestra siempre el precio con IVA (obligatorio por la normativa de consumidores).
 
