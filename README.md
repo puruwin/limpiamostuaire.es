@@ -37,11 +37,17 @@ Solo `SITE_ENV=production` genera páginas indexables; sin variable, el build ll
 ```text
 astro.config.mjs           site, trailingSlash 'always', build.format 'directory', i18n, fuente Figtree, SITE_ENV y CSP
 src/
+  content.config.ts        Esquema de la colección pages
+  content/pages/es/, en/   Un Markdown por página e idioma
   i18n/locales.ts          Idiomas: es en la raíz, en en /en/
   i18n/ui.ts               Cadenas de interfaz de los 2 idiomas
   layouts/BaseLayout.astro Esqueleto HTML común: fuente, favicon, robots, salto al contenido y <main>
+  integrations/            Guarda de {{PENDIENTE sobre dist/ en producción
+  lib/pages.ts             URL de cada página y validación de la colección
+  lib/pendientes.ts        Búsqueda de {{PENDIENTE en un directorio
   lib/site-env.ts          SITE_ENV e isIndexable
-  pages/                   Páginas en español; pages/en/, las inglesas
+  pages/[...path].astro    Ruta dinámica que genera todas las páginas de la colección
+  templates/               Plantillas de página (campo template)
   styles/global.css        Entrada de Tailwind con los colores de DESIGN.md
 public/                    Ficheros que se copian tal cual a dist/ (favicon)
 scripts/                   Comprobaciones check:* sobre dist/ y deploy/
@@ -60,13 +66,41 @@ import { useTranslations } from "../i18n/ui";
 const t = useTranslations("es");
 ---
 
-<p>{t("placeholder.text")}</p>
+<a href="#contenido">{t("a11y.skipToContent")}</a>
 ```
 
 ## Añadir una página en los 2 idiomas
 
-1. Crea la versión española en `src/pages/<slug>/index.astro` y la inglesa en `src/pages/en/<slug-en>/index.astro` (el slug inglés va traducido). Las dos usan `BaseLayout` con su `lang`.
-2. Si la página necesita textos de interfaz nuevos, añade la clave a `es` y a `en` en `src/i18n/ui.ts`.
-3. Comprueba con `npm run check && npm run build` que salen `dist/<slug>/index.html` y `dist/en/<slug-en>/index.html`.
+Cada página es un Markdown en `src/content/pages/<locale>/` y `src/pages/[...path].astro` las genera todas; no se crean `.astro` en `src/pages/`.
 
-A partir de M1.3 las páginas pasan a la colección de contenido `pages` (un Markdown por idioma con `locale` y `translationKey`) y una ruta dinámica las genera; este apartado se actualizará entonces.
+```md
+---
+locale: es # es | en; tiene que coincidir con la carpeta
+translationKey: precios # igual en la versión de cada idioma
+slug: precios # sin barras; "" para la home. La URL sale de aquí: /precios/, /en/prices/
+title: Precios de limpieza de aire acondicionado | Limpiamos tu aire
+description: …
+h1: Precios
+template: basica # plantilla de src/templates/
+draft: false # opcional; true = borrador
+updated: 2026-11-25
+---
+
+Cuerpo en Markdown.
+```
+
+1. Crea `src/content/pages/es/<nombre>.md` y `src/content/pages/en/<nombre>.md` con el mismo `translationKey` y el `slug` traducido. El nombre del fichero no afecta a la URL.
+2. Para una plantilla nueva, crea `src/templates/<Nombre>.astro` (recibe `page` y el cuerpo por `<slot />`), añádela al `z.enum` de `template` en `src/content.config.ts` y al mapa `templates` de `src/pages/[...path].astro`.
+3. Si la página necesita textos de interfaz nuevos, añade la clave a `es` y a `en` en `src/i18n/ui.ts`.
+4. `npm run check && npm run build`.
+
+El build falla en cualquier entorno si dos páginas del mismo idioma comparten ruta o `translationKey`, o si el `locale` no coincide con la carpeta. Un campo que falte o no cumpla el esquema también.
+
+## Guardas de producción
+
+Con `SITE_ENV=production` (y solo entonces), `npm run build` falla si:
+
+- alguna página tiene `draft: true` (lo comprueba la ruta dinámica);
+- queda un `{{PENDIENTE` en cualquier fichero de `dist/`, HTML o no (integración `src/integrations/production-guards.ts`, al final del build). El error da fichero y línea.
+
+Para marcar un texto que falta, escribe `{{PENDIENTE: lo que falta}}`. En staging, `provisional` y local los borradores se generan y los huecos se publican, para revisarlos; el día del lanzamiento (M5.2) bloquean el despliegue. Para probarlo en local: `SITE_ENV=production npm run build`.
