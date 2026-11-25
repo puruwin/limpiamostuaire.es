@@ -16,10 +16,9 @@ Textos listos para copiar a la ficha de Google Business Profile. Redactados el 2
 
 ### Categoría
 
-Google no tiene una categoría exacta para «limpieza de aire acondicionado». Hay que escribir en el desplegable y elegir la más cercana. No vale ninguna genérica, como «Servicio de limpieza».
-
-1. Principal: la que hable de **aire acondicionado** sin que implique instalación ni reparación. Si solo salen «Servicio de reparación de aire acondicionado» y «Contratista de aire acondicionado», elegir la de reparación, que es la que mejor encaja con el mantenimiento.
-2. Secundaria: no añadir «Limpieza de conductos», porque ese servicio no se ofrece (M2.5).
+- Principal: **Servicios de limpieza**. Es la categoría con la que se creó la ficha el 24-11-2026. Ti&Di solo limpia; no instala, no repara ni hace mantenimiento.
+- Secundarias: ninguna. Ni «Reparación de aire acondicionado», porque no se repara, ni «Limpieza de conductos», porque ese servicio no se ofrece (M2.5).
+- Referencia (M0.5): Clining usa la misma categoría y sale en el mapa de Benidorm para «limpieza split benidorm» y «air conditioner cleaning benidorm».
 
 Nombre, categoría y zonas tienen que estar cerrados **antes** de pulsar «Verificar».
 
