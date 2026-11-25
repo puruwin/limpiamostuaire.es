@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+/* Paleta «Mar y arena» y tipografía de DESIGN.md. Componentes, escala y modo
+   oscuro: M1.4. */
+@theme {
+  --font-sans: var(--font-figtree), system-ui, sans-serif;
+
+  --color-tinta: #12313f;
+  /* Solo texto grande sobre fondo (4,5:1); el pequeño usa acento-texto. */
+  --color-acento: #1f7a8c;
+  --color-acento-texto: #176474;
+  /* Superficie; nunca texto (1,6:1 sobre fondo). */
+  --color-calido: #e3b98a;
+  --color-fondo: #f7f3ec;
+  --color-suave: #e2eeec;
+  --color-agua-clara: #9fd3dc;
+  --color-papel: #ffffff;
+}

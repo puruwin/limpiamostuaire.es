@@ -1,0 +1,84 @@
+# Sitios de limpiamostuaire.es en el VPS. Se copia a
+# /etc/caddy/sites/limpiamostuaire.caddy, que el Caddyfile del VPS ya importa
+# (docs/despliegue.md). Es el mismo VPS que rqpbioclean.es: los snippets llevan
+# el prefijo lta_ para no chocar con los suyos.
+# HTTPS automático con Let's Encrypt (el CAA del dominio solo le deja a él).
+# Requiere Caddy >= 2.8 (basic_auth).
+
+# Cabeceras de seguridad de todas las respuestas, también las 401 de staging y
+# las redirecciones. La CSP fuerte (script-src y style-src con hashes) la pone
+# Astro en un <meta> de cada página (security.csp en astro.config.mjs); aquí va
+# lo que un <meta> no puede llevar (frame-ancestors) y lo que no depende de la
+# página. El navegador aplica las dos políticas a la vez.
+(lta_headers) {
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "accelerometer=(), browsing-topics=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+		Content-Security-Policy "frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests"
+		Cross-Origin-Opener-Policy "same-origin"
+	}
+	# Aparte: un header con algún "-Campo" se aplica al escribir la respuesta
+	# (defer) y se pierde en las de error (404, 401 de staging). Así, las de
+	# arriba salen siempre; Server solo se quita en las que no son de error.
+	header -Server
+}
+
+(lta_static) {
+	import lta_headers
+	encode zstd gzip
+
+	# Ficheros con hash en el nombre (CSS, JS, fuentes, imágenes de Astro):
+	# no cambian nunca, así que un año y sin revalidar.
+	@hashed path /_astro/*
+	header @hashed Cache-Control "public, max-age=31536000, immutable"
+
+	# /index.html y /<ruta>/index.html → /<ruta>/ con 301 (una sola URL por
+	# página). file_server también lo hace, pero con 308. Solo si el fichero
+	# existe: lo que no existe da 404 directamente.
+	@index {
+		path_regexp index ^(.*/)index\.html$
+		file
+	}
+	redir @index {re.index.1}{?query} permanent
+
+	# Barra final siempre (trailingSlash de Astro), con 301.
+	@no_slash {
+		not path */
+		file {path}/index.html
+	}
+	redir @no_slash {path}/{?query} permanent
+
+	file_server
+}
+
+# --- Sitios --- (check:caddy prueba solo lo anterior a esta línea)
+
+# Producción. Hasta el lanzamiento (M5.2) el repo construye main con
+# SITE_ENV=provisional (meta noindex) y esta cabecera cubre además lo que no es
+# HTML. En M5.2: quitar la línea X-Robots-Tag y pasar SITE_ENV a production.
+limpiamostuaire.es {
+	root * /srv/limpiamostuaire/production
+	header X-Robots-Tag "noindex, nofollow"
+	import lta_static
+}
+
+# www → apex con 301 y la misma ruta.
+www.limpiamostuaire.es {
+	import lta_headers
+	redir https://limpiamostuaire.es{uri} permanent
+}
+
+# Staging: el último PR actualizado. Nunca indexable y con contraseña.
+# Credenciales fuera del repo, una línea "usuario hash" (caddy hash-password).
+# Si el fichero no existe, Caddy no arranca: staging nunca queda abierto.
+staging.limpiamostuaire.es {
+	root * /srv/limpiamostuaire/staging
+	header X-Robots-Tag "noindex, nofollow"
+	basic_auth {
+		import /etc/caddy/limpiamostuaire-staging.auth
+	}
+	import lta_static
+}

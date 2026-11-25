@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # PR → staging. main → vars.SITE_ENV (provisional hasta el lanzamiento,
+      # M5.2; production después). Sin la variable, provisional: un olvido nunca
+      # da un build indexable.
+      SITE_ENV: ${{ github.event_name == 'pull_request' && 'staging' || vars.SITE_ENV || 'provisional' }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run check
+      - run: npm test
+      - run: npm run build
+      - run: npm run check:robots
+      - run: npm run check:csp
+      # Cabeceras, caché y redirecciones de deploy/Caddyfile, con Caddy real.
+      # Versión fijada y verificada con el checksums.txt de la release.
+      - name: Instalar Caddy
+        env:
+          CADDY_VERSION: 2.11.7
+        run: |
+          base="https://github.com/caddyserver/caddy/releases/download/v$CADDY_VERSION"
+          tarball="caddy_${CADDY_VERSION}_linux_amd64.tar.gz"
+          curl -fsSLO "$base/$tarball"
+          curl -fsSL "$base/caddy_${CADDY_VERSION}_checksums.txt" | grep " $tarball\$" | sha512sum -c
+          mkdir -p "$RUNNER_TEMP/caddy"
+          tar -xzf "$tarball" -C "$RUNNER_TEMP/caddy" caddy
+          rm "$tarball"
+          echo "CADDY=$RUNNER_TEMP/caddy/caddy" >> "$GITHUB_ENV"
+      - run: npm run check:caddy
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+  # Se salta hasta que exista la variable DEPLOY_HOST (docs/despliegue.md).
+  # No despliega PRs que vengan de forks: no tendrían acceso a los secrets.
+  deploy:
+    needs: build
+    if: >-
+      vars.DEPLOY_HOST != '' &&
+      (github.event_name == 'push' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event_name == 'pull_request' && 'staging' || 'production' }}
+      url: ${{ github.event_name == 'pull_request' && 'https://staging.limpiamostuaire.es/' || 'https://limpiamostuaire.es/' }}
+    concurrency:
+      group: deploy-${{ github.event_name == 'pull_request' && 'staging' || 'production' }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+    env:
+      TARGET: ${{ github.event_name == 'pull_request' && 'staging' || 'production' }}
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
+      - name: Configurar SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
+      - name: Subir dist/ al VPS
+        # rrsync en el servidor limita la clave a /srv/limpiamostuaire: la ruta es relativa a ella.
+        run: >-
+          rsync -rtz --chmod=D755,F644 --delete --delay-updates
+          dist/ "${{ vars.DEPLOY_USER || 'ltadeploy' }}@${{ vars.DEPLOY_HOST }}:$TARGET/"
