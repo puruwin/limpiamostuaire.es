@@ -12,6 +12,9 @@
     "preview": "astro preview",
     "check": "astro check",
     "test": "node --test \"src/**/*.test.ts\"",
+    "check:robots": "node scripts/check-robots.mjs",
+    "check:csp": "node scripts/check-csp.mjs",
+    "check:caddy": "node scripts/check-caddy.mjs",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
