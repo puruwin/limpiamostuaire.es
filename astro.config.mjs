@@ -2,10 +2,13 @@
 import { defineConfig, envField, fontProviders } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 import { defaultLocale, locales } from "./src/i18n/locales.ts";
+import productionGuards from "./src/integrations/production-guards.ts";
 
 export default defineConfig({
   site: "https://limpiamostuaire.es",
   output: "static",
+  // Con SITE_ENV=production, ningún {{PENDIENTE en dist/ (README#guardas-de-producción).
+  integrations: [productionGuards()],
   trailingSlash: "always",
   build: {
     format: "directory",

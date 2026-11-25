@@ -27,6 +27,10 @@ No se usa `Disallow` en `robots.txt` para esto: si Google no puede rastrear, no 
 
 `provisional` existe porque el dominio ya apunta al VPS: `main` se publica en el apex desde ya, pero hasta M5.2 la web está a medias y no debe indexarse.
 
+### Qué bloquea el build de producción
+
+Con `SITE_ENV=production` el build falla si hay una página con `draft: true` o un `{{PENDIENTE` en cualquier fichero de `dist/` ([README](../README.md#guardas-de-producción)). El CI no llega a desplegar. Con `provisional` no bloquea: hasta M5.2 `main` publica la web a medias.
+
 ### Cabeceras y CSP
 
 En todas las respuestas (snippet `lta_headers` de [`deploy/Caddyfile`](../deploy/Caddyfile)), también en las 401 de staging y en las redirecciones:

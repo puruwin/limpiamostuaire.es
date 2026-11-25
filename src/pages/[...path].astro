@@ -1,0 +1,35 @@
+---
+import type { GetStaticPaths } from "astro";
+import { getCollection, render, type CollectionEntry } from "astro:content";
+import { routeParam, validatePages } from "../lib/pages";
+import { SITE_ENV } from "../lib/site-env";
+import Basica from "../templates/Basica.astro";
+
+// Genera todas las páginas de la colección `pages` (src/content/pages/).
+export const getStaticPaths = (async () => {
+  const pages = await getCollection("pages");
+  const errors = validatePages(pages, {
+    production: SITE_ENV === "production",
+  });
+  if (errors.length > 0) {
+    throw new Error(`Colección pages:\n  ${errors.join("\n  ")}`);
+  }
+  return pages.map((page) => ({
+    params: { path: routeParam(page.data.locale, page.data.slug) },
+    props: { page },
+  }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  page: CollectionEntry<"pages">;
+}
+
+const { page } = Astro.props;
+const { Content } = await render(page);
+const templates = { basica: Basica };
+const Template = templates[page.data.template];
+---
+
+<Template page={page}>
+  <Content />
+</Template>
