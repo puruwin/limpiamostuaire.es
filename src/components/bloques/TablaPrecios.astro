@@ -1,0 +1,107 @@
+---
+import { precio, suplementos, type Segment } from "../../data/tarifa";
+import { useTranslations } from "../../i18n/ui";
+import { asLocale } from "../../lib/current-locale";
+import { euros, fill } from "../../lib/format";
+
+// Tabla de la tarifa: casa y negocio por número de splits, el adicional y los
+// suplementos, todo de src/data/tarifa.ts.
+const locale = asLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+const segmentos: readonly Segment[] = ["vivienda", "negocio"];
+const columna = {
+  vivienda: { titulo: t("price.home"), iva: t("price.vatIncluded") },
+  negocio: { titulo: t("price.business"), iva: t("price.plusVat") },
+};
+const filas = [
+  ...([1, 2, 3] as const).map((splits) => ({
+    concepto:
+      splits === 1
+        ? t("table.splits.one")
+        : fill(t("table.splits.other"), { count: String(splits) }),
+    importes: segmentos.map((s) => euros(locale, precio(s, splits).price)),
+  })),
+  {
+    concepto: t("table.additional"),
+    importes: segmentos.map(
+      (s) => `+${euros(locale, precio(s, "adicional").price)}`,
+    ),
+  },
+];
+const extras = [
+  {
+    concepto: t("table.outdoor"),
+    importes: segmentos.map(
+      () => `+${euros(locale, suplementos.exteriorSinAltura)}`,
+    ),
+  },
+  {
+    concepto: t("table.outside"),
+    importes: segmentos.map(
+      (s) => `+${euros(locale, suplementos.fueraDeZona[s])}`,
+    ),
+  },
+];
+const celda = "px-3 py-3 sm:px-5";
+---
+
+<div class="overflow-x-auto rounded-2xl bg-papel">
+  <table class="w-full border-collapse text-left">
+    <caption class="sr-only">{t("table.caption")}</caption>
+    <thead>
+      <tr class="border-b-2 border-tinta/15 align-bottom">
+        <th scope="col" class:list={[celda, "font-medium"]}>
+          {t("table.concept")}
+        </th>
+        {segmentos.map((s) => (
+          <th scope="col" class:list={[celda, "text-right"]}>
+            <span class="block text-lg font-bold">{columna[s].titulo}</span>
+            <span class="block text-sm font-medium">{columna[s].iva}</span>
+          </th>
+        ))}
+      </tr>
+    </thead>
+    <tbody>
+      {filas.map((fila) => (
+        <tr class="border-b border-tinta/15">
+          <th scope="row" class:list={[celda, "font-medium"]}>
+            {fila.concepto}
+          </th>
+          {fila.importes.map((importe) => (
+            <td
+              class:list={[
+                celda,
+                "text-right text-xl font-bold whitespace-nowrap",
+              ]}
+            >
+              {importe}
+            </td>
+          ))}
+        </tr>
+      ))}
+    </tbody>
+    <tbody>
+      <tr class="bg-suave/60">
+        <th
+          scope="colgroup"
+          colspan="3"
+          class:list={[celda, "py-2 text-sm font-bold"]}
+        >
+          {t("table.extras")}
+        </th>
+      </tr>
+      {extras.map((fila, i) => (
+        <tr class:list={[i < extras.length - 1 && "border-b border-tinta/15"]}>
+          <th scope="row" class:list={[celda, "font-medium"]}>
+            {fila.concepto}
+          </th>
+          {fila.importes.map((importe) => (
+            <td class:list={[celda, "text-right font-bold whitespace-nowrap"]}>
+              {importe}
+            </td>
+          ))}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>

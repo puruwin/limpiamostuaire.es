@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { diaYMes, euros, fill, lista } from "./format.ts";
+import { diaYMes, euros, fill, lista, plural } from "./format.ts";
 
 const NBSP = " ";
 
@@ -29,4 +29,11 @@ test("diaYMes: sin desfase de zona horaria", () => {
 test("fill: sustituye y falla si falta un valor", () => {
   assert.equal(fill("{a} y {b}", { a: "1", b: "2" }), "1 y 2");
   assert.throws(() => fill("{a}", {}), /falta \{a\}/);
+});
+
+test("plural: one con 1 y other con el resto", () => {
+  assert.equal(plural("es", 1), "one");
+  assert.equal(plural("es", 2), "other");
+  assert.equal(plural("en", 1), "one");
+  assert.equal(plural("en", 0), "other");
 });

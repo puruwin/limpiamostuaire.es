@@ -98,8 +98,8 @@ slug: precios # sin barras; "" para la home. La URL sale de aquí: /precios/, /e
 title: Precio de limpieza de aire acondicionado · Tarifa por split # ≤ 60 caracteres, tal cual, sin sufijo de marca
 description: … # ≤ 155 caracteres
 h1: Precios
-template: basica # plantilla de src/templates/: basica o home
-lead: … # opcional; entradilla bajo el H1 (plantilla home)
+template: pagina # plantilla de src/templates/: basica, home o pagina (H1, entradilla y bloques)
+lead: … # opcional; entradilla bajo el H1 (plantillas home y pagina)
 draft: false # opcional; true = borrador
 updated: 2026-11-25
 ---
@@ -117,19 +117,22 @@ Cuerpo en Markdown.
 
 Un `.mdx` usa los bloques de `src/components/bloques/` sin importarlos: la ruta dinámica se los pasa (`bloques` en `index.ts`). Cogen el idioma de la URL y los datos de `src/data/`, así que ningún precio ni municipio se escribe a mano en el texto. Deja una línea en blanco entre la etiqueta y el texto para que dentro se lea como Markdown.
 
-| Bloque                                                                                    | Qué pinta                                                                   |
-| ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| `<Seccion id titulo tono>`                                                                | Sección con su `h2`. `tono`: `fondo` (por defecto), `suave` o `tinta`       |
-| `<Rejilla>` + `<Tarjeta titulo>`                                                          | Tarjetas en 2 columnas desde `md`                                           |
-| `<PreciosDesde />`                                                                        | «Desde» de casa y de negocio, más el precio de lanzamiento si sigue vigente |
-| `<Suplemento tipo="exterior" />`, `<Suplemento tipo="fueraDeZona" segmento="vivienda" />` | Importe del suplemento, dentro de una frase                                 |
-| `<Municipios />`, `<Municipios chips />`                                                  | Los municipios de `business.ts`, en la frase («A, B y C») o como lista      |
-| `<Trabajos />`                                                                            | Antes y después de `src/data/trabajos.ts`; sin trabajos, un `{{PENDIENTE`   |
-| `<Pregunta titulo>`                                                                       | Pregunta frecuente plegable (sin JS ni `FAQPage`)                           |
-| `<EnlacePagina clave="precios">texto</EnlacePagina>`                                      | Enlace a otra página del idioma; no sale nada mientras no exista            |
-| `<Contacto titulo>`                                                                       | Bloque final sobre tinta con WhatsApp, teléfono y horario                   |
+| Bloque                                                                                    | Qué pinta                                                                                    |
+| ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `<Seccion id titulo tono>`                                                                | Sección con su `h2`. `tono`: `fondo` (por defecto), `suave` o `tinta`                        |
+| `<Rejilla>` + `<Tarjeta titulo>`                                                          | Tarjetas en 2 columnas desde `md`                                                            |
+| `<PreciosDesde />`                                                                        | «Desde» de casa y de negocio, más el precio de lanzamiento si sigue vigente                  |
+| `<TablaPrecios />`                                                                        | Tarifa entera de casa y negocio: 1–3 splits, el adicional y los suplementos                  |
+| `<Lanzamiento detalle />`                                                                 | Precio de lanzamiento; con `detalle`, también el precio de los demás splits                  |
+| `<Ejemplo segmento="vivienda" splits={3} exteriores={1} />`                               | Presupuesto con líneas y total (`fueraDeZona` opcional); en casa, también con el lanzamiento |
+| `<Suplemento tipo="exterior" />`, `<Suplemento tipo="fueraDeZona" segmento="vivienda" />` | Importe del suplemento, dentro de una frase                                                  |
+| `<Municipios />`, `<Municipios chips />`                                                  | Los municipios de `business.ts`, en la frase («A, B y C») o como lista                       |
+| `<Trabajos />`                                                                            | Antes y después de `src/data/trabajos.ts`; sin trabajos, un `{{PENDIENTE`                    |
+| `<Pregunta titulo>`                                                                       | Pregunta frecuente plegable (sin JS ni `FAQPage`)                                            |
+| `<EnlacePagina clave="precios">texto</EnlacePagina>`                                      | Enlace a otra página del idioma; no sale nada mientras no exista                             |
+| `<Contacto titulo>`                                                                       | Bloque final sobre tinta con WhatsApp, teléfono y horario                                    |
 
-El precio de lanzamiento (`lanzamiento` en `src/data/tarifa.ts`) sale solo si el día del build, en hora de Madrid, es su fecha de fin o anterior. Pasada esa fecha, hace falta un despliegue para que desaparezca. La `description` de la home lleva el «desde» escrito a mano: si cambia la tarifa, cámbiala también.
+El precio de lanzamiento (`lanzamiento` en `src/data/tarifa.ts`) sale solo si el día del build, en hora de Madrid, es su fecha de fin o anterior. Pasada esa fecha, hace falta un despliegue para que desaparezca. Con el lanzamiento, el primer split sale a su precio y cada uno de los demás al del split adicional (`presupuesto()` en `tarifa.ts`). Las `description` de la home y de precios llevan precios escritos a mano: si cambia la tarifa, cámbialas también.
 
 El build falla en cualquier entorno si dos páginas del mismo idioma comparten ruta o `translationKey`, o si el `locale` no coincide con la carpeta. Un campo que falte o no cumpla el esquema también (un `title` de más de 60 caracteres o una `description` de más de 155, por ejemplo).
 

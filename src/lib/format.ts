@@ -38,3 +38,10 @@ export function fill(template: string, values: Record<string, string>): string {
     return value;
   });
 }
+
+/** Forma del plural de `count` («one» u «other»), para elegir la cadena de ui.ts. */
+export function plural(locale: Locale, count: number): "one" | "other" {
+  return new Intl.PluralRules(intlLocale[locale]).select(count) === "one"
+    ? "one"
+    : "other";
+}

@@ -1,0 +1,30 @@
+---
+import type { CollectionEntry } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+// Página interior hecha de bloques (.mdx): H1 y entradilla, y debajo las
+// secciones de src/components/bloques/, a todo el ancho.
+interface Props {
+  page: CollectionEntry<"pages">;
+}
+
+const { page } = Astro.props;
+const { locale, title, description, h1, lead, translationKey } = page.data;
+---
+
+<BaseLayout
+  lang={locale}
+  title={title}
+  description={description}
+  translationKey={translationKey}
+>
+  <section class="bg-fondo">
+    <div class="mx-auto max-w-6xl px-4 pt-6 pb-10 sm:pt-10 lg:pt-16">
+      <h1 class="max-w-4xl text-3xl leading-tight font-bold sm:text-4xl lg:text-5xl">
+        {h1}
+      </h1>
+      {lead && <p class="mt-4 max-w-3xl text-lg sm:text-xl">{lead}</p>}
+    </div>
+  </section>
+  <slot />
+</BaseLayout>

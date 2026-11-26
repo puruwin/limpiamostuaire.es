@@ -10,7 +10,7 @@ import { SITE } from "./site.ts";
 // con la tarifa y las migas. Seo.astro lo pinta y check:seo lo comprueba.
 // Sin FAQPage: Google retiró ese resultado enriquecido.
 
-/** Páginas que llevan el Service con la tarifa (la de precios llega en M2.2). */
+/** Páginas que llevan el Service con la tarifa. */
 export const serviceKeys: readonly string[] = ["inicio", "precios"];
 
 export interface GraphInput {

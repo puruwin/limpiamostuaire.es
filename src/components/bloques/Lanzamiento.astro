@@ -1,16 +1,21 @@
 ---
-import { lanzamiento, lanzamientoVigente } from "../../data/tarifa";
+import { lanzamiento, lanzamientoVigente, precio } from "../../data/tarifa";
 import type { Locale } from "../../i18n/locales";
 import { useTranslations } from "../../i18n/ui";
+import { asLocale } from "../../lib/current-locale";
 import { diaYMes, euros, fill } from "../../lib/format";
 
-// Precio de lanzamiento, solo mientras esté vigente el día del build.
+// Precio de lanzamiento, solo mientras esté vigente el día del build. Con
+// `detalle`, también lo que cuesta cada split más en la misma visita. Desde un
+// .mdx (<Lanzamiento detalle />) coge el idioma de la URL.
 interface Props {
-  locale: Locale;
+  locale?: Locale;
+  detalle?: boolean;
 }
 
-const { locale } = Astro.props;
+const { locale = asLocale(Astro.currentLocale), detalle = false } = Astro.props;
 const t = useTranslations(locale);
+const adicional = precio(lanzamiento.segment, "adicional");
 ---
 
 {lanzamientoVigente() && (
@@ -20,5 +25,7 @@ const t = useTranslations(locale);
       price: euros(locale, lanzamiento.price),
       date: diaYMes(locale, lanzamiento.hasta),
     })}
+    {detalle &&
+      ` ${fill(t("launch.more"), { price: euros(locale, adicional.price) })}`}
   </p>
 )}

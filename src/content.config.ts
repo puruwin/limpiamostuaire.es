@@ -33,9 +33,9 @@ const pages = defineCollection({
       message: "como mucho 155 caracteres (Google corta el resto)",
     }),
     h1: z.string().trim().min(1),
-    /** Entradilla bajo el H1 (plantilla home). */
+    /** Entradilla bajo el H1 (plantillas home y pagina). */
     lead: z.string().trim().min(1).optional(),
-    template: z.enum(["basica", "home"]),
+    template: z.enum(["basica", "home", "pagina"]),
     /** Un borrador se genera en staging y provisional; en producción rompe el build. */
     draft: z.boolean().default(false),
     updated: z.coerce.date(),
