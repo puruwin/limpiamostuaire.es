@@ -9,7 +9,7 @@ import type { Locale } from "../i18n/locales";
 import { useTranslations } from "../i18n/ui";
 import { PUBLIC_UMAMI_WEBSITE_ID } from "astro:env/server";
 import { isIndexable } from "../lib/site-env";
-import { UMAMI_DOMAIN, UMAMI_SCRIPT } from "../lib/umami";
+import { UMAMI_DOMAIN, UMAMI_HOST, UMAMI_SCRIPT } from "../lib/umami";
 
 interface Props {
   lang: Locale;
@@ -74,6 +74,7 @@ const umamiWebsiteId = PUBLIC_UMAMI_WEBSITE_ID?.trim();
           defer
           src={UMAMI_SCRIPT}
           data-website-id={umamiWebsiteId}
+          data-host-url={UMAMI_HOST}
           data-domains={UMAMI_DOMAIN}
         />
       )

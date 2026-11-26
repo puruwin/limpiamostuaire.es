@@ -7,6 +7,7 @@ import { defaultLocale, locales } from "./src/i18n/locales.ts";
 import productionGuards from "./src/integrations/production-guards.ts";
 import statusPages from "./src/integrations/status-pages.ts";
 import { SITE } from "./src/lib/site.ts";
+import { UMAMI_HOST, UMAMI_SCRIPT } from "./src/lib/umami.ts";
 
 export default defineConfig({
   site: SITE,
@@ -85,8 +86,8 @@ export default defineConfig({
         "default-src 'self'",
         "img-src 'self' data:",
         "font-src 'self'",
-        // Umami Cloud (M3.3) envía los eventos a su propio dominio.
-        "connect-src 'self' https://cloud.umami.is https://api-gateway.umami.dev",
+        // Umami Cloud (M3.3) envía visitas y eventos a UMAMI_HOST.
+        `connect-src 'self' ${UMAMI_HOST}`,
         // Turnstile (M3.2) pinta el desafío en un iframe.
         "frame-src https://challenges.cloudflare.com",
         "object-src 'none'",
@@ -100,7 +101,7 @@ export default defineConfig({
         hashes: ["sha256-ZnYJX5ypMaaAhxxWhSEjbMkhO2A9yPmbzEQH3LFaITA="],
         resources: [
           "'self'",
-          "https://cloud.umami.is",
+          new URL(UMAMI_SCRIPT).origin,
           "https://challenges.cloudflare.com",
         ],
       },
