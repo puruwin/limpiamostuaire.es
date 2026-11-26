@@ -3,6 +3,7 @@ dist/
 .astro/
 .lighthouseci/
 .noche/
+.data/
 .env
 .env.*
 !.env.example

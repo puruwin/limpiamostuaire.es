@@ -1,11 +1,13 @@
 ---
+import { whatsappTopic } from "../../data/business";
 import { useTranslations } from "../../i18n/ui";
-import { translationKeyAt } from "../../lib/collection";
+import { translationKeyAt, urlOf } from "../../lib/collection";
 import { asLocale } from "../../lib/current-locale";
 import Botones from "./Botones.astro";
 import Seccion from "./Seccion.astro";
 
-// Llamada a la acción final, sobre tinta: texto, WhatsApp, teléfono y horario.
+// Llamada a la acción final, sobre tinta: texto, WhatsApp, teléfono, horario
+// y el enlace al formulario de presupuesto (salvo en su propia página).
 interface Props {
   titulo: string;
 }
@@ -15,6 +17,12 @@ const locale = asLocale(Astro.currentLocale);
 const t = useTranslations(locale);
 // Los bloques de MDX no reciben la página: se busca por su URL.
 const translationKey = await translationKeyAt(Astro.url.pathname);
+const formUrl =
+  translationKey === "contacto" ? undefined : await urlOf(locale, "contacto");
+// Desde negocios, el formulario llega con «En un negocio» marcado.
+const formHref =
+  formUrl &&
+  `${formUrl}${whatsappTopic(translationKey) === "negocio" ? "?tipo=negocio" : ""}#formulario`;
 ---
 
 <Seccion id="contacto" titulo={titulo} tono="tinta">
@@ -26,4 +34,9 @@ const translationKey = await translationKeyAt(Astro.url.pathname);
     class="mt-6"
   />
   <p>{t("footer.hours")}.</p>
+  {formHref && (
+    <p>
+      <a href={formHref}>{t("cta.form")}</a>
+    </p>
+  )}
 </Seccion>

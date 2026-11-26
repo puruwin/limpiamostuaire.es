@@ -1,0 +1,47 @@
+# Endpoint del formulario de presupuesto (M3.2). Una instancia por sitio:
+# production y staging. Se instala en /etc/systemd/system/
+# (docs/despliegue.md). El código lo sube el CI a
+# /srv/limpiamostuaire/api/%i/; los secretos, en /etc/limpiamostuaire/api-%i.env.
+[Unit]
+Description=Limpiamos tu aire: endpoint del formulario (%i)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+Environment=NODE_ENV=production
+EnvironmentFile=/etc/limpiamostuaire/api-%i.env
+WorkingDirectory=/srv/limpiamostuaire/api/%i
+ExecStart=/usr/bin/node /srv/limpiamostuaire/api/%i/server/main.ts
+Restart=on-failure
+RestartSec=5
+
+# Usuario efímero sin privilegios. Las fotos van en
+# /var/lib/limpiamostuaire-api/%i ($STATE_DIRECTORY), fuera de lo que sirve
+# Caddy, y solo las lee este servicio.
+DynamicUser=yes
+StateDirectory=limpiamostuaire-api/%i
+StateDirectoryMode=0700
+UMask=0077
+
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

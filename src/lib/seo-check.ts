@@ -1,3 +1,4 @@
+import { quoteResultFiles } from "../data/quote-form.ts";
 import { defaultLocale, locales, type Locale } from "../i18n/locales.ts";
 
 // Reglas de npm run check:seo (scripts/check-seo.mjs) sobre el HTML de dist/.
@@ -7,8 +8,12 @@ import { defaultLocale, locales, type Locale } from "../i18n/locales.ts";
 export const TITLE_MAX = 60;
 export const DESCRIPTION_MAX = 155;
 
-/** Páginas sin URL propia (las 404): sin canonical, hreflang, JSON-LD ni sitemap. */
-const noCanonical = /(^|\/)404\.html$/;
+/**
+ * Páginas sin URL propia (las 404 y las de resultado del formulario): sin
+ * canonical, hreflang, JSON-LD ni sitemap.
+ */
+const noCanonical = (file: string) =>
+  /(^|\/)404\.html$/.test(file) || quoteResultFiles.includes(file);
 
 export interface HtmlFile {
   /** Ruta relativa a dist/, con "/": "index.html", "en/prices/index.html". */
@@ -207,7 +212,7 @@ export function checkSeo(
       }
     }
 
-    if (noCanonical.test(file)) {
+    if (noCanonical(file)) {
       if (page.canonicals.length > 0 || page.alternates.length > 0) {
         err("sin URL propia: no lleva canonical ni hreflang.");
       }
@@ -443,7 +448,7 @@ export function checkSitemap(
 
   const urls = new Set(
     pages
-      .filter((file) => !noCanonical.test(file))
+      .filter((file) => !noCanonical(file))
       .map((file) => `${site}${urlPath(file)}`),
   );
   const seen = new Set<string>();

@@ -17,9 +17,21 @@ interface Props {
   translationKey?: string | undefined;
   /** false para páginas sin URL propia, como la 404 (src/components/NotFound.astro). */
   canonical?: boolean;
+  /**
+   * noindex también en producción: páginas que no tienen que salir en Google,
+   * como las de resultado del formulario (src/components/ResultadoPresupuesto.astro).
+   */
+  noindex?: boolean;
 }
 
-const { lang, title, description, translationKey, canonical } = Astro.props;
+const {
+  lang,
+  title,
+  description,
+  translationKey,
+  canonical,
+  noindex = false,
+} = Astro.props;
 const t = useTranslations(lang);
 ---
 
@@ -30,7 +42,9 @@ const t = useTranslations(lang);
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     {
       /* Solo SITE_ENV=production es indexable (docs/despliegue.md#indexación). */
-      !isIndexable && <meta name="robots" content="noindex, nofollow" />
+      (!isIndexable || noindex) && (
+        <meta name="robots" content="noindex, nofollow" />
+      )
     }
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />

@@ -2,6 +2,7 @@
 import { defineConfig, envField, fontProviders } from "astro/config";
 import mdx from "@astrojs/mdx";
 import tailwindcss from "@tailwindcss/vite";
+import { TURNSTILE_TEST_SITE_KEY } from "./src/data/quote-form.ts";
 import { defaultLocale, locales } from "./src/i18n/locales.ts";
 import productionGuards from "./src/integrations/production-guards.ts";
 import statusPages from "./src/integrations/status-pages.ts";
@@ -57,6 +58,14 @@ export default defineConfig({
         values: ["production", "provisional", "staging", "development"],
         default: "development",
       }),
+      // Clave pública del widget de Turnstile del formulario (M3.2). Sin
+      // valor, la de pruebas; el build de producción no la admite
+      // (src/integrations/production-guards.ts).
+      PUBLIC_TURNSTILE_SITE_KEY: envField.string({
+        context: "server",
+        access: "public",
+        default: TURNSTILE_TEST_SITE_KEY,
+      }),
     },
   },
   security: {
@@ -92,5 +101,9 @@ export default defineConfig({
   },
   vite: {
     plugins: [tailwindcss()],
+    // En local, el formulario envía al endpoint de server/ (npm run dev:api).
+    server: {
+      proxy: { "/api/": "http://127.0.0.1:4311" },
+    },
   },
 });

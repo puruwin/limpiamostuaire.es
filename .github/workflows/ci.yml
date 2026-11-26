@@ -17,6 +17,9 @@ jobs:
       # M5.2; production después). Sin la variable, provisional: un olvido nunca
       # da un build indexable.
       SITE_ENV: ${{ github.event_name == 'pull_request' && 'staging' || vars.SITE_ENV || 'provisional' }}
+      # Clave pública del widget de Turnstile (M3.2). Sin la variable, la de
+      # pruebas; el build de producción falla sin ella.
+      PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.TURNSTILE_SITE_KEY }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -54,6 +57,30 @@ jobs:
           name: dist
           path: dist/
           retention-days: 7
+      # Endpoint del formulario (M3.2): TypeScript que Node 24 ejecuta tal cual,
+      # sin dependencias. Solo server/ (sin tests) y lo que importa de src/.
+      - name: Empaquetar el endpoint
+        run: |
+          mkdir api
+          cp -r --parents server src/data/quote-form.ts src/data/business.ts \
+            src/i18n/ui.ts src/i18n/locales.ts api/
+          find api -name '*.test.ts' -delete
+          echo '{ "private": true, "type": "module" }' > api/package.json
+          echo "$GITHUB_SHA" > api/REVISION
+      # Que el paquete arranca tal cual: falla aquí, no en el VPS, si le falta
+      # un fichero de src/.
+      - name: Probar el endpoint empaquetado
+        run: |
+          PHOTO_DIR="$RUNNER_TEMP/fotos" node api/server/main.ts &
+          pid=$!
+          sleep 2
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:4311/api/presupuesto/)" = 405
+          kill "$pid"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: api
+          path: api/
+          retention-days: 7
 
   # Se salta hasta que exista la variable DEPLOY_HOST (docs/despliegue.md).
   # No despliega PRs que vengan de forks: no tendrían acceso a los secrets.
@@ -77,6 +104,10 @@ jobs:
         with:
           name: dist
           path: dist/
+      - uses: actions/download-artifact@v8
+        with:
+          name: api
+          path: api/
       - name: Configurar SSH
         env:
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
@@ -86,6 +117,15 @@ jobs:
           printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519
           printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
+      # Antes que dist/: el formulario nuevo puede necesitar el endpoint nuevo.
+      # REVISION va la última: al cambiar, systemd reinicia el servicio
+      # (deploy/systemd/limpiamostuaire-api-restart@.path). api/ tiene que
+      # existir en el VPS (docs/despliegue.md, endpoint, paso D).
+      - name: Subir el endpoint al VPS
+        run: |
+          DEST="${{ vars.DEPLOY_USER || 'ltadeploy' }}@${{ vars.DEPLOY_HOST }}:api/$TARGET/"
+          rsync -rtz --chmod=D755,F644 --delete --delay-updates --exclude=REVISION api/ "$DEST"
+          rsync -rtz --chmod=F644 api/REVISION "$DEST"
       - name: Subir dist/ al VPS
         # rrsync en el servidor limita la clave a /srv/limpiamostuaire: la ruta es relativa a ella.
         run: >-
