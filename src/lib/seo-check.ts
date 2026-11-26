@@ -86,7 +86,7 @@ function attributes(tag: string): Map<string, string> {
   return attrs;
 }
 
-function tags(html: string, name: string): Map<string, string>[] {
+export function tags(html: string, name: string): Map<string, string>[] {
   return [...html.matchAll(new RegExp(`<${name}\\b([^>]*)>`, "gi"))].map(
     ([, attrs]) => attributes(` ${attrs}`),
   );

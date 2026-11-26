@@ -36,8 +36,12 @@ const es = {
   "header.call": "Llámanos",
   "header.whatsapp": "WhatsApp",
   "header.whatsappLabel": "Escríbenos por WhatsApp",
-  "whatsapp.greeting":
+  "whatsapp.greeting.casa":
     "Hola, quiero pedir presupuesto para limpiar mi aire acondicionado.",
+  "whatsapp.greeting.negocio":
+    "Hola, quiero pedir presupuesto para limpiar los aires acondicionados de mi negocio.",
+  "whatsapp.greeting.conductos":
+    "Hola, quiero pedir presupuesto para limpiar los conductos de mi aire acondicionado.",
 
   "lang.switcher": "Idioma",
   "lang.es": "Español",
@@ -149,7 +153,12 @@ const en = {
   "header.call": "Call us",
   "header.whatsapp": "WhatsApp",
   "header.whatsappLabel": "Message us on WhatsApp",
-  "whatsapp.greeting": "Hi, I'd like a quote for cleaning my air conditioner.",
+  "whatsapp.greeting.casa":
+    "Hi, I'd like a quote for cleaning my air conditioner.",
+  "whatsapp.greeting.negocio":
+    "Hi, I'd like a quote for cleaning the air conditioners at my business.",
+  "whatsapp.greeting.conductos":
+    "Hi, I'd like a quote for cleaning my air conditioning ducts.",
 
   "lang.switcher": "Language",
   "lang.es": "Español",

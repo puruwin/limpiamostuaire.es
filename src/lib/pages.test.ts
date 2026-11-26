@@ -7,6 +7,7 @@ import {
   pagePath,
   pageUrlByKey,
   routeParam,
+  translationKeyByPath,
   validatePages,
   type PageEntry,
 } from "./pages.ts";
@@ -88,6 +89,18 @@ test("URL de una página por translationKey", () => {
   assert.equal(pageUrlByKey(pages, "es", "precios"), "/precios/");
   assert.equal(pageUrlByKey(pages, "en", "precios"), "/en/prices/");
   assert.equal(pageUrlByKey(pages, "es", "benidorm"), undefined);
+});
+
+test("translationKey de una página por su URL", () => {
+  const pages = [
+    page("es/inicio", { slug: "", translationKey: "inicio" }),
+    page("es/negocios", { translationKey: "negocios" }),
+    page("en/businesses", { translationKey: "negocios" }),
+  ];
+  assert.equal(translationKeyByPath(pages, "/"), "inicio");
+  assert.equal(translationKeyByPath(pages, "/negocios/"), "negocios");
+  assert.equal(translationKeyByPath(pages, "/en/businesses/"), "negocios");
+  assert.equal(translationKeyByPath(pages, "/en/"), undefined);
 });
 
 test("el selector lleva a la equivalente o a la home del idioma", () => {

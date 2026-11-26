@@ -33,7 +33,7 @@ const { locale, title, description, h1, lead, translationKey } = page.data;
         <PrecioDesde locale={locale} segment="vivienda" />
         <Lanzamiento locale={locale} />
       </div>
-      <Botones locale={locale} />
+      <Botones locale={locale} translationKey={translationKey} />
     </div>
   </section>
   <slot />

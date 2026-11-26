@@ -19,7 +19,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check:claims": "node scripts/check-claims.mjs"
+    "check:claims": "node scripts/check-claims.mjs",
+    "check:contact": "node scripts/check-contact.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^8.1.6",

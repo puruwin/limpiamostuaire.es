@@ -6,6 +6,7 @@ import {
   breadcrumbTrail,
   languageLinks,
   pageUrlByKey,
+  translationKeyByPath,
 } from "./pages.ts";
 
 // Acceso a la colección `pages` para los componentes (menú, pie, selector).
@@ -35,6 +36,16 @@ export async function urlOf(
   translationKey: string,
 ): Promise<string | undefined> {
   return pageUrlByKey(await entries(), locale, translationKey);
+}
+
+/**
+ * translationKey de la página con esa URL ("/negocios/"), para los bloques de
+ * MDX. Falla si no hay ninguna: un bloque solo va dentro de una página.
+ */
+export async function translationKeyAt(path: string): Promise<string> {
+  const key = translationKeyByPath(await entries(), path);
+  if (key === undefined) throw new Error(`Ninguna página tiene la URL ${path}`);
+  return key;
 }
 
 /** Enlaces de las claves que ya tienen página en `locale`, en ese orden. */

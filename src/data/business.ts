@@ -50,11 +50,39 @@ export function telHref(): string {
   return `tel:${business.phone.e164}`;
 }
 
+/** Tema del saludo de WhatsApp: qué pide quien escribe. */
+export const whatsappTopics = ["casa", "negocio", "conductos"] as const;
+export type WhatsAppTopic = (typeof whatsappTopics)[number];
+
 /**
- * Enlace a WhatsApp con el saludo genérico en el idioma de la página. El
- * saludo por página llega en M3.1 (parámetro `greeting`).
+ * Páginas (translationKey) con su propio saludo. Las demás (home, precios,
+ * legales, 404…) usan el de casa, el más general.
  */
-export function whatsappHref(locale: Locale, greeting?: string): string {
-  const text = greeting ?? useTranslations(locale)("whatsapp.greeting");
+const topicByPage: Readonly<Record<string, WhatsAppTopic>> = {
+  negocios: "negocio",
+  conductos: "conductos",
+};
+
+export function whatsappTopic(translationKey?: string): WhatsAppTopic {
+  return (translationKey && topicByPage[translationKey]) || "casa";
+}
+
+/** Texto con el que se abre el chat de WhatsApp en esa página. */
+export function whatsappGreeting(
+  locale: Locale,
+  translationKey?: string,
+): string {
+  return useTranslations(locale)(
+    `whatsapp.greeting.${whatsappTopic(translationKey)}`,
+  );
+}
+
+/**
+ * Enlace a WhatsApp con el saludo de la página en su idioma. Lo usan la
+ * cabecera, el botón flotante y los botones de las CTA; check:contact
+ * comprueba que en cada página de dist/ lleven el mismo texto.
+ */
+export function whatsappHref(locale: Locale, translationKey?: string): string {
+  const text = whatsappGreeting(locale, translationKey);
   return `https://wa.me/${business.phone.e164.slice(1)}?text=${encodeURIComponent(text)}`;
 }
