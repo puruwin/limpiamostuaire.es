@@ -30,6 +30,16 @@ export function diaYMes(locale: Locale, isoDate: string): string {
   }).format(new Date(`${isoDate}T00:00:00Z`));
 }
 
+/** «26 de noviembre de 2026» / «26 November 2026». */
+export function fechaLarga(locale: Locale, date: Date): string {
+  return new Intl.DateTimeFormat(intlLocale[locale], {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(date);
+}
+
 /** Sustituye `{nombre}` en una cadena de ui.ts. */
 export function fill(template: string, values: Record<string, string>): string {
   return template.replace(/\{(\w+)\}/g, (_match, name: string) => {

@@ -101,7 +101,7 @@ slug: precios # sin barras; "" para la home. La URL sale de aquí: /precios/, /e
 title: Precio de limpieza de aire acondicionado · Tarifa por split # ≤ 60 caracteres, tal cual, sin sufijo de marca
 description: … # ≤ 155 caracteres
 h1: Precios
-template: pagina # plantilla de src/templates/: basica, home, pagina (H1, entradilla y bloques) u operador (pagina + tarjeta del operador)
+template: pagina # plantilla de src/templates/: basica, home, pagina (H1, entradilla y bloques), operador (pagina + tarjeta del operador) o legal (H1, fecha de updated y texto)
 lead: … # opcional; entradilla bajo el H1 (plantillas home y pagina)
 draft: false # opcional; true = borrador
 updated: 2026-11-25

@@ -1,0 +1,36 @@
+---
+import { business, telHref } from "../../data/business";
+import { useTranslations } from "../../i18n/ui";
+import { asLocale } from "../../lib/current-locale";
+import { lista } from "../../lib/format";
+
+// Datos del titular para el aviso legal y la privacidad (LSSI art. 10 y RGPD
+// art. 13), desde business.ts: así las dos páginas dicen lo mismo.
+const locale = asLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+const { titular } = business;
+---
+
+<ul>
+  <li>
+    <strong>{t("legal.holder")}:</strong> {titular.nombre}.
+  </li>
+  <li>
+    <strong>{t("legal.tradeNames")}:</strong>
+    {lista(locale, [business.brand, business.operator])}.
+  </li>
+  <li>
+    <strong>{t("legal.nif")}:</strong> {titular.nif}.
+  </li>
+  <li>
+    <strong>{t("legal.address")}:</strong> {titular.domicilio}.
+  </li>
+  <li>
+    <strong>{t("legal.email")}:</strong>
+    <a href={`mailto:${business.email}`}>{business.email}</a>.
+  </li>
+  <li>
+    <strong>{t("legal.phone")}:</strong>
+    <a href={telHref()}>{business.phone.display}</a>.
+  </li>
+</ul>

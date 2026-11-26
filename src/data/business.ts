@@ -10,6 +10,16 @@ export const business = {
   brand: "Limpiamos tu aire",
   /** Operador en Benidorm; no va en la cabecera (DESIGN.md). */
   operator: "Ti&Di",
+  /**
+   * Titular de la web y responsable de los datos (aviso legal y privacidad:
+   * LSSI art. 10 y RGPD art. 13). El domicilio va solo aquí: la ficha lo
+   * oculta.
+   */
+  titular: {
+    nombre: "David Pérez Martínez",
+    nif: "49234343Z",
+    domicilio: "Calle Serreta 19, 03520 Polop (Alicante), España",
+  },
   phone: { display: "+34 608 96 22 13", e164: "+34608962213" },
   email: "hola@limpiamostuaire.es",
   locality: "Benidorm",
