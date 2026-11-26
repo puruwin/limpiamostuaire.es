@@ -6,7 +6,7 @@ Sitio estático en español e inglés hecho con [Astro](https://astro.build), Ty
 
 ## Requisitos
 
-- Node 24 (versión fijada en `.node-version`; Astro exige ≥ 22.23.4).
+- Node 24 (versión fijada en `.node-version`; Astro exige ≥ 22.23.4). El endpoint del formulario lo ejecuta tal cual, sin build.
 - npm.
 
 ## Comandos
@@ -15,10 +15,11 @@ Sitio estático en español e inglés hecho con [Astro](https://astro.build), Ty
 | ----------------------- | ------------------------------------------------------------------ |
 | `npm ci`                | Instala las dependencias exactas de `package-lock.json`            |
 | `npm run dev`           | Servidor de desarrollo en `http://localhost:4321/`                 |
+| `npm run dev:api`       | Endpoint del formulario (`server/`) en `http://127.0.0.1:4311/`    |
 | `npm run build`         | Genera el sitio estático en `dist/`                                |
 | `npm run preview`       | Sirve `dist/` en local para revisarlo                              |
 | `npm run check`         | Tipos de Astro y TypeScript (`astro check`), claves de `ui.ts`     |
-| `npm test`              | Tests con `node --test` (`src/**/*.test.ts`)                       |
+| `npm test`              | Tests con `node --test` (`src/` y `server/`)                       |
 | `npm run check:robots`  | Meta robots de `dist/` y `robots.txt` según `SITE_ENV`             |
 | `npm run check:csp`     | CSP de cada página de `dist/`: hashes, sin `unsafe-inline`         |
 | `npm run check:caddy`   | `deploy/Caddyfile` con Caddy real: cabeceras, caché, 301 y 404     |
@@ -48,6 +49,7 @@ src/
   components/bloques/      Bloques de las páginas .mdx: secciones, precios «desde», zonas, trabajos, preguntas y contacto
   components/              Cabecera, pie, selector de idioma, WhatsApp flotante, iconos, NotFound.astro (la 404) y Seo.astro (title, canonical, hreflang, Open Graph y JSON-LD)
   data/business.ts         Datos del negocio (NAP, horario, zonas): única fuente, igual que la ficha de Google
+  data/quote-form.ts       Formulario de presupuesto: campos, límites, endpoint y páginas de resultado (contrato con server/)
   data/tarifa.ts           Tarifa de casa y negocio, suplementos y precio de lanzamiento: única fuente para el schema y las páginas
   data/trabajos.ts         Fotos de antes y después de trabajos reales (M0.4)
   data/pasos.ts            Pasos de la limpieza de un split y la foto propia de cada uno (M0.4)
@@ -67,13 +69,16 @@ src/
   lib/structured-data.ts   Grafo JSON-LD: WebSite, WebPage, Organization, LocalBusiness Ti&Di, Service y migas
   pages/[...path].astro    Ruta dinámica que genera todas las páginas de la colección
   pages/404.astro, en/     Páginas 404 de cada idioma
+  pages/contacto/, en/contact/  Páginas de resultado del formulario (enviada y error), noindex
   pages/sitemap.xml.ts     sitemap.xml
   pages/robots.txt.ts      robots.txt
   templates/               Plantillas de página (campo template)
   styles/global.css        Entrada de Tailwind con los colores de DESIGN.md
 public/                    Ficheros que se copian tal cual a dist/ (favicon, og.png, logo.png y la clave de IndexNow)
+server/                    Endpoint del formulario: Node sin dependencias, Turnstile, honeypot, fotos con enlace firmado y Resend
 scripts/                   Comprobaciones check:* sobre dist/ y deploy/
-deploy/Caddyfile           Sitios de producción, www y staging en el VPS
+deploy/Caddyfile           Sitios de producción, www y staging en el VPS, y el paso de /api/presupuesto/ al endpoint
+deploy/systemd/            Servicio del endpoint (una instancia por sitio) y su reinicio tras cada despliegue
 brand/                     Logos y fuentes (ver DESIGN.md)
 docs/                      Negocio, SEO y decisiones
 ```
@@ -200,6 +205,18 @@ WhatsApp y teléfono van en tres sitios, marcados con `data-contacto`: la cabece
 
 La página de cada URL la saca del frontmatter de `src/content/pages/`.
 
+## Formulario de presupuesto
+
+`/contacto/` y `/en/contact/` (bloque `<Formulario>`, `src/components/bloques/Formulario.astro`) envían a `/api/presupuesto/`, que atiende `server/` en el VPS. Nombres de campos, opciones y límites salen de `src/data/quote-form.ts`, que leen la página y el endpoint.
+
+- **Campos:** nombre, teléfono, email (opcional), municipio (los de `business.areaServed` u «Otro»), casa o negocio, n.º de splits, conductos y unidad exterior sin trabajar en altura (sí/no, opcionales), hasta 5 fotos de 10 MB, mensaje y consentimiento.
+- **Antispam:** honeypot (`web`), Cloudflare Turnstile (sin JS no se puede enviar) y 5 envíos por IP y hora.
+- **Emails** (Resend): a `hola@` con el asunto `Presupuesto · <municipio> · <n.º> splits`, los datos y enlaces firmados a las fotos, que se borran a los 30 días; y un acuse al cliente en su idioma si deja email.
+- **Enlaces al formulario:** el bloque `<Contacto>` (salvo en la propia página; desde `negocios`, con `?tipo=negocio`) y el pie.
+- Sin JS el formulario se envía igual y el endpoint redirige a la página de resultado del idioma; con JS valida campo a campo y envía con `fetch`. Las páginas de resultado llevan `noindex` siempre.
+
+En local, `npm run dev:api` y `npm run dev` a la vez. Despliegue, secretos y prueba de punta a punta: [`docs/despliegue.md`](docs/despliegue.md#endpoint-del-formulario-m32).
+
 ## Publicidad e imágenes permitidas
 
 No estamos inscritos en el ROESB, así que no podemos anunciar desinfección ni ningún efecto biocida. Las fotos de trabajos tienen que ser reales. `npm run check:claims` (reglas en `src/lib/claims-check.ts`) lo comprueba en cualquier entorno:
@@ -214,6 +231,7 @@ El error da el fichero, la regla, la palabra y el contexto.
 Con `SITE_ENV=production` (y solo entonces), `npm run build` falla si:
 
 - alguna página tiene `draft: true` (lo comprueba la ruta dinámica);
-- queda un `{{PENDIENTE` en cualquier fichero de `dist/`, HTML o no (integración `src/integrations/production-guards.ts`, al final del build). El error da fichero y línea.
+- queda un `{{PENDIENTE` en cualquier fichero de `dist/`, HTML o no (integración `src/integrations/production-guards.ts`, al final del build). El error da fichero y línea;
+- falta `PUBLIC_TURNSTILE_SITE_KEY`, así que el formulario usaría la clave de pruebas de Turnstile (misma integración, al empezar el build).
 
 Para marcar un texto que falta, escribe `{{PENDIENTE: lo que falta}}`. En staging, `provisional` y local los borradores se generan y los huecos se publican, para revisarlos; el día del lanzamiento (M5.2) bloquean el despliegue. Para probarlo en local: `SITE_ENV=production npm run build`.

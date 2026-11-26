@@ -1,0 +1,839 @@
+---
+import { PUBLIC_TURNSTILE_SITE_KEY } from "astro:env/server";
+import { business, telHref, whatsappHref } from "../../data/business";
+import {
+  OTHER_MUNICIPALITY,
+  QUOTE_ENDPOINT,
+  TURNSTILE_TEST_SITE_KEY,
+  photoLimits,
+  places,
+  quoteFields as f,
+  quoteResultPaths,
+  textLimits,
+  yesNo,
+} from "../../data/quote-form";
+import { useTranslations, type UiKey } from "../../i18n/ui";
+import { translationKeyAt, urlOf } from "../../lib/collection";
+import { asLocale } from "../../lib/current-locale";
+
+// Formulario de presupuesto con fotos (M3.2), como bloque de las páginas
+// .mdx (contacto). Sin JS se valida con los atributos HTML y se envía en
+// multipart al endpoint (server/), que redirige a la página de resultado. El
+// JS solo mejora: preselecciona `?tipo=`, valida con mensajes en el idioma de
+// la página y envía con fetch sin salir de la página si falla. Turnstile
+// necesita JS: sin él, el endpoint rechaza el envío y el <noscript> manda a
+// llamar o a WhatsApp. Contrato con el endpoint: src/data/quote-form.ts.
+
+interface Props {
+  titulo: string;
+}
+
+const { titulo } = Astro.props;
+const locale = asLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+const origin = Astro.url.pathname;
+const translationKey = await translationKeyAt(origin);
+const privacyUrl = await urlOf(locale, "privacidad");
+
+const mb = photoLimits.maxBytes / (1024 * 1024);
+const fill = (key: UiKey, values: Record<string, string | number> = {}) =>
+  t(key).replace(/\{(\w+)\}/g, (_, name: string) => String(values[name]));
+
+// Mensajes del JS, ya en el idioma de la página.
+const messages = {
+  required: t("form.error.required"),
+  choose: t("form.error.choose"),
+  privacy: t("form.error.privacy"),
+  email: t("form.error.email"),
+  phone: t("form.error.phone"),
+  splits: fill("form.error.splits", { max: textLimits.splitsMax }),
+  tooLong: t("form.error.tooLong"),
+  tooMany: fill("form.error.tooMany", { max: photoLimits.maxFiles }),
+  tooLarge: fill("form.error.tooLarge", { mb }),
+  fileType: t("form.error.fileType"),
+  invalid: t("form.error.invalid"),
+  send: t("form.error.send"),
+  turnstile: t("form.error.turnstile"),
+  rateLimit: t("form.error.rateLimit"),
+  summary: t("form.errorSummary"),
+  sending: t("form.sending"),
+  photosNone: t("form.photosNone"),
+  photosOne: t("form.photosOne"),
+  photosMany: t("form.photosMany"),
+};
+
+const config = {
+  sentUrl: quoteResultPaths[locale].sent,
+  other: OTHER_MUNICIPALITY,
+  places,
+  photos: photoLimits,
+  phone: { min: textLimits.phoneMin, max: textLimits.phoneMax },
+};
+
+const accept = [...photoLimits.types, ".heic", ".heif"].join(",");
+
+// Vacía (variable de CI sin crear): la de pruebas. Producción no la admite.
+const turnstileSiteKey =
+  PUBLIC_TURNSTILE_SITE_KEY.trim() || TURNSTILE_TEST_SITE_KEY;
+
+const label = "block font-bold";
+const hint = "mt-1 text-sm";
+const error = "error mt-1 text-sm font-bold text-red-700";
+const control =
+  "mt-2 block min-h-11 w-full rounded-lg border border-tinta/40 bg-papel px-3 py-2 text-base text-tinta aria-invalid:border-red-700";
+const choice =
+  "flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border border-tinta/40 bg-papel px-3 py-2 has-checked:border-tinta has-checked:bg-suave";
+const optional = `(${t("form.optional")})`;
+
+/** Pregunta de sí o no, opcional (conductos, unidad exterior). */
+const yesNoQuestions = [
+  {
+    name: f.ducts,
+    id: "conductos",
+    label: "form.ducts",
+    hint: "form.ductsHint",
+  },
+  {
+    name: f.outdoor,
+    id: "exterior",
+    label: "form.outdoor",
+    hint: "form.outdoorHint",
+  },
+] as const;
+---
+
+<section id="formulario" aria-labelledby="formulario-titulo" class="bg-suave">
+  <div class="mx-auto max-w-6xl px-4 py-12 sm:py-16">
+    <h2 id="formulario-titulo" class="text-2xl font-bold sm:text-3xl">
+      {titulo}
+    </h2>
+    <div class="prosa mt-4 max-w-3xl">
+      <slot />
+    </div>
+
+    <form
+      method="post"
+      action={QUOTE_ENDPOINT}
+      enctype="multipart/form-data"
+      class="mt-8 max-w-3xl space-y-6 rounded-2xl bg-papel p-5 sm:p-8"
+      data-quote-form
+      data-messages={JSON.stringify(messages)}
+      data-config={JSON.stringify(config)}
+    >
+      <div
+        class="hidden rounded-lg border border-red-700 bg-red-50 p-4 font-bold text-red-800"
+        role="alert"
+        tabindex="-1"
+        data-summary
+      ></div>
+
+      <noscript>
+        <p class="rounded-lg border border-tinta bg-fondo p-4">
+          {t("form.noscript")}{" "}
+          <a
+            href={telHref()}
+            class="font-bold text-acento-texto underline underline-offset-4"
+          >
+            {business.phone.display}
+          </a>
+          ·
+          <a
+            href={whatsappHref(locale, translationKey)}
+            class="font-bold text-acento-texto underline underline-offset-4"
+          >
+            WhatsApp
+          </a>
+        </p>
+      </noscript>
+
+      <input type="hidden" name={f.locale} value={locale} />
+      <input type="hidden" name={f.origin} value={origin} />
+
+      <div class="grid gap-6 sm:grid-cols-2">
+        <div>
+          <label for="f-nombre" class={label}>
+            {t("form.name")}
+          </label>
+          <input
+            id="f-nombre"
+            name={f.name}
+            type="text"
+            autocomplete="name"
+            required
+            maxlength={textLimits.name}
+            class={control}
+            aria-describedby="f-nombre-error"
+          />
+          <p id="f-nombre-error" class={error} hidden></p>
+        </div>
+
+        <div>
+          <label for="f-telefono" class={label}>
+            {t("form.phone")}
+          </label>
+          <input
+            id="f-telefono"
+            name={f.phone}
+            type="tel"
+            autocomplete="tel"
+            inputmode="tel"
+            required
+            minlength={textLimits.phoneMin}
+            maxlength={textLimits.phoneMax}
+            class={control}
+            aria-describedby="f-telefono-hint f-telefono-error"
+          />
+          <p id="f-telefono-hint" class={hint}>
+            {t("form.phoneHint")}
+          </p>
+          <p id="f-telefono-error" class={error} hidden></p>
+        </div>
+
+        <div class="sm:col-span-2">
+          <label for="f-email" class={label}>
+            {t("form.email")} <span class="font-normal">{optional}</span>
+          </label>
+          <input
+            id="f-email"
+            name={f.email}
+            type="email"
+            autocomplete="email"
+            maxlength={textLimits.email}
+            class={control}
+            aria-describedby="f-email-hint f-email-error"
+          />
+          <p id="f-email-hint" class={hint}>
+            {t("form.emailHint")}
+          </p>
+          <p id="f-email-error" class={error} hidden></p>
+        </div>
+
+        <div>
+          <label for="f-municipio" class={label}>
+            {t("form.municipality")}
+          </label>
+          <select
+            id="f-municipio"
+            name={f.municipality}
+            required
+            class={control}
+            aria-describedby="f-municipio-error"
+          >
+            <option value="">{t("form.municipalityChoose")}</option>
+            {business.areaServed.map((name) => (
+              <option value={name}>{name}</option>
+            ))}
+            <option value={OTHER_MUNICIPALITY}>
+              {t("form.municipalityOther")}
+            </option>
+          </select>
+          <p id="f-municipio-error" class={error} hidden></p>
+        </div>
+
+        <div data-other-municipality>
+          <label for="f-municipio-otro" class={label}>
+            {t("form.municipalityOtherLabel")}
+          </label>
+          <input
+            id="f-municipio-otro"
+            name={f.municipalityOther}
+            type="text"
+            autocomplete="address-level2"
+            maxlength={textLimits.municipalityOther}
+            class={control}
+            aria-describedby="f-municipio-otro-error"
+          />
+          <p id="f-municipio-otro-error" class={error} hidden></p>
+        </div>
+      </div>
+
+      <fieldset aria-describedby="f-tipo-hint f-tipo-error">
+        <legend class={label}>{t("form.place")}</legend>
+        <div class="mt-2 grid gap-3 sm:grid-cols-2">
+          {places.map((place, index) => (
+            <label class={choice}>
+              <input
+                type="radio"
+                name={f.place}
+                value={place}
+                required={index === 0}
+                class="size-5 accent-tinta"
+              />
+              {t(`form.place.${place}`)}
+            </label>
+          ))}
+        </div>
+        <p id="f-tipo-hint" class={hint}>
+          {t("form.placeHint")}
+        </p>
+        <p id="f-tipo-error" class={error} hidden></p>
+      </fieldset>
+
+      <div>
+        <label for="f-splits" class={label}>
+          {t("form.splits")}
+        </label>
+        <input
+          id="f-splits"
+          name={f.splits}
+          type="number"
+          inputmode="numeric"
+          min="1"
+          max={textLimits.splitsMax}
+          step="1"
+          required
+          class:list={[control, "sm:max-w-40"]}
+          aria-describedby="f-splits-hint f-splits-error"
+        />
+        <p id="f-splits-hint" class={hint}>
+          {t("form.splitsHint")}
+        </p>
+        <p id="f-splits-error" class={error} hidden></p>
+      </div>
+
+      {yesNoQuestions.map((question) => (
+        <fieldset
+          aria-describedby={`f-${question.id}-hint f-${question.id}-error`}
+        >
+          <legend class={label}>
+            {t(question.label)} <span class="font-normal">{optional}</span>
+          </legend>
+          <p id={`f-${question.id}-hint`} class={hint}>
+            {t(question.hint)}
+          </p>
+          <div class="mt-2 grid grid-cols-2 gap-3 sm:max-w-80">
+            {yesNo.map((answer) => (
+              <label class={choice}>
+                <input
+                  type="radio"
+                  name={question.name}
+                  value={answer}
+                  class="size-5 accent-tinta"
+                />
+                {t(answer === "si" ? "form.yes" : "form.no")}
+              </label>
+            ))}
+          </div>
+          <p id={`f-${question.id}-error`} class={error} hidden></p>
+        </fieldset>
+      ))}
+
+      <div>
+        <label for="f-fotos" class={label}>
+          {t("form.photos")} <span class="font-normal">{optional}</span>
+        </label>
+        <!--
+          El botón y el estado del input nativo salen en el idioma del
+          navegador, no en el de la página: el input queda oculto pero con
+          foco, y el botón es otra etiqueta del mismo input.
+        -->
+        <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <input
+            id="f-fotos"
+            name={f.photos}
+            type="file"
+            multiple
+            accept={accept}
+            class="peer sr-only"
+            aria-describedby="f-fotos-status f-fotos-hint f-fotos-error"
+            data-photos
+          />
+          <label
+            for="f-fotos"
+            aria-hidden="true"
+            class="inline-flex min-h-11 cursor-pointer items-center rounded-full border-2 border-tinta px-5 font-bold peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-acento-texto peer-aria-invalid:border-red-700 hover:bg-suave"
+          >
+            {t("form.photosChoose")}
+          </label>
+          <span
+            id="f-fotos-status"
+            class="text-sm"
+            aria-live="polite"
+            data-photos-status
+          >
+            {t("form.photosNone")}
+          </span>
+        </div>
+        <p id="f-fotos-hint" class={hint}>
+          {fill("form.photosHint", { max: photoLimits.maxFiles, mb })}
+        </p>
+        <p id="f-fotos-error" class={error} hidden></p>
+      </div>
+
+      <div>
+        <label for="f-mensaje" class={label}>
+          {t("form.message")} <span class="font-normal">{optional}</span>
+        </label>
+        <textarea
+          id="f-mensaje"
+          name={f.message}
+          rows="4"
+          maxlength={textLimits.message}
+          class={control}
+          aria-describedby="f-mensaje-hint f-mensaje-error"
+        ></textarea>
+        <p id="f-mensaje-hint" class={hint}>
+          {t("form.messageHint")}
+        </p>
+        <p id="f-mensaje-error" class={error} hidden></p>
+      </div>
+
+      <!-- Honeypot: invisible para personas; si llega con valor, es spam. -->
+      <div class="honeypot" aria-hidden="true">
+        <label for="f-web">{t("form.honeypot")}</label>
+        <input
+          id="f-web"
+          name={f.honeypot}
+          type="text"
+          tabindex="-1"
+          autocomplete="off"
+        />
+      </div>
+
+      <div>
+        <div class="flex items-start gap-3">
+          <input
+            id="f-privacidad"
+            name={f.privacy}
+            type="checkbox"
+            value="si"
+            required
+            class="mt-1 size-5 shrink-0 accent-tinta"
+            aria-describedby="f-privacidad-info f-privacidad-error"
+          />
+          <label for="f-privacidad">
+            {t("form.privacyBefore")}{" "}
+            {privacyUrl ? (
+              <a
+                href={privacyUrl}
+                class="font-bold text-acento-texto underline underline-offset-4"
+              >
+                {t("form.privacyLink")}
+              </a>
+            ) : (
+              `${t("form.privacyLink")} ${t("form.privacyPending")}`
+            )}{" "}
+            {t("form.privacyAfter")}
+          </label>
+        </div>
+        <p id="f-privacidad-error" class={error} hidden></p>
+        <p id="f-privacidad-info" class="mt-3 text-sm">
+          {fill("form.privacyInfo", {
+            holder: `${business.titular.nombre} (${business.brand})`,
+            email: business.email,
+          })}
+        </p>
+      </div>
+
+      <!-- Turnstile: solo se ve si Cloudflare necesita que interactúes. -->
+      <div
+        class="cf-turnstile"
+        data-sitekey={turnstileSiteKey}
+        data-language={locale}
+        data-appearance="interaction-only"
+        data-size="flexible"
+        data-response-field-name={f.turnstile}
+        data-turnstile
+      ></div>
+
+      <button
+        type="submit"
+        class="inline-flex min-h-12 items-center justify-center rounded-full bg-tinta px-6 font-bold text-fondo hover:bg-acento-texto disabled:cursor-wait disabled:opacity-70"
+        data-submit
+      >
+        {t("form.submit")}
+      </button>
+    </form>
+  </div>
+</section>
+
+<script
+  is:inline
+  src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+  async
+  defer
+></script>
+
+<style>
+  .honeypot {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+</style>
+
+<script>
+  type Messages = Record<
+    | "required"
+    | "choose"
+    | "privacy"
+    | "email"
+    | "phone"
+    | "splits"
+    | "tooLong"
+    | "tooMany"
+    | "tooLarge"
+    | "fileType"
+    | "invalid"
+    | "send"
+    | "turnstile"
+    | "rateLimit"
+    | "summary"
+    | "sending"
+    | "photosNone"
+    | "photosOne"
+    | "photosMany",
+    string
+  >;
+  interface Config {
+    sentUrl: string;
+    other: string;
+    places: string[];
+    photos: { maxFiles: number; maxBytes: number; types: string[] };
+    phone: { min: number; max: number };
+  }
+  type Field = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+  type Turnstile = { reset: (widget?: Element) => void };
+
+  const TURNSTILE_FIELD = "cf-turnstile-response";
+  /** Lo que se espera al token si se pulsa enviar antes de que llegue. */
+  const TURNSTILE_WAIT_MS = 30_000;
+
+  const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  /** Campos que se validan, con su id de error (f-<id>-error). */
+  const names = [
+    "nombre",
+    "telefono",
+    "email",
+    "municipio",
+    "municipio_otro",
+    "tipo",
+    "splits",
+    "conductos",
+    "exterior",
+    "fotos",
+    "mensaje",
+    "privacidad",
+  ];
+
+  for (const form of document.querySelectorAll<HTMLFormElement>(
+    "[data-quote-form]",
+  )) {
+    enhance(form);
+  }
+
+  function enhance(form: HTMLFormElement) {
+    const messages = JSON.parse(form.dataset.messages ?? "{}") as Messages;
+    const config = JSON.parse(form.dataset.config ?? "{}") as Config;
+    const summary = form.querySelector<HTMLElement>("[data-summary]");
+    const submit = form.querySelector<HTMLButtonElement>("[data-submit]");
+    const widget = form.querySelector<HTMLElement>("[data-turnstile]");
+    const field = (name: string) =>
+      form.elements.namedItem(name) as Field | RadioNodeList | null;
+
+    form.noValidate = true;
+
+    // Casa o negocio preseleccionado desde el enlace al formulario (?tipo=).
+    const place = new URLSearchParams(location.search).get("tipo");
+    if (place && config.places.includes(place)) {
+      const radio = form.querySelector<HTMLInputElement>(
+        `input[name="tipo"][value="${place}"]`,
+      );
+      if (radio) radio.checked = true;
+    }
+
+    // Página de origen: la de la web desde la que se llegó al formulario.
+    const origin = field("origen");
+    if (origin instanceof HTMLInputElement && document.referrer) {
+      try {
+        const referrer = new URL(document.referrer);
+        if (
+          referrer.origin === location.origin &&
+          referrer.pathname !== location.pathname
+        ) {
+          origin.value = referrer.pathname;
+        }
+      } catch {
+        // Referrer no válido: se queda la página del formulario.
+      }
+    }
+
+    // «Otro» municipio: el campo solo se ve (y se pide) al elegirlo.
+    const municipality = field("municipio");
+    const otherBox = form.querySelector<HTMLElement>(
+      "[data-other-municipality]",
+    );
+    const other = field("municipio_otro");
+    const syncOther = () => {
+      if (!(municipality instanceof HTMLSelectElement) || !otherBox) return;
+      const isOther = municipality.value === config.other;
+      otherBox.hidden = !isOther;
+      if (other instanceof HTMLInputElement) {
+        other.required = isOther;
+        if (!isOther) clearError("municipio_otro");
+      }
+    };
+    if (municipality instanceof HTMLSelectElement) {
+      municipality.addEventListener("change", syncOther);
+    }
+    syncOther();
+
+    // Estado del botón de fotos, en el idioma de la página.
+    const photos = form.querySelector<HTMLInputElement>("[data-photos]");
+    const photosStatus = form.querySelector<HTMLElement>(
+      "[data-photos-status]",
+    );
+    const syncPhotos = () => {
+      if (!photos || !photosStatus) return;
+      const count = photos.files?.length ?? 0;
+      photosStatus.textContent =
+        count === 0
+          ? messages.photosNone
+          : count === 1
+            ? messages.photosOne
+            : messages.photosMany.replace("{n}", String(count));
+    };
+    photos?.addEventListener("change", syncPhotos);
+    syncPhotos();
+
+    function errorEl(name: string) {
+      const id = name === "municipio_otro" ? "municipio-otro" : name;
+      return form.querySelector<HTMLElement>(`#f-${id}-error`);
+    }
+
+    function controls(name: string): HTMLElement[] {
+      return [...form.querySelectorAll<HTMLElement>(`[name="${name}"]`)];
+    }
+
+    function setError(name: string, message: string) {
+      const el = errorEl(name);
+      if (el) {
+        el.textContent = message;
+        el.hidden = false;
+      }
+      for (const control of controls(name)) {
+        control.setAttribute("aria-invalid", "true");
+      }
+    }
+
+    function clearError(name: string) {
+      const el = errorEl(name);
+      if (el) {
+        el.textContent = "";
+        el.hidden = true;
+      }
+      for (const control of controls(name)) {
+        control.removeAttribute("aria-invalid");
+      }
+    }
+
+    function fileOk(file: File) {
+      if (config.photos.types.includes(file.type)) return true;
+      // Algunos navegadores no dan el tipo de las HEIC.
+      return !file.type && /\.(heic|heif)$/i.test(file.name);
+    }
+
+    /** Mensaje de error del campo, o "" si es válido. */
+    function check(name: string): string {
+      const el = field(name);
+      if (!el) return "";
+      if (el instanceof RadioNodeList) {
+        const first = el[0];
+        const required = first instanceof HTMLInputElement && first.required;
+        return el.value || !required ? "" : messages.choose;
+      }
+      if (el instanceof HTMLInputElement && el.type === "checkbox") {
+        return el.checked ? "" : messages.privacy;
+      }
+      if (el instanceof HTMLInputElement && el.type === "file") {
+        const files = [...(el.files ?? [])];
+        if (files.length > config.photos.maxFiles) return messages.tooMany;
+        if (files.some((file) => !fileOk(file))) return messages.fileType;
+        if (files.some((file) => file.size > config.photos.maxBytes)) {
+          return messages.tooLarge;
+        }
+        return "";
+      }
+      const value = el.value.trim();
+      // Un número a medio escribir («2e») llega vacío pero no es válido.
+      if (name === "splits" && !value && el.validity.badInput) {
+        return messages.splits;
+      }
+      if (!value) {
+        if (!el.required) return "";
+        return el instanceof HTMLSelectElement
+          ? messages.choose
+          : messages.required;
+      }
+      if (name === "email" && !EMAIL.test(value)) return messages.email;
+      if (name === "telefono") {
+        const digits = value.replace(/\D/g, "").length;
+        if (
+          !/^[0-9+().\s-]+$/.test(value) ||
+          digits < config.phone.min ||
+          digits > 15
+        ) {
+          return messages.phone;
+        }
+      }
+      if (name === "splits" && !el.checkValidity()) return messages.splits;
+      if (
+        (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) &&
+        el.maxLength > 0 &&
+        value.length > el.maxLength
+      ) {
+        return messages.tooLong.replace("{max}", String(el.maxLength));
+      }
+      return "";
+    }
+
+    function validate(name: string): boolean {
+      const message = check(name);
+      if (message) setError(name, message);
+      else clearError(name);
+      return !message;
+    }
+
+    // Se revisa al salir del campo y, si ya tenía error, al corregirlo.
+    for (const name of names) {
+      for (const control of controls(name)) {
+        const event =
+          control instanceof HTMLInputElement &&
+          ["radio", "checkbox", "file"].includes(control.type)
+            ? "change"
+            : "blur";
+        control.addEventListener(event, () => validate(name));
+        control.addEventListener("input", () => {
+          if (control.getAttribute("aria-invalid")) validate(name);
+        });
+      }
+    }
+
+    function showSummary(message: string) {
+      if (!summary) return;
+      summary.textContent = message;
+      summary.classList.remove("hidden");
+    }
+
+    function hideSummary() {
+      if (!summary) return;
+      summary.textContent = "";
+      summary.classList.add("hidden");
+    }
+
+    function focusFirstError() {
+      const first = form.querySelector<HTMLElement>('[aria-invalid="true"]');
+      first?.focus();
+    }
+
+    // Mensaje propio para un "invalid" del servidor en estos campos.
+    const invalidMessage: Record<string, string> = {
+      email: messages.email,
+      telefono: messages.phone,
+      splits: messages.splits,
+    };
+
+    // El token de Turnstile sirve una sola vez: tras un envío fallido se pide otro.
+    function resetTurnstile() {
+      const turnstile = (window as unknown as { turnstile?: Turnstile })
+        .turnstile;
+      if (widget && turnstile) turnstile.reset(widget);
+    }
+
+    const turnstileToken = () =>
+      form.querySelector<HTMLInputElement>(`input[name="${TURNSTILE_FIELD}"]`)
+        ?.value ?? "";
+
+    // Turnstile tarda unos segundos en dar el token (más en el móvil, o si
+    // pide marcar la casilla): si aún no está, se espera en vez de dar error.
+    async function waitForToken(): Promise<boolean> {
+      const until = Date.now() + TURNSTILE_WAIT_MS;
+      while (!turnstileToken()) {
+        if (Date.now() > until) return false;
+        await new Promise((resolve) => setTimeout(resolve, 250));
+      }
+      return true;
+    }
+
+    let sending = false;
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (sending) return;
+      hideSummary();
+
+      const invalid = names.filter((name) => !validate(name));
+      if (invalid.length > 0) {
+        showSummary(messages.summary);
+        focusFirstError();
+        return;
+      }
+
+      sending = true;
+      const label = submit?.textContent ?? "";
+      if (submit) {
+        submit.disabled = true;
+        submit.textContent = messages.sending;
+      }
+      try {
+        if (widget && !(await waitForToken())) {
+          showSummary(messages.turnstile);
+          summary?.focus();
+          return;
+        }
+        const response = await fetch(form.action, {
+          method: "POST",
+          body: new FormData(form),
+          headers: { Accept: "application/json" },
+        });
+        const data = (await response.json().catch(() => null)) as {
+          ok?: boolean;
+          errors?: Record<string, string>;
+          error?: string;
+        } | null;
+        if (response.ok && data?.ok) {
+          location.assign(config.sentUrl);
+          return;
+        }
+        resetTurnstile();
+        const errors = Object.entries(data?.errors ?? {}).filter(([name]) =>
+          names.includes(name),
+        );
+        if (errors.length > 0) {
+          for (const [name, code] of errors) {
+            const text =
+              code === "required"
+                ? check(name) || messages.required
+                : code === "invalid"
+                  ? (invalidMessage[name] ?? messages.invalid)
+                  : code in messages
+                    ? messages[code as keyof Messages]
+                    : messages.invalid;
+            setError(name, text);
+          }
+          showSummary(messages.summary);
+          focusFirstError();
+        } else {
+          showSummary(
+            data?.error === "turnstile" || data?.error === "rateLimit"
+              ? messages[data.error]
+              : messages.send,
+          );
+          summary?.focus();
+        }
+      } catch {
+        resetTurnstile();
+        showSummary(messages.send);
+        summary?.focus();
+      } finally {
+        sending = false;
+        if (submit) {
+          submit.disabled = false;
+          submit.textContent = label;
+        }
+      }
+    });
+  }
+</script>

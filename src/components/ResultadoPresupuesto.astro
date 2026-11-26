@@ -1,0 +1,52 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Botones from "./bloques/Botones.astro";
+import { quoteResultPaths } from "../data/quote-form";
+import type { Locale } from "../i18n/locales";
+import { useTranslations } from "../i18n/ui";
+import { urlOf } from "../lib/collection";
+import { pagePath } from "../lib/pages";
+
+// Resultado del formulario de presupuesto (M3.2): el endpoint redirige aquí
+// cuando se envía sin JS; con JS, el éxito también llega aquí. Como la 404,
+// sin clave de traducción ni canonical, y noindex también en producción:
+// check:seo y check:robots las reconocen por quoteResultFiles.
+
+interface Props {
+  locale: Locale;
+  result: "sent" | "error";
+}
+
+const { locale, result } = Astro.props;
+const expected = quoteResultPaths[locale][result];
+if (Astro.url.pathname !== expected) {
+  throw new Error(
+    `${Astro.url.pathname}: la página de resultado tiene que estar en ${expected} (src/data/quote-form.ts).`,
+  );
+}
+const t = useTranslations(locale);
+const form = await urlOf(locale, "contacto");
+const back = result === "error" && form ? `${form}#formulario` : undefined;
+---
+
+<BaseLayout
+  lang={locale}
+  title={t(`quoteResult.${result}.title`)}
+  description={t(`quoteResult.${result}.description`)}
+  canonical={false}
+  noindex
+>
+  <div class="mx-auto max-w-3xl px-4 py-16">
+    <h1 class="text-3xl font-bold sm:text-4xl">
+      {t(`quoteResult.${result}.h1`)}
+    </h1>
+    <p class="mt-4 text-lg">{t(`quoteResult.${result}.text`)}</p>
+    <a
+      href={back ?? pagePath(locale, "")}
+      class="mt-8 inline-flex min-h-11 items-center font-bold text-acento-texto underline underline-offset-4"
+    >
+      {back ? t("quoteResult.back") : t("quoteResult.home")}
+    </a>
+    <Botones locale={locale} translationKey="contacto" class="mt-8" />
+  </div>
+</BaseLayout>

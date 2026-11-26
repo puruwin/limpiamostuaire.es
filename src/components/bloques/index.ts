@@ -1,6 +1,7 @@
 import Contacto from "./Contacto.astro";
 import Ejemplo from "./Ejemplo.astro";
 import EnlacePagina from "./EnlacePagina.astro";
+import Formulario from "./Formulario.astro";
 import Lanzamiento from "./Lanzamiento.astro";
 import Municipios from "./Municipios.astro";
 import Paso from "./Paso.astro";
@@ -22,6 +23,7 @@ export const bloques = {
   Contacto,
   Ejemplo,
   EnlacePagina,
+  Formulario,
   Lanzamiento,
   Municipios,
   Paso,

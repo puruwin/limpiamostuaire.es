@@ -1,11 +1,13 @@
 // Comprueba la indexación de dist/ según SITE_ENV (docs/despliegue.md#indexación):
-// - Meta robots: con "production" ninguna página lleva noindex; con cualquier
-//   otro valor (o ninguno), todas, las 404 incluidas.
+// - Meta robots: con "production" ninguna página lleva noindex, salvo las de
+//   resultado del formulario (quoteResultFiles), que lo llevan siempre; con
+//   cualquier otro valor (o ninguno), todas, las 404 incluidas.
 // - robots.txt: existe y enlaza ${SITE}/sitemap.xml. Fuera de producción, sin
 //   ningún Disallow (si Google no rastrea, no ve el noindex); en producción,
 //   nunca Disallow: / (bloquearía la web entera).
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { quoteResultFiles } from "../src/data/quote-form.ts";
 import { SITE } from "../src/lib/site.ts";
 
 const siteEnv = process.env.SITE_ENV || "development";
@@ -24,10 +26,9 @@ if (files.length === 0) {
 const errors = [];
 for (const file of files) {
   const hasNoindex = noindex.test(await readFile(join("dist", file), "utf8"));
-  if (hasNoindex === indexable) {
-    errors.push(
-      `dist/${file}: debería ir ${indexable ? "sin" : "con"} noindex.`,
-    );
+  const wanted = !indexable || quoteResultFiles.includes(file);
+  if (hasNoindex !== wanted) {
+    errors.push(`dist/${file}: debería ir ${wanted ? "con" : "sin"} noindex.`);
   }
 }
 

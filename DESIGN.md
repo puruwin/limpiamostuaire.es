@@ -65,7 +65,7 @@ Contrastes comprobados: `tinta`/`fondo` 12,4:1 · `tinta`/`suave` 11,5:1 · `tin
   - Ti&Di no va en la cabecera.
 - **Menú:** Precios · Cómo lo hacemos · Negocios · Benidorm · Sobre nosotros. Solo salen las páginas que ya existen.
   - Por debajo de `lg` se pliega tras un botón con `aria-expanded`; Escape lo cierra.
-  - Sin JS queda desplegado. Es el único JS del sitio.
+  - Sin JS queda desplegado. Es el único JS del sitio, junto con el del formulario de presupuesto.
 - **Selector de idioma:** banderas de ES y EN que llevan a la página equivalente o, si no existe, a la home del idioma. El nombre accesible del idioma va en ese idioma. La activa lleva un subrayado en `acento`.
 - **Pie** (`Footer.astro`), sobre `tinta` con el logo invertido:
   - Contacto (NAP de `src/data/business.ts`) y «En Benidorm te atiende» + wordmark blanco de Ti&Di, que enlaza a `/benidorm/` cuando exista.
@@ -107,6 +107,14 @@ Contrastes comprobados: `tinta`/`fondo` 12,4:1 · `tinta`/`suave` 11,5:1 · `tin
 - **Plantilla `legal`** (`src/templates/Legal.astro`), para el aviso legal, la privacidad y las cookies: H1, «Última actualización» con la fecha de `updated` y el texto en una columna de lectura (`max-w-3xl`), sin bloques ni botones.
 - **Tablas:** bordes de `tinta` al 15 % y cabecera en `suave`. En el móvil se desplazan en horizontal dentro de la columna.
 - **Titular:** el bloque `<Titular />` saca nombre, NIF y domicilio de `business.titular` y el contacto de `business.ts`, así el aviso legal y la privacidad dicen lo mismo.
+
+## Formulario de presupuesto (M3.2)
+
+- **Bloque `Formulario`** (`src/components/bloques/Formulario.astro`), en `/contacto/`: sección en `suave` con el formulario en una tarjeta `papel` (`rounded-2xl`), en una columna de `max-w-3xl`.
+- **Campos:** etiqueta en 700 encima, «(opcional)» en 400 al lado; campos de 44 px de alto como mínimo, borde de `tinta` al 40 % y esquinas de 8 px. Las opciones (casa o negocio, sí o no) son tarjetas con radio que pasan a borde `tinta` y fondo `suave` al marcarlas.
+- **Fotos:** botón propio con borde de 2 px en `tinta` (el del navegador sale en su idioma) y el estado («2 fotos elegidas») al lado.
+- **Errores:** texto en 700 en `red-700` bajo el campo, borde del campo en `red-700` y un resumen arriba con `role="alert"`.
+- **Enviar:** botón principal en `tinta`, como el de WhatsApp. Turnstile solo se ve si Cloudflare pide marcar la casilla.
 
 ## Logo de Limpiamos tu aire
 

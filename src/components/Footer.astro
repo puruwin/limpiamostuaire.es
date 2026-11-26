@@ -29,6 +29,7 @@ const legal = await existingLinks(locale, [
   "cookies",
 ]);
 const operadorUrl = await urlOf(locale, operador.pagina);
+const formUrl = await urlOf(locale, "contacto");
 const TidiWordmark = operador.wordmarkBlanco;
 const year = new Date().getFullYear();
 
@@ -54,6 +55,13 @@ const linkClass =
             {business.email}
           </a>
         </p>
+        {formUrl && (
+          <p>
+            <a href={formUrl} class={linkClass}>
+              {t("footer.quoteForm")}
+            </a>
+          </p>
+        )}
         <p class="mt-2">{t("footer.hours")}</p>
         <p>{`${business.locality} (${business.region})`}</p>
       </address>

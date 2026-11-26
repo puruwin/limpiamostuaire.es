@@ -74,6 +74,19 @@
 	}
 }
 
+# Endpoint del formulario de presupuesto (M3.2): servicio Node de server/ en
+# local, una instancia por sitio (deploy/systemd/, docs/despliegue.md). El
+# servicio limita el cuerpo a ~52 MB (5 fotos de 10 MB); esto es solo un tope
+# de seguridad. Puertos 4311 y 4312: rqpbioclean.es usa 4301 y 4302.
+(lta_api) {
+	handle /api/presupuesto/* {
+		request_body {
+			max_size 100MB
+		}
+		reverse_proxy 127.0.0.1:{args[0]}
+	}
+}
+
 # --- Sitios --- (check:caddy prueba solo lo anterior a esta línea)
 
 # Producción. Hasta el lanzamiento (M5.2) el repo construye main con
@@ -82,6 +95,7 @@
 limpiamostuaire.es {
 	root * /srv/limpiamostuaire/production
 	header X-Robots-Tag "noindex, nofollow"
+	import lta_api 4311
 	import lta_static
 }
 
@@ -91,7 +105,8 @@ www.limpiamostuaire.es {
 	redir https://limpiamostuaire.es{uri} permanent
 }
 
-# Staging: el último PR actualizado. Nunca indexable y con contraseña.
+# Staging: el último PR actualizado. Nunca indexable y con contraseña (también
+# la API y los enlaces de las fotos).
 # Credenciales fuera del repo, una línea "usuario hash" (caddy hash-password).
 # Si el fichero no existe, Caddy no arranca: staging nunca queda abierto.
 staging.limpiamostuaire.es {
@@ -100,5 +115,6 @@ staging.limpiamostuaire.es {
 	basic_auth {
 		import /etc/caddy/limpiamostuaire-staging.auth
 	}
+	import lta_api 4312
 	import lta_static
 }

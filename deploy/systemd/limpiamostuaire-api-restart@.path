@@ -1,0 +1,12 @@
+# Reinicia limpiamostuaire-api@%i cuando el CI despliega código nuevo: lo
+# último que sube es REVISION (el commit). El usuario de despliegue solo puede
+# hacer rsync, así que no puede llamar a systemctl.
+[Unit]
+Description=Limpiamos tu aire: vigila los despliegues del endpoint (%i)
+
+[Path]
+PathChanged=/srv/limpiamostuaire/api/%i/REVISION
+Unit=limpiamostuaire-api-restart@%i.service
+
+[Install]
+WantedBy=paths.target

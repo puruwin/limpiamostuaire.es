@@ -1,0 +1,7 @@
+# La lanza limpiamostuaire-api-restart@%i.path tras cada despliegue.
+[Unit]
+Description=Limpiamos tu aire: reinicia el endpoint tras desplegar (%i)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/systemctl restart limpiamostuaire-api@%i.service
