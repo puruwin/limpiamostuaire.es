@@ -1,0 +1,26 @@
+---
+import { business } from "../../data/business";
+import { asLocale } from "../../lib/current-locale";
+import { useTranslations } from "../../i18n/ui";
+import { lista } from "../../lib/format";
+
+// Los municipios de business.areaServed (los mismos de la ficha). En línea,
+// dentro de una frase; con `chips`, como lista.
+interface Props {
+  chips?: boolean;
+}
+
+const { chips = false } = Astro.props;
+const locale = asLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+---
+
+{chips ? (
+  <ul aria-label={t("areas.label")} class="flex list-none flex-wrap gap-2 p-0">
+    {business.areaServed.map((name) => (
+      <li class="mt-0 rounded-full bg-papel px-4 py-2 font-medium">{name}</li>
+    ))}
+  </ul>
+) : (
+  lista(locale, business.areaServed)
+)}

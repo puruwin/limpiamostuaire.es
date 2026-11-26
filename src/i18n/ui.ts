@@ -50,6 +50,25 @@ const es = {
   "footer.areasIntro": "Limpiamos aires acondicionados en",
   "footer.pages": "Servicios",
   "footer.legal": "Información legal",
+
+  "cta.whatsapp": "Pide presupuesto por WhatsApp",
+  "cta.call": "Llama al",
+
+  "price.from": "Desde",
+  "price.perSplit": "por split",
+  "price.vatIncluded": "IVA incluido",
+  "price.plusVat": "+ IVA, con factura",
+  "price.home": "En casa",
+  "price.business": "En negocios",
+  "launch.title": "Precio de lanzamiento",
+  "launch.body": "{price} un split en casa, IVA incluido, hasta el {date}.",
+
+  "areas.label": "Municipios donde trabajamos",
+
+  "works.before": "Antes",
+  "works.after": "Después",
+  "works.pending":
+    "{{PENDIENTE: fotos de antes y después de trabajos reales, con municipio (M0.4)}}",
 };
 
 export type UiKey = keyof typeof es;
@@ -100,6 +119,26 @@ const en = {
   "footer.areasIntro": "We clean air conditioners in",
   "footer.pages": "Services",
   "footer.legal": "Legal information",
+
+  "cta.whatsapp": "Get a quote on WhatsApp",
+  "cta.call": "Call",
+
+  "price.from": "From",
+  "price.perSplit": "per split unit",
+  "price.vatIncluded": "VAT included",
+  "price.plusVat": "+ VAT, with invoice",
+  "price.home": "At home",
+  "price.business": "For businesses",
+  "launch.title": "Launch price",
+  "launch.body":
+    "{price} for one split unit at home, VAT included, until {date}.",
+
+  "areas.label": "Towns we cover",
+
+  "works.before": "Before",
+  "works.after": "After",
+  "works.pending":
+    "{{PENDIENTE: before and after photos of real jobs, with the town (M0.4)}}",
 };
 
 export const ui = { es, en } satisfies Record<Locale, Record<UiKey, string>>;

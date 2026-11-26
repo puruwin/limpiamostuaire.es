@@ -1,0 +1,27 @@
+---
+import { urlOf } from "../../lib/collection";
+import type { NavKey } from "../../lib/collection";
+import { asLocale } from "../../lib/current-locale";
+
+// Enlace a otra página del mismo idioma por su translationKey. Si la página
+// todavía no existe, no pinta nada: así no hay enlaces rotos y el enlace
+// aparece solo cuando se publica la página.
+interface Props {
+  clave: NavKey;
+}
+
+const { clave } = Astro.props;
+const url = await urlOf(asLocale(Astro.currentLocale), clave);
+---
+
+{url && (
+  <div>
+    <a
+      href={url}
+      class="inline-flex min-h-11 items-center gap-1 font-semibold text-acento-texto underline underline-offset-4 hover:text-tinta"
+    >
+      <slot />
+      <span aria-hidden="true">→</span>
+    </a>
+  </div>
+)}

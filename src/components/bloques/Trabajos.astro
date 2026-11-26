@@ -1,0 +1,54 @@
+---
+import { Image } from "astro:assets";
+import { trabajos } from "../../data/trabajos";
+import { useTranslations } from "../../i18n/ui";
+import { asLocale } from "../../lib/current-locale";
+
+// Antes y después de trabajos reales (src/data/trabajos.ts). Sin trabajos,
+// dos huecos con un {{PENDIENTE (M0.4).
+const locale = asLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+const sizes = "(min-width: 48rem) 22rem, 45vw";
+---
+
+{trabajos.length === 0 ? (
+  <figure>
+    <div class="grid grid-cols-2 gap-3">
+      {[t("works.before"), t("works.after")].map((label) => (
+        <div class="flex aspect-[4/3] items-center justify-center rounded-2xl border-2 border-dashed border-tinta/30 bg-papel font-bold">
+          {label}
+        </div>
+      ))}
+    </div>
+    <figcaption class="mt-3 text-sm">{t("works.pending")}</figcaption>
+  </figure>
+) : (
+  <div class="grid gap-8 lg:grid-cols-2">
+    {trabajos.map((trabajo) => (
+      <figure>
+        <div class="grid grid-cols-2 gap-3">
+          {[
+            { label: t("works.before"), foto: trabajo.antes },
+            { label: t("works.after"), foto: trabajo.despues },
+          ].map(({ label, foto }) => (
+            <div class="relative">
+              <Image
+                src={foto.src}
+                alt={foto.alt[locale]}
+                widths={[360, 720]}
+                sizes={sizes}
+                class="aspect-[4/3] w-full rounded-2xl object-cover"
+              />
+              <span class="absolute top-2 left-2 rounded-full bg-tinta px-3 py-1 text-sm font-bold text-fondo">
+                {label}
+              </span>
+            </div>
+          ))}
+        </div>
+        <figcaption class="mt-3 text-sm font-medium">
+          {`${trabajo.equipo[locale]} · ${trabajo.municipio}`}
+        </figcaption>
+      </figure>
+    ))}
+  </div>
+)}

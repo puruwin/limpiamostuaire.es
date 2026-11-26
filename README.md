@@ -40,15 +40,18 @@ Solo `SITE_ENV=production` genera páginas indexables; sin variable, el build ll
 astro.config.mjs           site, trailingSlash 'always', build.format 'directory', i18n, fuente Figtree, SITE_ENV y CSP
 src/
   content.config.ts        Esquema de la colección pages
-  content/pages/es/, en/   Un Markdown por página e idioma
+  content/pages/es/, en/   Un Markdown (.md, o .mdx con bloques) por página e idioma
   i18n/locales.ts          Idiomas: es en la raíz, en en /en/
   i18n/ui.ts               Cadenas de interfaz de los 2 idiomas
   layouts/BaseLayout.astro Esqueleto HTML común: fuente, favicon, robots, salto al contenido, cabecera, <main>, pie y WhatsApp flotante
+  components/bloques/      Bloques de las páginas .mdx: secciones, precios «desde», zonas, trabajos, preguntas y contacto
   components/              Cabecera, pie, selector de idioma, WhatsApp flotante, iconos, NotFound.astro (la 404) y Seo.astro (title, canonical, hreflang, Open Graph y JSON-LD)
   data/business.ts         Datos del negocio (NAP, horario, zonas): única fuente, igual que la ficha de Google
-  data/tarifa.ts           Tarifa de casa y negocio: única fuente para el schema y la página de precios
+  data/tarifa.ts           Tarifa de casa y negocio, suplementos y precio de lanzamiento: única fuente para el schema y las páginas
+  data/trabajos.ts         Fotos de antes y después de trabajos reales (M0.4)
   integrations/            Guarda de {{PENDIENTE sobre dist/ en producción y en/404.html en su sitio
   lib/pages.ts             URL de cada página, equivalentes por idioma y validación de la colección
+  lib/format.ts            Euros, listas y fechas en el idioma de la página
   lib/collection.ts        Acceso a la colección para los componentes y claves del menú y del pie
   lib/pendientes.ts        Búsqueda de {{PENDIENTE en un directorio
   lib/seo-check.ts         Reglas de check:seo sobre el HTML de dist/
@@ -85,7 +88,7 @@ const t = useTranslations("es");
 
 ## Añadir una página en los 2 idiomas
 
-Cada página es un Markdown en `src/content/pages/<locale>/` y `src/pages/[...path].astro` las genera todas; no se crean `.astro` en `src/pages/`.
+Cada página es un Markdown (`.md`) o un MDX (`.mdx`, si usa bloques) en `src/content/pages/<locale>/` y `src/pages/[...path].astro` las genera todas; no se crean `.astro` en `src/pages/`.
 
 ```md
 ---
@@ -95,7 +98,8 @@ slug: precios # sin barras; "" para la home. La URL sale de aquí: /precios/, /e
 title: Precio de limpieza de aire acondicionado · Tarifa por split # ≤ 60 caracteres, tal cual, sin sufijo de marca
 description: … # ≤ 155 caracteres
 h1: Precios
-template: basica # plantilla de src/templates/
+template: basica # plantilla de src/templates/: basica o home
+lead: … # opcional; entradilla bajo el H1 (plantilla home)
 draft: false # opcional; true = borrador
 updated: 2026-11-25
 ---
@@ -108,6 +112,24 @@ Cuerpo en Markdown.
 3. Las páginas del menú y del pie aparecen solas en cuanto existen, si usan estas `translationKey`: `precios`, `como-lo-hacemos`, `negocios`, `benidorm` y `sobre-nosotros` (menú y pie); `conductos` y `apartamentos-turisticos` (solo pie); `aviso-legal`, `privacidad` y `cookies` (barra legal). Están en `navKeys` (`src/lib/collection.ts`).
 4. Si la página necesita textos de interfaz nuevos, añade la clave a `es` y a `en` en `src/i18n/ui.ts`.
 5. `npm run check && npm run build`.
+
+### Bloques (páginas `.mdx`)
+
+Un `.mdx` usa los bloques de `src/components/bloques/` sin importarlos: la ruta dinámica se los pasa (`bloques` en `index.ts`). Cogen el idioma de la URL y los datos de `src/data/`, así que ningún precio ni municipio se escribe a mano en el texto. Deja una línea en blanco entre la etiqueta y el texto para que dentro se lea como Markdown.
+
+| Bloque                                                                                    | Qué pinta                                                                   |
+| ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `<Seccion id titulo tono>`                                                                | Sección con su `h2`. `tono`: `fondo` (por defecto), `suave` o `tinta`       |
+| `<Rejilla>` + `<Tarjeta titulo>`                                                          | Tarjetas en 2 columnas desde `md`                                           |
+| `<PreciosDesde />`                                                                        | «Desde» de casa y de negocio, más el precio de lanzamiento si sigue vigente |
+| `<Suplemento tipo="exterior" />`, `<Suplemento tipo="fueraDeZona" segmento="vivienda" />` | Importe del suplemento, dentro de una frase                                 |
+| `<Municipios />`, `<Municipios chips />`                                                  | Los municipios de `business.ts`, en la frase («A, B y C») o como lista      |
+| `<Trabajos />`                                                                            | Antes y después de `src/data/trabajos.ts`; sin trabajos, un `{{PENDIENTE`   |
+| `<Pregunta titulo>`                                                                       | Pregunta frecuente plegable (sin JS ni `FAQPage`)                           |
+| `<EnlacePagina clave="precios">texto</EnlacePagina>`                                      | Enlace a otra página del idioma; no sale nada mientras no exista            |
+| `<Contacto titulo>`                                                                       | Bloque final sobre tinta con WhatsApp, teléfono y horario                   |
+
+El precio de lanzamiento (`lanzamiento` en `src/data/tarifa.ts`) sale solo si el día del build, en hora de Madrid, es su fecha de fin o anterior. Pasada esa fecha, hace falta un despliegue para que desaparezca. La `description` de la home lleva el «desde» escrito a mano: si cambia la tarifa, cámbiala también.
 
 El build falla en cualquier entorno si dos páginas del mismo idioma comparten ruta o `translationKey`, o si el `locale` no coincide con la carpeta. Un campo que falte o no cumpla el esquema también (un `title` de más de 60 caracteres o una `description` de más de 155, por ejemplo).
 

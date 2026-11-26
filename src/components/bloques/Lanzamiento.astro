@@ -1,0 +1,24 @@
+---
+import { lanzamiento, lanzamientoVigente } from "../../data/tarifa";
+import type { Locale } from "../../i18n/locales";
+import { useTranslations } from "../../i18n/ui";
+import { diaYMes, euros, fill } from "../../lib/format";
+
+// Precio de lanzamiento, solo mientras esté vigente el día del build.
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+---
+
+{lanzamientoVigente() && (
+  <p class="rounded-xl bg-calido px-4 py-3 text-tinta">
+    <strong class="block font-bold">{t("launch.title")}</strong>
+    {fill(t("launch.body"), {
+      price: euros(locale, lanzamiento.price),
+      date: diaYMes(locale, lanzamiento.hasta),
+    })}
+  </p>
+)}

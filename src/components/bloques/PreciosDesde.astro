@@ -1,0 +1,31 @@
+---
+import { asLocale } from "../../lib/current-locale";
+import { useTranslations } from "../../i18n/ui";
+import Lanzamiento from "./Lanzamiento.astro";
+import PrecioDesde from "./PrecioDesde.astro";
+
+// El «desde» de casa y de negocio, con el precio de lanzamiento. La tabla
+// completa va en /precios/ (docs/seo/keywords.md: el precio solo allí).
+const locale = asLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+---
+
+<div class="space-y-4">
+  <div class="grid gap-4 sm:grid-cols-2">
+    <div class="rounded-2xl bg-papel p-6">
+      <PrecioDesde
+        locale={locale}
+        segment="vivienda"
+        titulo={t("price.home")}
+      />
+    </div>
+    <div class="rounded-2xl bg-papel p-6">
+      <PrecioDesde
+        locale={locale}
+        segment="negocio"
+        titulo={t("price.business")}
+      />
+    </div>
+  </div>
+  <Lanzamiento locale={locale} />
+</div>

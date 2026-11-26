@@ -1,0 +1,40 @@
+---
+import type { CollectionEntry } from "astro:content";
+import Botones from "../components/bloques/Botones.astro";
+import Lanzamiento from "../components/bloques/Lanzamiento.astro";
+import PrecioDesde from "../components/bloques/PrecioDesde.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+// Home: cabecera con H1, entradilla, «desde» y botones, todo a la vista sin
+// hacer scroll en móvil. Debajo, los bloques del .mdx (src/components/bloques/).
+interface Props {
+  page: CollectionEntry<"pages">;
+}
+
+const { page } = Astro.props;
+const { locale, title, description, h1, lead, translationKey } = page.data;
+---
+
+<BaseLayout
+  lang={locale}
+  title={title}
+  description={description}
+  translationKey={translationKey}
+>
+  <section class="bg-fondo">
+    <div class="mx-auto grid max-w-6xl gap-6 px-4 pt-6 pb-12 sm:pt-10 lg:grid-cols-[3fr_2fr] lg:gap-x-12 lg:py-16">
+      <div>
+        <h1 class="text-3xl leading-tight font-bold sm:text-4xl lg:text-5xl">
+          {h1}
+        </h1>
+        {lead && <p class="mt-4 text-lg sm:text-xl">{lead}</p>}
+      </div>
+      <div class="space-y-3 self-start rounded-2xl bg-papel p-5 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-center lg:p-6">
+        <PrecioDesde locale={locale} segment="vivienda" />
+        <Lanzamiento locale={locale} />
+      </div>
+      <Botones locale={locale} />
+    </div>
+  </section>
+  <slot />
+</BaseLayout>

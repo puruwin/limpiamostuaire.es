@@ -1,9 +1,11 @@
 ---
 import type { GetStaticPaths } from "astro";
 import { getCollection, render, type CollectionEntry } from "astro:content";
+import { bloques } from "../components/bloques";
 import { routeParam, validatePages } from "../lib/pages";
 import { SITE_ENV } from "../lib/site-env";
 import Basica from "../templates/Basica.astro";
+import Home from "../templates/Home.astro";
 
 // Genera todas las páginas de la colección `pages` (src/content/pages/).
 export const getStaticPaths = (async () => {
@@ -26,10 +28,10 @@ interface Props {
 
 const { page } = Astro.props;
 const { Content } = await render(page);
-const templates = { basica: Basica };
+const templates = { basica: Basica, home: Home };
 const Template = templates[page.data.template];
 ---
 
 <Template page={page}>
-  <Content />
+  <Content components={bloques} />
 </Template>
