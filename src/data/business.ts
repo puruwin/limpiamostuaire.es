@@ -12,14 +12,13 @@ export const business = {
   operator: "Ti&Di",
   /**
    * Titular de la web y responsable de los datos (aviso legal y privacidad:
-   * LSSI art. 10 y RGPD art. 13). Mientras lleven {{PENDIENTE, el build de
-   * producción falla. El domicilio va solo aquí: la ficha lo oculta.
+   * LSSI art. 10 y RGPD art. 13). El domicilio va solo aquí: la ficha lo
+   * oculta.
    */
   titular: {
-    nombre:
-      "{{PENDIENTE: nombre y apellidos del autónomo, o razón social y forma jurídica}}",
-    nif: "{{PENDIENTE: NIF}}",
-    domicilio: "{{PENDIENTE: domicilio fiscal completo, con código postal}}",
+    nombre: "David Pérez Martínez",
+    nif: "49234343Z",
+    domicilio: "Calle Serreta 19, 03502 Polop (Alicante), España",
   },
   phone: { display: "+34 608 96 22 13", e164: "+34608962213" },
   email: "hola@limpiamostuaire.es",
