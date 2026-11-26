@@ -23,6 +23,8 @@ resvg -w 1200 "$L/logo-horizontal-invertido.svg" "$L/png/logo-horizontal-inverti
 # Open Graph por defecto: se sirve tal cual desde public/ (Seo.astro)
 resvg -w 1200 "$L/og.svg" "$L/png/og-1200x630.png"
 cp "$L/png/og-1200x630.png" "$B/../public/og.png"
+# Logo de los datos estructurados (Organization.logo): cuadrado, ≥112 px
+cp "$L/png/icono-512.png" "$B/../public/logo.png"
 
 # Ti&Di
 resvg -w 1200 "$T/wordmark.svg" "$T/png/wordmark-1200.png"

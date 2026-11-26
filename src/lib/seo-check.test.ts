@@ -15,7 +15,38 @@ interface Options {
   ogUrl?: string | null;
   ogImage?: string;
   links?: string[];
+  /** Bloques JSON-LD tal cual; por defecto, uno correcto (jsonLd()). */
+  jsonLd?: string[];
 }
+
+/** @graph mínimo como el de structured-data.ts. */
+// Los tests cambian nodos a mano antes de serializarlos.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function graph(path: string): Record<string, any>[] {
+  const url = `${site}${path}`;
+  return [
+    {
+      "@type": "WebSite",
+      "@id": `${site}/#website`,
+      url: `${site}/`,
+      inLanguage: localeOf(path),
+    },
+    {
+      "@type": "Organization",
+      "@id": `${site}/#organization`,
+      logo: { "@type": "ImageObject", url: `${site}/og.png` },
+    },
+    {
+      "@type": "LocalBusiness",
+      "@id": `${site}/#tidi`,
+      url,
+      parentOrganization: { "@id": `${site}/#organization` },
+    },
+  ];
+}
+
+const jsonLd = (nodes: unknown[]) =>
+  JSON.stringify({ "@context": "https://schema.org", "@graph": nodes });
 
 /** HTML mínimo como el de BaseLayout + Seo.astro. */
 function html(path: string, o: Options = {}): string {
@@ -34,6 +65,7 @@ ${canonical ? `<link rel="canonical" href="${canonical}">` : ""}
 ${alternates.map(([h, u]) => `<link rel="alternate" hreflang="${h}" href="${u}">`).join("\n")}
 ${ogUrl ? `<meta property="og:url" content="${ogUrl}">` : ""}
 <meta property="og:image" content="${o.ogImage ?? `${site}/og.png`}">
+${(o.jsonLd ?? [jsonLd(graph(path))]).map((j) => `<script type="application/ld+json">${j}</script>`).join("")}
 </head><body><svg><title>Logo</title></svg>
 ${"<h1>H1</h1>".repeat(o.h1 ?? 1)}
 ${(o.links ?? []).map((href) => `<a href="${href}">x</a>`).join("")}
@@ -231,15 +263,89 @@ test("og:image absoluta y existente", () => {
   );
 });
 
-test("la 404 no lleva canonical ni hreflang", () => {
+test("la 404 no lleva canonical, hreflang ni JSON-LD", () => {
   const page = html("/404.html", {
     canonical: null,
     ogUrl: null,
     alternates: [],
+    jsonLd: [],
   });
   assert.deepEqual(check([{ file: "404.html", html: page }]), []);
   assert.match(
-    check([{ file: "404.html", html: html("/404.html") }])[0]!,
-    /sin URL propia/,
+    check([{ file: "404.html", html: html("/404.html", { jsonLd: [] }) }])[0]!,
+    /sin URL propia: no lleva canonical ni hreflang/,
+  );
+  assert.match(
+    check([
+      {
+        file: "404.html",
+        html: html("/404.html", {
+          canonical: null,
+          ogUrl: null,
+          alternates: [],
+        }),
+      },
+    ])[0]!,
+    /sin URL propia: no lleva JSON-LD/,
+  );
+});
+
+/** Errores de la home con estos bloques JSON-LD. */
+const ld = (...blocks: string[]) =>
+  check([{ file: "index.html", html: html("/", { jsonLd: blocks }) }]);
+
+test("JSON-LD: un solo bloque, válido y con @graph", () => {
+  assert.match(ld()[0]!, /0 bloques JSON-LD/);
+  const ok = jsonLd(graph("/"));
+  assert.match(ld(ok, ok)[0]!, /2 bloques JSON-LD/);
+  assert.match(ld("{rota")[0]!, /JSON-LD no válido/);
+  assert.match(ld("{}")[0]!, /sin @graph/);
+});
+
+test("JSON-LD: WebSite en el idioma de la página", () => {
+  const nodes = graph("/");
+  nodes[0]!.inLanguage = "en";
+  assert.match(ld(jsonLd(nodes))[0]!, /inLanguage "en", debería ser "es"/);
+  assert.match(ld(jsonLd(nodes.slice(1)))[0]!, /0 WebSite/);
+});
+
+test("JSON-LD: LocalBusiness hijo de la Organization", () => {
+  const nodes = graph("/");
+  nodes[2]!.parentOrganization = { "@id": `${site}/#otra` };
+  assert.match(ld(jsonLd(nodes))[0]!, /parentOrganization .* no apunta/);
+  assert.match(ld(jsonLd(nodes.slice(0, 2)))[0]!, /0 LocalBusiness/);
+});
+
+test("JSON-LD: sin FAQPage", () => {
+  const nodes = [...graph("/"), { "@type": "FAQPage" }];
+  assert.match(ld(jsonLd(nodes))[0]!, /FAQPage/);
+});
+
+test("JSON-LD: URLs absolutas y ficheros existentes", () => {
+  const nodes = graph("/");
+  nodes[1]!.logo.url = "/og.png";
+  assert.match(ld(jsonLd(nodes))[0]!, /url "\/og.png" no es una URL absoluta/);
+  nodes[1]!.logo.url = `${site}/logo.png`;
+  assert.match(ld(jsonLd(nodes))[0]!, /logo.png" no existe en dist/);
+});
+
+test("JSON-LD: las migas acaban en la página", () => {
+  const crumbs = (last: string) => ({
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, item: `${site}/` },
+      { "@type": "ListItem", position: 2, item: last },
+    ],
+  });
+  const page = (last: string) => ({
+    file: "precios/index.html",
+    html: html("/precios/", {
+      jsonLd: [jsonLd([...graph("/precios/"), crumbs(last)])],
+    }),
+  });
+  assert.deepEqual(check([page(`${site}/precios/`)]), []);
+  assert.match(
+    check([page(`${site}/otra/`)])[0]!,
+    /BreadcrumbList acaba en "https:\/\/example.com\/otra\/"/,
   );
 });

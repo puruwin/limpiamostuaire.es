@@ -5,7 +5,10 @@
 // - hreflang a sí misma, recíproco con cada versión y x-default a la española.
 // - og:image absoluta y presente en dist/.
 // - Enlaces internos solo a páginas de su idioma, salvo el selector (hreflang).
-// La 404 no lleva canonical ni hreflang.
+// - Un JSON-LD válido: WebSite con inLanguage, Organization y LocalBusiness
+//   con parentOrganization, sin FAQPage, URLs absolutas existentes y migas
+//   que acaban en la página.
+// La 404 no lleva canonical, hreflang ni JSON-LD.
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { checkSeo } from "../src/lib/seo-check.ts";
