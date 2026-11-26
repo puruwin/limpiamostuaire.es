@@ -2,11 +2,17 @@
 import { business } from "../data/business";
 import { ogLocale, type Locale } from "../i18n/locales";
 import { useTranslations } from "../i18n/ui";
-import { getAlternateLinks } from "../lib/collection";
+import { getAlternateLinks, getBreadcrumbTrail } from "../lib/collection";
 import { SITE } from "../lib/site";
+import {
+  buildGraph,
+  serializeJsonLd,
+  serviceKeys,
+} from "../lib/structured-data";
 
-// Etiquetas SEO del <head>: title, description, canonical, hreflang y Open
-// Graph. npm run check:seo comprueba en dist/ lo que sale de aquí.
+// Etiquetas SEO del <head>: title, description, canonical, hreflang, Open
+// Graph y datos estructurados (JSON-LD). npm run check:seo comprueba en dist/
+// lo que sale de aquí.
 
 interface Props {
   lang: Locale;
@@ -39,6 +45,22 @@ const otherLocales = alternates
 // Imagen por defecto (brand/exportar.sh). Las de cada página llegarán con
 // las fotos propias (M0.4).
 const image = { path: "/og.png", width: 1200, height: 630, type: "image/png" };
+
+// Sin URL propia (404), sin JSON-LD: no hay página que describir.
+const jsonLd = canonical
+  ? serializeJsonLd(
+      buildGraph({
+        locale: lang,
+        url,
+        title,
+        breadcrumbs: translationKey
+          ? await getBreadcrumbTrail(lang, translationKey)
+          : [],
+        withService:
+          translationKey !== undefined && serviceKeys.includes(translationKey),
+      }),
+    )
+  : undefined;
 ---
 
 <title>{title}</title>
@@ -63,3 +85,4 @@ const image = { path: "/og.png", width: 1200, height: 630, type: "image/png" };
 <meta property="og:image:height" content={String(image.height)} />
 <meta property="og:image:alt" content={t("seo.ogImageAlt")} />
 <meta name="twitter:card" content="summary_large_image" />
+{jsonLd && <script type="application/ld+json" set:html={jsonLd} />}

@@ -30,6 +30,8 @@ interface ParsedPage {
   alternates: Link[];
   ogUrls: string[];
   ogImages: string[];
+  /** Contenido de cada <script type="application/ld+json"> del <head>. */
+  jsonLd: string[];
   links: Link[];
 }
 
@@ -114,6 +116,13 @@ export function parsePage(html: string): ParsedPage {
       .map((l) => ({ href: l.get("href") ?? "", hreflang: l.get("hreflang") })),
     ogUrls: meta("property", "og:url"),
     ogImages: meta("property", "og:image"),
+    jsonLd: [
+      ...head.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi),
+    ].flatMap(([, attrs, body]) =>
+      attributes(` ${attrs}`).get("type") === "application/ld+json"
+        ? [body!]
+        : [],
+    ),
     links: tags(html, "a")
       .filter((a) => a.has("href"))
       .map((a) => ({ href: a.get("href")!, hreflang: a.get("hreflang") })),
@@ -201,8 +210,15 @@ export function checkSeo(
       if (page.canonicals.length > 0 || page.alternates.length > 0) {
         err("sin URL propia: no lleva canonical ni hreflang.");
       }
+      if (page.jsonLd.length > 0) err("sin URL propia: no lleva JSON-LD.");
       continue;
     }
+
+    errors.push(
+      ...checkJsonLd(page.jsonLd, { url, locale, site, files }).map(
+        (message) => `dist/${file}: ${message}`,
+      ),
+    );
 
     if (page.canonicals.length !== 1) {
       err(`${page.canonicals.length} canonical, debería haber 1.`);
@@ -282,6 +298,119 @@ function checkAlternates(
     );
   } else if (!fallback && xDefault) {
     errors.push(`x-default sin versión en ${defaultLocale}.`);
+  }
+
+  return errors;
+}
+
+type JsonNode = Record<string, unknown>;
+
+/** Todos los objetos del JSON, a cualquier profundidad. */
+function walk(value: unknown, visit: (node: JsonNode) => void): void {
+  if (Array.isArray(value)) value.forEach((v) => walk(v, visit));
+  else if (value && typeof value === "object") {
+    visit(value as JsonNode);
+    Object.values(value).forEach((v) => walk(v, visit));
+  }
+}
+
+const typeOf = (node: JsonNode) => [node["@type"]].flat();
+
+/**
+ * Datos estructurados (src/lib/structured-data.ts): un solo bloque con @graph,
+ * WebSite en el idioma de la página, Organization y LocalBusiness enlazados,
+ * sin FAQPage, URLs absolutas del sitio y migas que acaban en la página.
+ */
+function checkJsonLd(
+  blocks: string[],
+  {
+    url,
+    locale,
+    site,
+    files,
+  }: { url: string; locale: Locale; site: string; files: ReadonlySet<string> },
+): string[] {
+  if (blocks.length !== 1) {
+    return [`${blocks.length} bloques JSON-LD, debería haber 1.`];
+  }
+  let data: unknown;
+  try {
+    data = JSON.parse(blocks[0]!);
+  } catch (e) {
+    return [`JSON-LD no válido: ${(e as Error).message}`];
+  }
+  const graph = (data as JsonNode | null)?.["@graph"];
+  if (!Array.isArray(graph)) return ["JSON-LD sin @graph."];
+
+  const errors: string[] = [];
+  const nodes = graph as JsonNode[];
+  const ofType = (type: string) =>
+    nodes.filter((node) => typeOf(node).includes(type));
+
+  const websites = ofType("WebSite");
+  if (websites.length !== 1) {
+    errors.push(`${websites.length} WebSite en el JSON-LD, debería haber 1.`);
+  } else if (websites[0]!.inLanguage !== locale) {
+    errors.push(
+      `WebSite con inLanguage ${JSON.stringify(websites[0]!.inLanguage)}, debería ser "${locale}".`,
+    );
+  }
+
+  const organizations = ofType("Organization");
+  const businesses = ofType("LocalBusiness");
+  if (organizations.length !== 1) {
+    errors.push(
+      `${organizations.length} Organization en el JSON-LD, debería haber 1.`,
+    );
+  }
+  if (businesses.length !== 1) {
+    errors.push(
+      `${businesses.length} LocalBusiness en el JSON-LD, debería haber 1.`,
+    );
+  }
+  const orgId = organizations[0]?.["@id"];
+  const parent = (businesses[0]?.parentOrganization as JsonNode | undefined)?.[
+    "@id"
+  ];
+  if (organizations.length === 1 && businesses.length === 1) {
+    if (!orgId || parent !== orgId) {
+      errors.push(
+        `LocalBusiness.parentOrganization ${JSON.stringify(parent)} no apunta a la Organization (${JSON.stringify(orgId)}).`,
+      );
+    }
+  }
+
+  walk(graph, (node) => {
+    if (typeOf(node).includes("FAQPage")) {
+      errors.push("FAQPage en el JSON-LD: Google retiró ese resultado.");
+    }
+    for (const key of ["@id", "url", "item", "logo", "image"]) {
+      const value = node[key];
+      if (typeof value !== "string") continue;
+      if (!value.startsWith(`${site}/`)) {
+        errors.push(
+          `JSON-LD: ${key} "${value}" no es una URL absoluta de ${site}.`,
+        );
+        continue;
+      }
+      const path = value.slice(site.length + 1).replace(/[?#].*$/, "");
+      const last = path.split("/").pop() ?? "";
+      if (last.includes(".") && !files.has(path)) {
+        errors.push(`JSON-LD: ${key} "${value}" no existe en dist/.`);
+      }
+    }
+  });
+
+  for (const list of ofType("BreadcrumbList")) {
+    const items = Array.isArray(list.itemListElement)
+      ? (list.itemListElement as JsonNode[])
+      : [];
+    const last = items.at(-1)?.item;
+    if (last !== url) {
+      errors.push(
+        `BreadcrumbList acaba en ${JSON.stringify(last)}, debería acabar en "${url}".`,
+      );
+    }
   }
 
   return errors;

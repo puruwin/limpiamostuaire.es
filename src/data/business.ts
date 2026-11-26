@@ -2,8 +2,9 @@ import type { Locale } from "../i18n/locales.ts";
 import { useTranslations } from "../i18n/ui.ts";
 
 // Datos del negocio: única fuente para la cabecera, el pie y los datos
-// estructurados (M1.6). Tienen que coincidir carácter a carácter con la ficha
-// de Google de Ti&Di (docs/ficha-google.md): si cambian allí, se cambian aquí.
+// estructurados (src/lib/structured-data.ts). Tienen que coincidir carácter a
+// carácter con la ficha de Google de Ti&Di (docs/ficha-google.md): si cambian
+// allí, se cambian aquí.
 // Negocio de área de servicio con la dirección oculta: solo localidad.
 export const business = {
   brand: "Limpiamos tu aire",
@@ -13,6 +14,9 @@ export const business = {
   email: "hola@limpiamostuaire.es",
   locality: "Benidorm",
   region: "Alicante",
+  country: "ES",
+  /** Enlace para compartir de la ficha (sameAs del LocalBusiness). */
+  googleBusinessUrl: "https://share.google/W0LGnOaaaB6GDUrih",
   /** Lunes a viernes; sábado y domingo, cerrado. */
   hours: {
     days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],

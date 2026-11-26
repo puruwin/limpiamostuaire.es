@@ -88,7 +88,7 @@ No se pone como servicio: se publica en *Añadir actualización* → *Oferta*, c
 
 ## Tarifa (24-11-2026)
 
-Esta tarifa sustituye a la de la issue M2.2.
+Esta tarifa sustituye a la de la issue M2.2. La web la toma de `src/data/tarifa.ts` (datos estructurados y página de precios): si cambia aquí, se cambia allí.
 
 | | Casa (IVA incluido) | Negocio (sin IVA) |
 |---|---|---|

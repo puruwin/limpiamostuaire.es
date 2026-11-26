@@ -7,6 +7,10 @@ const es = {
   "site.name": "Limpiamos tu aire",
   "a11y.skipToContent": "Saltar al contenido",
   "seo.ogImageAlt": "Logo de Limpiamos tu aire",
+  "breadcrumb.home": "Inicio",
+  "schema.serviceType": "Limpieza de aire acondicionado",
+  "schema.offerCatalog": "Tarifa de limpieza de splits",
+  "schema.paymentAccepted": "Efectivo, Bizum",
 
   "nav.label": "Menú principal",
   "nav.open": "Abrir el menú",
@@ -47,6 +51,10 @@ const en = {
   "site.name": "Limpiamos tu aire",
   "a11y.skipToContent": "Skip to content",
   "seo.ogImageAlt": "Limpiamos tu aire logo",
+  "breadcrumb.home": "Home",
+  "schema.serviceType": "Air conditioner cleaning",
+  "schema.offerCatalog": "Split unit cleaning prices",
+  "schema.paymentAccepted": "Cash, Bizum",
 
   "nav.label": "Main menu",
   "nav.open": "Open menu",

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   alternateLinks,
+  breadcrumbTrail,
   languageLinks,
   pagePath,
   pageUrlByKey,
@@ -18,6 +19,7 @@ function page(id: string, data: Partial<PageEntry["data"]> = {}): PageEntry {
       locale,
       translationKey: id,
       slug: id.split("/")[1] ?? "",
+      title: id,
       draft: false,
       ...data,
     },
@@ -129,5 +131,36 @@ test("hreflang: solo las equivalentes reales y x-default a la española", () => 
   // Sin versión española no hay x-default.
   assert.deepEqual(alternateLinks(pages, "only"), [
     { hreflang: "en", url: "/en/only/" },
+  ]);
+});
+
+test("migas: home y cada página que existe en el camino", () => {
+  const pages = [
+    page("es/inicio", { slug: "", translationKey: "inicio" }),
+    page("es/precios", { slug: "precios", title: "Precios" }),
+    page("es/zonas", { slug: "zonas", title: "Zonas" }),
+    page("es/benidorm", { slug: "zonas/benidorm", title: "Benidorm" }),
+    page("es/altea", { slug: "otras/altea", title: "Altea" }),
+    page("en/prices", { slug: "prices", translationKey: "es/precios" }),
+  ];
+  assert.deepEqual(breadcrumbTrail(pages, "es", "inicio", "Inicio"), []);
+  assert.deepEqual(breadcrumbTrail(pages, "es", "no-existe", "Inicio"), []);
+  assert.deepEqual(breadcrumbTrail(pages, "es", "es/precios", "Inicio"), [
+    { name: "Inicio", url: "/" },
+    { name: "Precios", url: "/precios/" },
+  ]);
+  assert.deepEqual(breadcrumbTrail(pages, "es", "es/benidorm", "Inicio"), [
+    { name: "Inicio", url: "/" },
+    { name: "Zonas", url: "/zonas/" },
+    { name: "Benidorm", url: "/zonas/benidorm/" },
+  ]);
+  // Sin página en /otras/: se salta ese nivel.
+  assert.deepEqual(breadcrumbTrail(pages, "es", "es/altea", "Inicio"), [
+    { name: "Inicio", url: "/" },
+    { name: "Altea", url: "/otras/altea/" },
+  ]);
+  assert.deepEqual(breadcrumbTrail(pages, "en", "es/precios", "Home"), [
+    { name: "Home", url: "/en/" },
+    { name: "en/prices", url: "/en/prices/" },
   ]);
 });

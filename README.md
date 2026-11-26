@@ -11,21 +11,21 @@ Sitio estático en español e inglés hecho con [Astro](https://astro.build), Ty
 
 ## Comandos
 
-| Comando                | Qué hace                                                       |
-| ---------------------- | -------------------------------------------------------------- |
-| `npm ci`               | Instala las dependencias exactas de `package-lock.json`        |
-| `npm run dev`          | Servidor de desarrollo en `http://localhost:4321/`             |
-| `npm run build`        | Genera el sitio estático en `dist/`                            |
-| `npm run preview`      | Sirve `dist/` en local para revisarlo                          |
-| `npm run check`        | Tipos de Astro y TypeScript (`astro check`), claves de `ui.ts` |
-| `npm test`             | Tests con `node --test` (`src/**/*.test.ts`)                   |
-| `npm run check:robots` | Meta robots de `dist/` según `SITE_ENV`                        |
-| `npm run check:csp`    | CSP de cada página de `dist/`: hashes, sin `unsafe-inline`     |
-| `npm run check:caddy`  | `deploy/Caddyfile` con Caddy real: cabeceras, caché y 301      |
-| `npm run check:seo`    | SEO de `dist/`: H1, title, description, canonical, hreflang    |
-| `npm run lint`         | ESLint (TypeScript, Astro y accesibilidad)                     |
-| `npm run format`       | Formatea con Prettier (incluye el orden de clases de Tailwind) |
-| `npm run format:check` | Comprueba el formato sin tocar ficheros                        |
+| Comando                | Qué hace                                                             |
+| ---------------------- | -------------------------------------------------------------------- |
+| `npm ci`               | Instala las dependencias exactas de `package-lock.json`              |
+| `npm run dev`          | Servidor de desarrollo en `http://localhost:4321/`                   |
+| `npm run build`        | Genera el sitio estático en `dist/`                                  |
+| `npm run preview`      | Sirve `dist/` en local para revisarlo                                |
+| `npm run check`        | Tipos de Astro y TypeScript (`astro check`), claves de `ui.ts`       |
+| `npm test`             | Tests con `node --test` (`src/**/*.test.ts`)                         |
+| `npm run check:robots` | Meta robots de `dist/` según `SITE_ENV`                              |
+| `npm run check:csp`    | CSP de cada página de `dist/`: hashes, sin `unsafe-inline`           |
+| `npm run check:caddy`  | `deploy/Caddyfile` con Caddy real: cabeceras, caché y 301            |
+| `npm run check:seo`    | SEO de `dist/`: H1, title, description, canonical, hreflang, JSON-LD |
+| `npm run lint`         | ESLint (TypeScript, Astro y accesibilidad)                           |
+| `npm run format`       | Formatea con Prettier (incluye el orden de clases de Tailwind)       |
+| `npm run format:check` | Comprueba el formato sin tocar ficheros                              |
 
 Los `check:*` van después de `npm run build`. `check:caddy` necesita el binario de Caddy (`caddy` en el `PATH` o `CADDY=/ruta/caddy`).
 
@@ -43,8 +43,9 @@ src/
   i18n/locales.ts          Idiomas: es en la raíz, en en /en/
   i18n/ui.ts               Cadenas de interfaz de los 2 idiomas
   layouts/BaseLayout.astro Esqueleto HTML común: fuente, favicon, robots, salto al contenido, cabecera, <main>, pie y WhatsApp flotante
-  components/              Cabecera, pie, selector de idioma, WhatsApp flotante, iconos y Seo.astro (title, canonical, hreflang, Open Graph)
+  components/              Cabecera, pie, selector de idioma, WhatsApp flotante, iconos y Seo.astro (title, canonical, hreflang, Open Graph y JSON-LD)
   data/business.ts         Datos del negocio (NAP, horario, zonas): única fuente, igual que la ficha de Google
+  data/tarifa.ts           Tarifa de casa y negocio: única fuente para el schema y la página de precios
   integrations/            Guarda de {{PENDIENTE sobre dist/ en producción
   lib/pages.ts             URL de cada página, equivalentes por idioma y validación de la colección
   lib/collection.ts        Acceso a la colección para los componentes y claves del menú y del pie
@@ -52,10 +53,11 @@ src/
   lib/seo-check.ts         Reglas de check:seo sobre el HTML de dist/
   lib/site.ts              Origen de producción (site de Astro, canonical y check:seo)
   lib/site-env.ts          SITE_ENV e isIndexable
+  lib/structured-data.ts   Grafo JSON-LD: WebSite, WebPage, Organization, LocalBusiness Ti&Di, Service y migas
   pages/[...path].astro    Ruta dinámica que genera todas las páginas de la colección
   templates/               Plantillas de página (campo template)
   styles/global.css        Entrada de Tailwind con los colores de DESIGN.md
-public/                    Ficheros que se copian tal cual a dist/ (favicon, og.png)
+public/                    Ficheros que se copian tal cual a dist/ (favicon, og.png, logo.png)
 scripts/                   Comprobaciones check:* sobre dist/ y deploy/
 deploy/Caddyfile           Sitios de producción, www y staging en el VPS
 brand/                     Logos y fuentes (ver DESIGN.md)
@@ -108,6 +110,29 @@ El build falla en cualquier entorno si dos páginas del mismo idioma comparten r
 `src/components/Seo.astro` (desde `BaseLayout`) pone en el `<head>` el `title` y la `description` del frontmatter, la canonical absoluta a `https://limpiamostuaire.es`, Open Graph con la imagen por defecto `public/og.png` y un `hreflang` por cada idioma en el que exista la página (mismo `translationKey`), más `x-default` a la versión en español. Una página que solo existe en un idioma lleva hreflang solo a sí misma: el selector de idioma lleva a la home del otro, pero eso no es una equivalente. La canonical apunta siempre a producción, también en staging.
 
 `npm run check:seo` lo comprueba en `dist/` (reglas en `src/lib/seo-check.ts`): un solo `<h1>`; `title` ≤ 60 y `description` ≤ 155 caracteres; `<html lang>` según la ruta; canonical y `og:url` a la propia URL; hreflang a sí misma, recíproco y con `x-default` a la española; `og:image` existente; y enlaces internos solo a páginas del mismo idioma. El único enlace que puede cruzar de idioma es el que lleva `hreflang` (el selector). La 404 (`404.html`) va sin canonical ni hreflang.
+
+### Datos estructurados
+
+`Seo.astro` añade también un `<script type="application/ld+json">` con un solo `@graph` (`src/lib/structured-data.ts`):
+
+- `WebSite` y `WebPage` con `inLanguage`.
+- `Organization` «Limpiamos tu aire», con `logo` (`public/logo.png`).
+- `LocalBusiness` «Ti&Di», con `parentOrganization` hacia la marca, teléfono, correo, solo la localidad (la dirección está oculta), zonas, horario y `sameAs` a la ficha de Google.
+- En la home y en precios (`serviceKeys`), un `Service` con la tarifa de `src/data/tarifa.ts`.
+- Fuera de la home, `BreadcrumbList` con las páginas que existen en el camino del slug.
+
+No lleva `FAQPage`, porque Google retiró ese resultado. Todo sale de `src/data/`: un dato nuevo del negocio se cambia allí, no en el JSON.
+
+`check:seo` exige en cada página:
+
+- Un solo bloque válido.
+- `WebSite.inLanguage` igual al idioma de la ruta.
+- `Organization` y `LocalBusiness` enlazados.
+- Ninguna `FAQPage`.
+- URLs absolutas del sitio cuyos ficheros existan en `dist/`.
+- Migas que acaben en la canonical.
+
+La 404 no lleva JSON-LD. Para validar a mano, pega el HTML de `dist/index.html` en el modo «Código» del [Rich Results Test](https://search.google.com/test/rich-results) y en [validator.schema.org](https://validator.schema.org/).
 
 ## Guardas de producción
 

@@ -13,6 +13,7 @@ export interface PageEntry {
     locale: Locale;
     translationKey: string;
     slug: string;
+    title: string;
     draft: boolean;
   };
 }
@@ -120,4 +121,33 @@ export function alternateLinks(
   const fallback = links.find((link) => link.hreflang === defaultLocale);
   if (fallback) links.push({ hreflang: "x-default", url: fallback.url });
   return links;
+}
+
+/**
+ * Migas de pan de la página `translationKey`: la home y cada página que exista
+ * en los prefijos de su slug ("zonas", "zonas/benidorm"), la propia incluida,
+ * con su `title` como nombre. Vacío en la home o si la página no existe.
+ */
+export function breadcrumbTrail(
+  entries: PageEntry[],
+  locale: Locale,
+  translationKey: string,
+  homeName: string,
+): { name: string; url: string }[] {
+  const page = entries.find(
+    (e) => e.data.locale === locale && e.data.translationKey === translationKey,
+  );
+  if (!page || page.data.slug === "") return [];
+  const segments = page.data.slug.split("/");
+  const trail = [{ name: homeName, url: pagePath(locale, "") }];
+  for (let i = 1; i <= segments.length; i++) {
+    const slug = segments.slice(0, i).join("/");
+    const entry = entries.find(
+      (e) => e.data.locale === locale && e.data.slug === slug,
+    );
+    if (entry) {
+      trail.push({ name: entry.data.title, url: pagePath(locale, slug) });
+    }
+  }
+  return trail;
 }
