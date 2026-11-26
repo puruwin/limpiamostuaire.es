@@ -3,6 +3,7 @@ import Icon from "../Icon.astro";
 import { business, telHref, whatsappHref } from "../../data/business";
 import type { Locale } from "../../i18n/locales";
 import { useTranslations } from "../../i18n/ui";
+import { contactAttrs } from "../../lib/umami";
 
 // WhatsApp (principal) y teléfono de una CTA. `translationKey`, la de la
 // página, elige el saludo de WhatsApp. `tono` según el fondo de debajo.
@@ -38,7 +39,7 @@ const estilos = {
 <div class:list={["flex flex-col gap-3 sm:flex-row sm:flex-wrap", className]}>
   <a
     href={whatsappHref(locale, translationKey)}
-    data-contacto="cta"
+    {...contactAttrs("whatsapp", "cta", locale, Astro.url.pathname)}
     class:list={[base, estilos.principal]}
   >
     <Icon name="whatsapp" />
@@ -46,7 +47,7 @@ const estilos = {
   </a>
   <a
     href={telHref()}
-    data-contacto="cta"
+    {...contactAttrs("telefono", "cta", locale, Astro.url.pathname)}
     class:list={[base, estilos.secundario]}
   >
     <Icon name="phone" />

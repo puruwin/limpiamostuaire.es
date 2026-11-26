@@ -20,6 +20,9 @@ jobs:
       # Clave pública del widget de Turnstile (M3.2). Sin la variable, la de
       # pruebas; el build de producción falla sin ella.
       PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.TURNSTILE_SITE_KEY }}
+      # ID del sitio en Umami Cloud (M3.3). Sin la variable, no se carga Umami;
+      # el build de producción falla sin ella.
+      PUBLIC_UMAMI_WEBSITE_ID: ${{ vars.UMAMI_WEBSITE_ID }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7

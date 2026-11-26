@@ -10,6 +10,7 @@ import {
   frontmatterPage,
   type ContactPage,
 } from "./contact-check.ts";
+import { localeOf, urlPath } from "./seo-check.ts";
 
 const tel = "tel:+34608962213";
 const casa = whatsappHref("es", "inicio");
@@ -22,8 +23,21 @@ interface Options {
   other?: string[];
 }
 
-const a = (href: string, spot?: string) =>
-  `<a href="${href.replace(/&/g, "&amp;")}"${spot ? ` data-contacto="${spot}"` : ""}>x</a>`;
+/**
+ * Enlace de contacto. Con `spot`, también los data-umami-event que pondría
+ * contactAttrs; idioma y página como {idioma} y {pagina}, que `check` cambia
+ * por los del fichero.
+ */
+const a = (href: string, spot?: string, umami = spot !== undefined) => {
+  const event = href.startsWith("tel:") ? "telefono" : "whatsapp";
+  const attrs = [
+    `href="${href.replace(/&/g, "&amp;")}"`,
+    spot && `data-contacto="${spot}"`,
+    umami &&
+      `data-umami-event="${event}" data-umami-event-idioma="{idioma}" data-umami-event-pagina="{pagina}" data-umami-event-ubicacion="${spot}"`,
+  ];
+  return `<a ${attrs.filter(Boolean).join(" ")}>x</a>`;
+};
 
 /** Página como la de BaseLayout: cabecera, main con las CTA y flotante. */
 function html(wa: string, options: Options = {}): string {
@@ -42,8 +56,13 @@ const collection = new Map<string, ContactPage>([
   ["/aviso-legal/", { translationKey: "aviso-legal", cta: false }],
 ]);
 
-const check = (file: string, page: string) =>
-  checkContact([{ file, html: page }], collection);
+const check = (file: string, page: string) => {
+  const path = urlPath(file);
+  const html = page
+    .replaceAll("{idioma}", localeOf(path))
+    .replaceAll("{pagina}", path.replace(/\.html$/, "/"));
+  return checkContact([{ file, html }], collection);
+};
 
 test("saludo de WhatsApp por página: negocio, conductos y casa por defecto", () => {
   assert.equal(whatsappTopic("negocios"), "negocio");
@@ -179,6 +198,43 @@ test("data-contacto desconocido", () => {
   assert.match(
     check("index.html", html(casa, { other: [a(tel, "pie")] }))[0]!,
     /data-contacto="pie" desconocido/,
+  );
+});
+
+test("enlaces con data-contacto sin los atributos de Umami", () => {
+  assert.deepEqual(
+    check(
+      "index.html",
+      html(casa, { cta: [a(casa, "cta", false), a(tel, "cta")] }),
+    ),
+    [
+      'data-umami-event="whatsapp"',
+      'data-umami-event-idioma="es"',
+      'data-umami-event-pagina="/"',
+      'data-umami-event-ubicacion="cta"',
+    ].map((attr) => `index.html: ${casa} sin ${attr}.`),
+  );
+});
+
+test("evento, idioma, página y ubicación de Umami, los del enlace y la página", () => {
+  const page = html(negocio).replace(
+    'data-umami-event="telefono" data-umami-event-idioma="{idioma}" data-umami-event-pagina="{pagina}" data-umami-event-ubicacion="cta"',
+    'data-umami-event="whatsapp" data-umami-event-idioma="en" data-umami-event-pagina="/" data-umami-event-ubicacion="cabecera"',
+  );
+  assert.deepEqual(check("negocios/index.html", page), [
+    `negocios/index.html: ${tel} con data-umami-event="whatsapp", no "telefono".`,
+    `negocios/index.html: ${tel} con data-umami-event-idioma="en", no "es".`,
+    `negocios/index.html: ${tel} con data-umami-event-pagina="/", no "/negocios/".`,
+    `negocios/index.html: ${tel} con data-umami-event-ubicacion="cabecera", no "cta".`,
+  ]);
+});
+
+test("la página de Umami en las 404 es /404/ y /en/404/", () => {
+  const en = html(whatsappHref("en"), { cta: [] });
+  assert.deepEqual(check("en/404.html", en), []);
+  assert.match(
+    check("en/404.html", en.replaceAll("{pagina}", "/en/404.html"))[0]!,
+    /data-umami-event-pagina="\/en\/404\.html", no "\/en\/404\/"/,
   );
 });
 

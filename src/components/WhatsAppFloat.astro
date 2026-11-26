@@ -1,6 +1,7 @@
 ---
 import Icon from "./Icon.astro";
 import { whatsappHref } from "../data/business";
+import { contactAttrs } from "../lib/umami";
 import type { Locale } from "../i18n/locales";
 import { useTranslations } from "../i18n/ui";
 
@@ -16,7 +17,7 @@ const t = useTranslations(locale);
 {/* Solo en móvil: en escritorio el botón de WhatsApp va en la cabecera. */}
 <a
   href={whatsappHref(locale, translationKey)}
-  data-contacto="flotante"
+  {...contactAttrs("whatsapp", "flotante", locale, Astro.url.pathname)}
   aria-label={t("header.whatsappLabel")}
   class="fixed right-4 bottom-4 z-40 inline-flex size-14 items-center justify-center rounded-full bg-tinta text-agua-clara ring-2 ring-agua-clara shadow-[0_10px_24px_-8px_rgb(18_49_63/0.6)] hover:bg-acento-texto hover:text-papel md:hidden"
 >

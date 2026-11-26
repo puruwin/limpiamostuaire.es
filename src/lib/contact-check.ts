@@ -7,8 +7,11 @@ import { localeOf, tags, urlPath, type HtmlFile } from "./seo-check.ts";
 // - "cabecera": teléfono y WhatsApp de la cabecera (src/components/Header.astro).
 // - "flotante": el botón de WhatsApp de móvil (WhatsAppFloat.astro).
 // - "cta": WhatsApp y teléfono de las llamadas a la acción (bloques/Botones.astro).
+// Con data-contacto van los data-umami-event del clic (contactAttrs en
+// src/lib/umami.ts).
 
 export const CONTACT_SPOTS = ["cabecera", "flotante", "cta"] as const;
+export type ContactSpot = (typeof CONTACT_SPOTS)[number];
 
 /** Lo que el check sabe de cada página de la colección, por su URL. */
 export interface ContactPage {
@@ -21,6 +24,7 @@ interface ContactLink {
   href: string;
   spot: string | undefined;
   inHeader: boolean;
+  attrs: Map<string, string>;
 }
 
 const isWhatsApp = (href: string) =>
@@ -42,6 +46,7 @@ function contactLinks(html: string): ContactLink[] {
         href,
         spot: attrs.get("data-contacto"),
         inHeader: match.index >= headerStart && match.index < headerEnd,
+        attrs,
       },
     ];
   });
@@ -70,6 +75,29 @@ function whatsappProblem(href: string, text: string): string | undefined {
   return undefined;
 }
 
+/** Problemas de los data-umami-event de un enlace con data-contacto. */
+function umamiProblems(
+  link: ContactLink,
+  locale: string,
+  path: string,
+): string[] {
+  const expected = {
+    "data-umami-event": link.href.startsWith("tel:") ? "telefono" : "whatsapp",
+    "data-umami-event-idioma": locale,
+    "data-umami-event-pagina": path,
+    "data-umami-event-ubicacion": link.spot ?? "",
+  };
+  return Object.entries(expected).flatMap(([name, value]) => {
+    const actual = link.attrs.get(name);
+    if (actual === value) return [];
+    return [
+      actual === undefined
+        ? `${link.href} sin ${name}="${value}"`
+        : `${link.href} con ${name}="${actual}", no "${value}"`,
+    ];
+  });
+}
+
 /**
  * Errores de los enlaces de contacto de cada página:
  * - Todos los tel: son el teléfono de business.ts.
@@ -77,6 +105,9 @@ function whatsappProblem(href: string, text: string): string | undefined {
  *   la página en su idioma (whatsappGreeting); las 404, el de casa.
  * - En la cabecera, teléfono y WhatsApp; un solo botón flotante de WhatsApp.
  * - En las páginas con CTA, WhatsApp y teléfono en cada una.
+ * - Los que llevan data-contacto, con el evento de Umami (telefono o
+ *   whatsapp) y su idioma, página y ubicación (la de data-contacto). La
+ *   página de las 404 es /404/ o /en/404/.
  */
 export function checkContact(
   pages: HtmlFile[],
@@ -87,8 +118,10 @@ export function checkContact(
 
   for (const { file, html } of pages) {
     const path = urlPath(file);
+    const locale = localeOf(path);
     const page = collection.get(path);
-    const text = whatsappGreeting(localeOf(path), page?.translationKey);
+    const text = whatsappGreeting(locale, page?.translationKey);
+    const eventPath = path.replace(/\.html$/, "/");
     const links = contactLinks(html);
     const error = (message: string) => errors.push(`${file}: ${message}.`);
 
@@ -104,6 +137,11 @@ export function checkContact(
         !(CONTACT_SPOTS as readonly string[]).includes(link.spot)
       ) {
         error(`data-contacto="${link.spot}" desconocido`);
+      }
+      if (link.spot !== undefined) {
+        for (const problem of umamiProblems(link, locale, eventPath)) {
+          error(problem);
+        }
       }
       if ((link.spot === "cabecera") !== link.inHeader) {
         error(

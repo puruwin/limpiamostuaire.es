@@ -7,7 +7,9 @@ import Seo from "../components/Seo.astro";
 import WhatsAppFloat from "../components/WhatsAppFloat.astro";
 import type { Locale } from "../i18n/locales";
 import { useTranslations } from "../i18n/ui";
+import { PUBLIC_UMAMI_WEBSITE_ID } from "astro:env/server";
 import { isIndexable } from "../lib/site-env";
+import { UMAMI_DOMAIN, UMAMI_SCRIPT } from "../lib/umami";
 
 interface Props {
   lang: Locale;
@@ -33,6 +35,7 @@ const {
   noindex = false,
 } = Astro.props;
 const t = useTranslations(lang);
+const umamiWebsiteId = PUBLIC_UMAMI_WEBSITE_ID?.trim();
 ---
 
 <!doctype html>
@@ -60,6 +63,21 @@ const t = useTranslations(lang);
     <script is:inline>
       document.documentElement.classList.add("js");
     </script>
+    {
+      /*
+        Umami (M3.3, src/lib/umami.ts): solo cuenta en limpiamostuaire.es
+        (data-domains); staging y local cargan el script pero no envían nada.
+      */
+      umamiWebsiteId && (
+        <script
+          is:inline
+          defer
+          src={UMAMI_SCRIPT}
+          data-website-id={umamiWebsiteId}
+          data-domains={UMAMI_DOMAIN}
+        />
+      )
+    }
   </head>
   <body class="flex min-h-screen flex-col bg-fondo font-sans text-tinta antialiased">
     <a

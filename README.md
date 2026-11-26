@@ -63,6 +63,7 @@ src/
   lib/seo-check.ts         Reglas de check:seo sobre el HTML de dist/
   lib/claims-check.ts      Reglas de check:claims: claims biocidas en dist/ e imágenes con C2PA de IA
   lib/contact-check.ts     Reglas de check:contact: teléfono y WhatsApp de cada página
+  lib/umami.ts             Medición con Umami (M3.3): script, dominio y atributos de los eventos
   lib/sitemap.ts           URLs y XML de sitemap.xml (lastmod desde updated)
   lib/site.ts              Origen de producción (site de Astro, canonical y check:seo)
   lib/site-env.ts          SITE_ENV e isIndexable
@@ -202,8 +203,21 @@ WhatsApp y teléfono van en tres sitios, marcados con `data-contacto`: la cabece
 - Todos los `tel:` son el teléfono del negocio, y todos los enlaces a WhatsApp, `https://wa.me/<número>?text=` con el saludo de la página. Un enlace a `api.whatsapp.com` o sin texto falla.
 - Cada página tiene teléfono y WhatsApp en la cabecera y un solo botón flotante. `data-contacto="cabecera"` solo dentro de `<header>`.
 - Las plantillas `home`, `pagina` y `operador` llevan al menos una CTA, y cada CTA, los dos botones.
+- Cada enlace con `data-contacto` lleva los atributos del evento de Umami con su idioma, página y ubicación ([Medición](#medición)).
 
 La página de cada URL la saca del frontmatter de `src/content/pages/`.
+
+## Medición
+
+Umami Cloud (M3.3, `src/lib/umami.ts`): sin cookies ni IP, como cuentan la política de privacidad y la de cookies. `BaseLayout` carga el script si hay `PUBLIC_UMAMI_WEBSITE_ID`, y con `data-domains` solo envía datos desde `limpiamostuaire.es`: staging y local lo cargan pero no cuentan. Además de las visitas (con sus UTM), tres eventos:
+
+| Evento       | Cuándo                                          | `idioma`    | `pagina`                                          | `ubicacion`                    |
+| ------------ | ----------------------------------------------- | ----------- | ------------------------------------------------- | ------------------------------ |
+| `telefono`   | Clic en un `tel:` con `data-contacto`           | `es` o `en` | La de la página (`/404/` en las 404)              | `cabecera` o `cta`             |
+| `whatsapp`   | Clic en un `wa.me` con `data-contacto`          | `es` o `en` | La de la página                                   | `cabecera`, `flotante` o `cta` |
+| `formulario` | Presupuesto enviado (el endpoint responde `ok`) | `es` o `en` | La de origen: desde la que se llegó al formulario | `formulario`                   |
+
+Los clics los registra el script por los atributos `data-umami-event*` que pone `contactAttrs` junto a `data-contacto`; `check:contact` los comprueba. El de `formulario` lo envía el JS del formulario antes de ir a la página de enviado (espera hasta 1 s). Sin JS no hay medición.
 
 ## Formulario de presupuesto
 
@@ -232,6 +246,7 @@ Con `SITE_ENV=production` (y solo entonces), `npm run build` falla si:
 
 - alguna página tiene `draft: true` (lo comprueba la ruta dinámica);
 - queda un `{{PENDIENTE` en cualquier fichero de `dist/`, HTML o no (integración `src/integrations/production-guards.ts`, al final del build). El error da fichero y línea;
-- falta `PUBLIC_TURNSTILE_SITE_KEY`, así que el formulario usaría la clave de pruebas de Turnstile (misma integración, al empezar el build).
+- falta `PUBLIC_TURNSTILE_SITE_KEY`, así que el formulario usaría la clave de pruebas de Turnstile (misma integración, al empezar el build);
+- falta `PUBLIC_UMAMI_WEBSITE_ID`, así que la web no mediría visitas ni contactos (ídem).
 
 Para marcar un texto que falta, escribe `{{PENDIENTE: lo que falta}}`. En staging, `provisional` y local los borradores se generan y los huecos se publican, para revisarlos; el día del lanzamiento (M5.2) bloquean el despliegue. Para probarlo en local: `SITE_ENV=production npm run build`.

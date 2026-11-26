@@ -5,6 +5,7 @@
 //   apartamento o conductos) en la cabecera, el botón flotante y las CTA.
 // - Teléfono y WhatsApp en la cabecera, el botón flotante y, en las
 //   plantillas home, pagina y operador, al menos una CTA.
+// - Los atributos del evento de Umami en cada enlace con data-contacto.
 // La página de cada URL sale del frontmatter de src/content/pages/.
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
