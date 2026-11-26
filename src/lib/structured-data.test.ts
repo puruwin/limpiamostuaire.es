@@ -66,6 +66,17 @@ test("WebSite y WebPage en el idioma de la página", () => {
   assert.equal(find(nodes, "WebPage")!.inLanguage, "en");
 });
 
+test("AboutPage sobre la marca y el operador, solo si se pide", () => {
+  assert.equal(find(graph(), "AboutPage"), undefined);
+  assert.equal(find(graph(), "WebPage")!.about, undefined);
+  const nodes = graph({ url: `${SITE}/sobre-nosotros/`, isAbout: true });
+  assert.equal(find(nodes, "WebPage"), undefined);
+  assert.deepEqual(find(nodes, "AboutPage")!.about, [
+    { "@id": ids.organization },
+    { "@id": ids.localBusiness },
+  ]);
+});
+
 test("Service con toda la tarifa e IVA según el cliente", () => {
   const offers = find(graph(), "Service")!.hasOfferCatalog.itemListElement;
   assert.equal(offers.length, tarifa.length);

@@ -10,6 +10,7 @@ import {
 } from "../lib/collection";
 import { SITE } from "../lib/site";
 import {
+  aboutKeys,
   buildGraph,
   serializeJsonLd,
   serviceKeys,
@@ -63,6 +64,8 @@ const jsonLd = canonical
           : [],
         withService:
           translationKey !== undefined && serviceKeys.includes(translationKey),
+        isAbout:
+          translationKey !== undefined && aboutKeys.includes(translationKey),
         operatorUrl: await urlOf(lang, operador.pagina),
       }),
     )
