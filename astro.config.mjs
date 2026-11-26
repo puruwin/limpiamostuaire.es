@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig, envField, fontProviders } from "astro/config";
+import mdx from "@astrojs/mdx";
 import tailwindcss from "@tailwindcss/vite";
 import { defaultLocale, locales } from "./src/i18n/locales.ts";
 import productionGuards from "./src/integrations/production-guards.ts";
@@ -9,10 +10,11 @@ import { SITE } from "./src/lib/site.ts";
 export default defineConfig({
   site: SITE,
   output: "static",
+  // mdx: páginas con bloques (src/components/bloques/), como la home.
   // statusPages: la 404 en inglés como en/404.html, no en/404/index.html.
   // productionGuards: con SITE_ENV=production, ningún {{PENDIENTE en dist/
   // (README#guardas-de-producción).
-  integrations: [statusPages(), productionGuards()],
+  integrations: [mdx(), statusPages(), productionGuards()],
   trailingSlash: "always",
   build: {
     format: "directory",

@@ -1,0 +1,30 @@
+---
+import { desde, type Segment } from "../../data/tarifa";
+import type { Locale } from "../../i18n/locales";
+import { useTranslations } from "../../i18n/ui";
+import { euros } from "../../lib/format";
+
+// «Desde 85 € por split, IVA incluido»: el precio de 1 split del segmento.
+interface Props {
+  locale: Locale;
+  segment: Segment;
+  /** Título encima de la cifra («En casa»); sin él, solo «Desde». */
+  titulo?: string | undefined;
+}
+
+const { locale, segment, titulo } = Astro.props;
+const t = useTranslations(locale);
+const line = desde(segment);
+---
+
+<div>
+  {titulo && <h3 class="text-lg font-bold">{titulo}</h3>}
+  <p class="flex flex-wrap items-baseline gap-x-2">
+    <span>{t("price.from")}</span>
+    <strong class="text-4xl font-bold">{euros(locale, line.price)}</strong>
+    <span>{t("price.perSplit")}</span>
+  </p>
+  <p class="text-sm font-medium">
+    {line.vatIncluded ? t("price.vatIncluded") : t("price.plusVat")}
+  </p>
+</div>

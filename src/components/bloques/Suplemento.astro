@@ -1,0 +1,16 @@
+---
+import { suplementos, type Segment } from "../../data/tarifa";
+import { asLocale } from "../../lib/current-locale";
+import { euros } from "../../lib/format";
+
+// Importe de un suplemento dentro de una frase: «por <Suplemento tipo="exterior" /> más».
+type Props = { tipo: "exterior" } | { tipo: "fueraDeZona"; segmento: Segment };
+
+const props = Astro.props;
+const amount =
+  props.tipo === "exterior"
+    ? suplementos.exteriorSinAltura
+    : suplementos.fueraDeZona[props.segmento];
+---
+
+{euros(asLocale(Astro.currentLocale), amount)}

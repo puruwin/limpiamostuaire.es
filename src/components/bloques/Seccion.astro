@@ -1,0 +1,26 @@
+---
+// Sección de una página con su h2. `tono` alterna el fondo entre bloques.
+interface Props {
+  id: string;
+  titulo: string;
+  tono?: "fondo" | "suave" | "tinta";
+}
+
+const { id, titulo, tono = "fondo" } = Astro.props;
+const tonos = {
+  fondo: "bg-fondo",
+  suave: "bg-suave",
+  tinta: "seccion-tinta bg-tinta text-fondo",
+};
+---
+
+<section id={id} aria-labelledby={`${id}-titulo`} class={tonos[tono]}>
+  <div class="mx-auto max-w-6xl px-4 py-12 sm:py-16">
+    <h2 id={`${id}-titulo`} class="text-2xl font-bold sm:text-3xl">
+      {titulo}
+    </h2>
+    <div class="prosa mt-6 max-w-4xl">
+      <slot />
+    </div>
+  </div>
+</section>

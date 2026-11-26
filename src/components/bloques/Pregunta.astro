@@ -1,0 +1,24 @@
+---
+// Pregunta frecuente plegable, sin JS. Sin FAQPage en el JSON-LD (Google
+// retiró ese resultado).
+interface Props {
+  titulo: string;
+}
+
+const { titulo } = Astro.props;
+---
+
+<details class="pregunta group mt-0 border-b border-tinta/15">
+  <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 py-4">
+    <h3 class="text-lg font-bold">{titulo}</h3>
+    <span
+      aria-hidden="true"
+      class="text-2xl leading-none font-bold text-acento transition-transform group-open:rotate-45"
+    >
+      +
+    </span>
+  </summary>
+  <div class="space-y-3 pb-5">
+    <slot />
+  </div>
+</details>

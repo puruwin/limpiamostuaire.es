@@ -75,6 +75,16 @@ Contrastes comprobados: `tinta`/`fondo` 12,4:1 · `tinta`/`suave` 11,5:1 · `tin
 - **Zonas de toque:** todo enlace o botón mide al menos 44 × 44 px (`min-h-11`), también las banderas y los enlaces del pie.
 - **Foco:** `outline` de 2 px en `acento-texto` con 2 px de separación; en el pie, `agua-clara`.
 
+## Home y bloques (M2.1)
+
+- **Cabecera de la home** (`src/templates/Home.astro`): H1, entradilla y tarjeta en `papel` con el «desde» en 4xl y el precio de lanzamiento en `calido`. Después, WhatsApp (en `tinta`) y teléfono (con borde). En móvil la tarjeta va antes de los botones y el precio se ve sin hacer scroll. Desde `lg`, la tarjeta pasa a la columna derecha.
+- **Secciones** (`src/components/bloques/`): `h2` en 2xl–3xl y texto de 4xl como mucho. El fondo alterna entre `fondo` y `suave`. El bloque final de contacto va sobre `tinta`, con los botones invertidos.
+- **Tarjetas:** `papel`, esquinas de 16 px (`rounded-2xl`) y sin sombra.
+- **Pasos:** lista numerada con el número en un círculo `acento` de 36 px.
+- **Municipios:** chips en `papel` sobre `suave`.
+- **Preguntas:** `<details>` con un «+» en `acento` que gira al abrirse, separadas por una línea de `tinta` al 15 %.
+- **Trabajos:** antes y después en 4:3. Mientras no haya fotos (M0.4), dos huecos con borde discontinuo.
+
 ## Logo de Limpiamos tu aire
 
 - **Símbolo:** una «l» cuya cola termina en un remolino de aire. Es un trazo con remate redondo; en el lockup su grosor es un 15 % mayor que el asta de la «l» de Figtree Bold y mide 1,55 veces su altura.
