@@ -22,8 +22,15 @@ const pages = defineCollection({
       message:
         'minúsculas, cifras y guiones separados por "/", sin barras al principio ni al final',
     }),
-    title: z.string().trim().min(1),
-    description: z.string().trim().min(1),
+    /** Tal cual en <title> y og:title, sin sufijo de marca. check:seo lo vuelve a medir en dist/. */
+    title: z
+      .string()
+      .trim()
+      .min(1)
+      .max(60, { message: "como mucho 60 caracteres (Google corta el resto)" }),
+    description: z.string().trim().min(1).max(155, {
+      message: "como mucho 155 caracteres (Google corta el resto)",
+    }),
     h1: z.string().trim().min(1),
     template: z.enum(["basica"]),
     /** Un borrador se genera en staging y provisional; en producción rompe el build. */

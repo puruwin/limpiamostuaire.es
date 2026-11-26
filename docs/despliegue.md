@@ -11,7 +11,7 @@ Es el mismo VPS que rqpbioclean.es (`187.124.51.152`, Hostinger), con el mismo C
 | Push a un PR (no forks) | `staging` | `/srv/limpiamostuaire/staging/` | `https://staging.limpiamostuaire.es/` (con contraseña) |
 | Merge a `main` | variable `SITE_ENV` del repo (`provisional` hasta M5.2, luego `production`) | `/srv/limpiamostuaire/production/` | `https://limpiamostuaire.es/` (`www.` → 301) |
 
-- El job `build` de [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) pasa format, lint, check, tests y build con su `SITE_ENV`, y después `check:robots`, `check:csp` y `check:caddy`. Guarda `dist/` como artefacto y el job `deploy` lo sube por SSH con `rsync --delete`.
+- El job `build` de [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) pasa format, lint, check, tests y build con su `SITE_ENV`, y después `check:robots`, `check:csp`, `check:seo` y `check:caddy`. Guarda `dist/` como artefacto y el job `deploy` lo sube por SSH con `rsync --delete`.
 - Staging es uno solo: el último PR que recibe un push lo sobrescribe. GitHub enlaza el despliegue desde el PR.
 - `deploy` se salta mientras no exista la variable `DEPLOY_HOST`, así el CI sigue en verde antes de configurar el VPS.
 - El CI no despliega [`deploy/Caddyfile`](../deploy/Caddyfile): cuando cambia, se copia a mano ([paso 3](#paso-3--añadir-los-sitios-a-caddy)).

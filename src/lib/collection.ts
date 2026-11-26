@@ -1,6 +1,6 @@
 import { getCollection } from "astro:content";
 import type { Locale } from "../i18n/locales.ts";
-import { languageLinks, pageUrlByKey } from "./pages.ts";
+import { alternateLinks, languageLinks, pageUrlByKey } from "./pages.ts";
 
 // Acceso a la colección `pages` para los componentes (menú, pie, selector).
 // La lógica está en pages.ts, sin astro:content, para poder probarla.
@@ -48,4 +48,8 @@ export async function getLanguageLinks(
   translationKey?: string,
 ) {
   return languageLinks(await entries(), locale, translationKey);
+}
+
+export async function getAlternateLinks(translationKey: string) {
+  return alternateLinks(await entries(), translationKey);
 }

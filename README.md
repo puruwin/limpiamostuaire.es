@@ -22,6 +22,7 @@ Sitio estático en español e inglés hecho con [Astro](https://astro.build), Ty
 | `npm run check:robots` | Meta robots de `dist/` según `SITE_ENV`                        |
 | `npm run check:csp`    | CSP de cada página de `dist/`: hashes, sin `unsafe-inline`     |
 | `npm run check:caddy`  | `deploy/Caddyfile` con Caddy real: cabeceras, caché y 301      |
+| `npm run check:seo`    | SEO de `dist/`: H1, title, description, canonical, hreflang    |
 | `npm run lint`         | ESLint (TypeScript, Astro y accesibilidad)                     |
 | `npm run format`       | Formatea con Prettier (incluye el orden de clases de Tailwind) |
 | `npm run format:check` | Comprueba el formato sin tocar ficheros                        |
@@ -42,17 +43,19 @@ src/
   i18n/locales.ts          Idiomas: es en la raíz, en en /en/
   i18n/ui.ts               Cadenas de interfaz de los 2 idiomas
   layouts/BaseLayout.astro Esqueleto HTML común: fuente, favicon, robots, salto al contenido, cabecera, <main>, pie y WhatsApp flotante
-  components/              Cabecera, pie, selector de idioma, WhatsApp flotante e iconos
+  components/              Cabecera, pie, selector de idioma, WhatsApp flotante, iconos y Seo.astro (title, canonical, hreflang, Open Graph)
   data/business.ts         Datos del negocio (NAP, horario, zonas): única fuente, igual que la ficha de Google
   integrations/            Guarda de {{PENDIENTE sobre dist/ en producción
   lib/pages.ts             URL de cada página, equivalentes por idioma y validación de la colección
   lib/collection.ts        Acceso a la colección para los componentes y claves del menú y del pie
   lib/pendientes.ts        Búsqueda de {{PENDIENTE en un directorio
+  lib/seo-check.ts         Reglas de check:seo sobre el HTML de dist/
+  lib/site.ts              Origen de producción (site de Astro, canonical y check:seo)
   lib/site-env.ts          SITE_ENV e isIndexable
   pages/[...path].astro    Ruta dinámica que genera todas las páginas de la colección
   templates/               Plantillas de página (campo template)
   styles/global.css        Entrada de Tailwind con los colores de DESIGN.md
-public/                    Ficheros que se copian tal cual a dist/ (favicon)
+public/                    Ficheros que se copian tal cual a dist/ (favicon, og.png)
 scripts/                   Comprobaciones check:* sobre dist/ y deploy/
 deploy/Caddyfile           Sitios de producción, www y staging en el VPS
 brand/                     Logos y fuentes (ver DESIGN.md)
@@ -81,8 +84,8 @@ Cada página es un Markdown en `src/content/pages/<locale>/` y `src/pages/[...pa
 locale: es # es | en; tiene que coincidir con la carpeta
 translationKey: precios # igual en la versión de cada idioma
 slug: precios # sin barras; "" para la home. La URL sale de aquí: /precios/, /en/prices/
-title: Precios de limpieza de aire acondicionado | Limpiamos tu aire
-description: …
+title: Precio de limpieza de aire acondicionado · Tarifa por split # ≤ 60 caracteres, tal cual, sin sufijo de marca
+description: … # ≤ 155 caracteres
 h1: Precios
 template: basica # plantilla de src/templates/
 draft: false # opcional; true = borrador
@@ -98,7 +101,13 @@ Cuerpo en Markdown.
 4. Si la página necesita textos de interfaz nuevos, añade la clave a `es` y a `en` en `src/i18n/ui.ts`.
 5. `npm run check && npm run build`.
 
-El build falla en cualquier entorno si dos páginas del mismo idioma comparten ruta o `translationKey`, o si el `locale` no coincide con la carpeta. Un campo que falte o no cumpla el esquema también.
+El build falla en cualquier entorno si dos páginas del mismo idioma comparten ruta o `translationKey`, o si el `locale` no coincide con la carpeta. Un campo que falte o no cumpla el esquema también (un `title` de más de 60 caracteres o una `description` de más de 155, por ejemplo).
+
+## SEO de cada página
+
+`src/components/Seo.astro` (desde `BaseLayout`) pone en el `<head>` el `title` y la `description` del frontmatter, la canonical absoluta a `https://limpiamostuaire.es`, Open Graph con la imagen por defecto `public/og.png` y un `hreflang` por cada idioma en el que exista la página (mismo `translationKey`), más `x-default` a la versión en español. Una página que solo existe en un idioma lleva hreflang solo a sí misma: el selector de idioma lleva a la home del otro, pero eso no es una equivalente. La canonical apunta siempre a producción, también en staging.
+
+`npm run check:seo` lo comprueba en `dist/` (reglas en `src/lib/seo-check.ts`): un solo `<h1>`; `title` ≤ 60 y `description` ≤ 155 caracteres; `<html lang>` según la ruta; canonical y `og:url` a la propia URL; hreflang a sí misma, recíproco y con `x-default` a la española; `og:image` existente; y enlaces internos solo a páginas del mismo idioma. El único enlace que puede cruzar de idioma es el que lleva `hreflang` (el selector). La 404 (`404.html`) va sin canonical ni hreflang.
 
 ## Guardas de producción
 

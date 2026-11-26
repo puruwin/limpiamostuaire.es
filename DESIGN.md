@@ -84,15 +84,16 @@ Contrastes comprobados: `tinta`/`fondo` 12,4:1 · `tinta`/`suave` 11,5:1 · `tin
 - **Tamaño mínimo:** 120 px de ancho para el horizontal; por debajo, solo el símbolo.
 - No se recolorea, no se separa el símbolo del texto en el horizontal y no se pone sobre fotos sin una banda de `tinta` o `fondo`.
 
-| Archivo (`brand/limpiamostuaire/`)                                   | Para                                                         |
-| -------------------------------------------------------------------- | ------------------------------------------------------------ |
-| `logo-horizontal.svg`                                                | Cabecera de la web sobre `fondo` o blanco                    |
-| `logo-horizontal-invertido.svg`                                      | Sobre `tinta` (pie, bloques oscuros)                         |
-| `logo-horizontal-negro.svg` / `-blanco.svg`                          | Una tinta: facturas, sellos, vinilos, bordado                |
-| `simbolo.svg`, `simbolo-negro.svg`, `simbolo-blanco.svg`             | Símbolo suelto                                               |
-| `icono-cuadrado.svg`, `icono-redondo.svg`                            | Redes y avatares de la marca paraguas                        |
-| `favicon.svg`, `favicon.ico`                                         | Favicon (SVG para navegadores modernos e ICO de 16/32/48 px) |
-| `png/apple-touch-icon.png`, `png/icono-192.png`, `png/icono-512.png` | iOS y manifest                                               |
+| Archivo (`brand/limpiamostuaire/`)                                   | Para                                                          |
+| -------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `logo-horizontal.svg`                                                | Cabecera de la web sobre `fondo` o blanco                     |
+| `logo-horizontal-invertido.svg`                                      | Sobre `tinta` (pie, bloques oscuros)                          |
+| `logo-horizontal-negro.svg` / `-blanco.svg`                          | Una tinta: facturas, sellos, vinilos, bordado                 |
+| `simbolo.svg`, `simbolo-negro.svg`, `simbolo-blanco.svg`             | Símbolo suelto                                                |
+| `icono-cuadrado.svg`, `icono-redondo.svg`                            | Redes y avatares de la marca paraguas                         |
+| `favicon.svg`, `favicon.ico`                                         | Favicon (SVG para navegadores modernos e ICO de 16/32/48 px)  |
+| `png/apple-touch-icon.png`, `png/icono-192.png`, `png/icono-512.png` | iOS y manifest                                                |
+| `og.svg` → `png/og-1200x630.png` → `public/og.png`                   | Vista previa al compartir (Open Graph) mientras no haya fotos |
 
 ## Ti&Di (operador en Benidorm)
 

@@ -1,0 +1,65 @@
+---
+import { business } from "../data/business";
+import { ogLocale, type Locale } from "../i18n/locales";
+import { useTranslations } from "../i18n/ui";
+import { getAlternateLinks } from "../lib/collection";
+import { SITE } from "../lib/site";
+
+// Etiquetas SEO del <head>: title, description, canonical, hreflang y Open
+// Graph. npm run check:seo comprueba en dist/ lo que sale de aquí.
+
+interface Props {
+  lang: Locale;
+  title: string;
+  description: string;
+  /** Sin él (o sin más versiones) no hay hreflang. */
+  translationKey?: string | undefined;
+  /** false para páginas sin URL propia, como la 404 (M1.7). */
+  canonical?: boolean | undefined;
+}
+
+const {
+  lang,
+  title,
+  description,
+  translationKey,
+  canonical = true,
+} = Astro.props;
+const t = useTranslations(lang);
+
+const absolute = (path: string) => new URL(path, SITE).href;
+const url = absolute(Astro.url.pathname);
+const alternates =
+  canonical && translationKey ? await getAlternateLinks(translationKey) : [];
+const otherLocales = alternates
+  .map((link) => link.hreflang)
+  .filter((hreflang): hreflang is Locale => hreflang !== "x-default")
+  .filter((locale) => locale !== lang);
+
+// Imagen por defecto (brand/exportar.sh). Las de cada página llegarán con
+// las fotos propias (M0.4).
+const image = { path: "/og.png", width: 1200, height: 630, type: "image/png" };
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+{canonical && <link rel="canonical" href={url} />}
+{alternates.map((link) => (
+  <link rel="alternate" hreflang={link.hreflang} href={absolute(link.url)} />
+))}
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={business.brand} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+{canonical && <meta property="og:url" content={url} />}
+<meta property="og:locale" content={ogLocale[lang]} />
+{otherLocales.map((locale) => (
+  <meta property="og:locale:alternate" content={ogLocale[locale]} />
+))}
+<meta property="og:image" content={absolute(image.path)} />
+<meta property="og:image:type" content={image.type} />
+<meta property="og:image:width" content={String(image.width)} />
+<meta property="og:image:height" content={String(image.height)} />
+<meta property="og:image:alt" content={t("seo.ogImageAlt")} />
+<meta name="twitter:card" content="summary_large_image" />

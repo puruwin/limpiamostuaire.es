@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  alternateLinks,
   languageLinks,
   pagePath,
   pageUrlByKey,
@@ -106,5 +107,27 @@ test("el selector lleva a la equivalente o a la home del idioma", () => {
   assert.deepEqual(languageLinks(pages, "en"), [
     { locale: "es", url: "/", current: false },
     { locale: "en", url: "/en/", current: true },
+  ]);
+});
+
+test("hreflang: solo las equivalentes reales y x-default a la española", () => {
+  const pages = [
+    page("es/precios", { translationKey: "precios" }),
+    page("en/prices", { translationKey: "precios" }),
+    page("es/benidorm", { translationKey: "benidorm" }),
+    page("en/only", { translationKey: "only" }),
+  ];
+  assert.deepEqual(alternateLinks(pages, "precios"), [
+    { hreflang: "es", url: "/precios/" },
+    { hreflang: "en", url: "/en/prices/" },
+    { hreflang: "x-default", url: "/precios/" },
+  ]);
+  assert.deepEqual(alternateLinks(pages, "benidorm"), [
+    { hreflang: "es", url: "/benidorm/" },
+    { hreflang: "x-default", url: "/benidorm/" },
+  ]);
+  // Sin versión española no hay x-default.
+  assert.deepEqual(alternateLinks(pages, "only"), [
+    { hreflang: "en", url: "/en/only/" },
   ]);
 });
