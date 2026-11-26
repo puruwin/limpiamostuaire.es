@@ -13,6 +13,9 @@ import { SITE } from "./site.ts";
 /** Páginas que llevan el Service con la tarifa. */
 export const serviceKeys: readonly string[] = ["inicio", "precios", "benidorm"];
 
+/** Páginas que son un AboutPage sobre la marca y el operador. */
+export const aboutKeys: readonly string[] = ["sobre-nosotros"];
+
 export interface GraphInput {
   locale: Locale;
   /** URL absoluta de la página (la canonical). */
@@ -21,6 +24,8 @@ export interface GraphInput {
   /** Migas con rutas relativas ("/", "/precios/"); vacío en la home. */
   breadcrumbs: readonly { name: string; url: string }[];
   withService: boolean;
+  /** AboutPage en vez de WebPage, con `about` hacia la marca y el operador. */
+  isAbout?: boolean;
   /** Ruta de la página del operador en el idioma ("/benidorm/"), si existe: url del LocalBusiness. Sin ella, la home. */
   operatorUrl?: string | undefined;
 }
@@ -43,6 +48,7 @@ export function buildGraph({
   title,
   breadcrumbs,
   withService,
+  isAbout = false,
   operatorUrl,
 }: GraphInput): { "@context": string; "@graph": Node[] } {
   const t = useTranslations(locale);
@@ -63,12 +69,15 @@ export function buildGraph({
       publisher: { "@id": ids.organization },
     },
     {
-      "@type": "WebPage",
+      "@type": isAbout ? "AboutPage" : "WebPage",
       "@id": `${url}#webpage`,
       url,
       name: title,
       inLanguage: locale,
       isPartOf: { "@id": ids.website(locale) },
+      ...(isAbout && {
+        about: [{ "@id": ids.organization }, { "@id": ids.localBusiness }],
+      }),
       ...(withCrumbs && { breadcrumb: { "@id": `${url}#breadcrumb` } }),
     },
     {

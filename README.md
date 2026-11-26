@@ -151,7 +151,7 @@ El build falla en cualquier entorno si dos páginas del mismo idioma comparten r
 
 `Seo.astro` añade también un `<script type="application/ld+json">` con un solo `@graph` (`src/lib/structured-data.ts`):
 
-- `WebSite` y `WebPage` con `inLanguage`.
+- `WebSite` y `WebPage` con `inLanguage`. En _Sobre nosotros_ (`aboutKeys`), `AboutPage`, con `about` hacia la marca y Ti&Di.
 - `Organization` «Limpiamos tu aire», con `logo` (`public/logo.png`).
 - `LocalBusiness` «Ti&Di», con `parentOrganization` hacia la marca, teléfono, correo, solo la localidad (la dirección está oculta), zonas, horario, `sameAs` a la ficha de Google y `url` a la página del operador (`/benidorm/`, la que enlaza la ficha) o, si no existe en el idioma, a la home.
 - En la home, precios y Benidorm (`serviceKeys`), un `Service` con la tarifa de `src/data/tarifa.ts`.
