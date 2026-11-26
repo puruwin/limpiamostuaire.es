@@ -8,6 +8,13 @@ const es = {
   "a11y.skipToContent": "Saltar al contenido",
   "seo.ogImageAlt": "Logo de Limpiamos tu aire",
   "breadcrumb.home": "Inicio",
+  "notFound.title": "Página no encontrada",
+  "notFound.description":
+    "La página que buscas no existe o ha cambiado de dirección.",
+  "notFound.h1": "No encontramos esta página",
+  "notFound.body":
+    "Puede que la dirección esté mal escrita o que la página ya no exista. Desde aquí puedes seguir:",
+  "notFound.home": "Ir al inicio",
   "schema.serviceType": "Limpieza de aire acondicionado",
   "schema.offerCatalog": "Tarifa de limpieza de splits",
   "schema.paymentAccepted": "Efectivo, Bizum",
@@ -52,6 +59,13 @@ const en = {
   "a11y.skipToContent": "Skip to content",
   "seo.ogImageAlt": "Limpiamos tu aire logo",
   "breadcrumb.home": "Home",
+  "notFound.title": "Page not found",
+  "notFound.description":
+    "The page you are looking for does not exist or has moved.",
+  "notFound.h1": "We can't find this page",
+  "notFound.body":
+    "The address may be mistyped or the page may no longer exist. You can carry on from here:",
+  "notFound.home": "Go to the home page",
   "schema.serviceType": "Air conditioner cleaning",
   "schema.offerCatalog": "Split unit cleaning prices",
   "schema.paymentAccepted": "Cash, Bizum",

@@ -3,9 +3,10 @@
 //   del de staging, que solo existe en el VPS).
 // - Levanta en local un sitio con los snippets (lo anterior a la línea
 //   "# --- Sitios ---") sobre dist/ y comprueba:
-//   - Todas las páginas de dist/ → 200 con las cabeceras de seguridad y sin
-//     Server; lo que no existe → 404, y con contraseña → 401, las dos también
-//     con las cabeceras.
+//   - Todas las páginas de dist/, robots.txt y sitemap.xml → 200 con las
+//     cabeceras de seguridad y sin Server; lo que no existe → 404 con la
+//     página 404 de su idioma, también /404.html y /en/404.html; con
+//     contraseña → 401. Las de error, también con las cabeceras.
 //   - /_astro/* → Cache-Control immutable de un año; el HTML no.
 //   - /index.html y /<ruta>/index.html → 301 a /<ruta>/; sin barra final →
 //     301 con barra. La query se conserva.
@@ -51,7 +52,16 @@ const REDIRECTS = {
   "/en": "/en/",
   "/en?a=1": "/en/?a=1",
 };
-const NOT_FOUND = ["/no-existe/", "/en/no-existe/", "/no-existe/index.html"];
+// Ruta → idioma de la página 404 que tiene que servir.
+const NOT_FOUND = {
+  "/no-existe/": "es",
+  "/en/no-existe/": "en",
+  "/no-existe/index.html": "es",
+  "/en/no/existe.png": "en",
+  "/404.html": "es",
+  "/en/404.html": "en",
+};
+const FILES = ["/robots.txt", "/sitemap.xml"];
 
 const caddyfile = await readFile("deploy/Caddyfile", "utf8");
 const cut = caddyfile.indexOf(MARKER);
@@ -128,7 +138,7 @@ let checked = 0;
 try {
   await waitFor(origin);
 
-  for (const path of pages) {
+  for (const path of [...pages, ...FILES]) {
     const res = await get(path, 200);
     securityHeaders(path, res);
     if (res.headers.get("cache-control") === IMMUTABLE) {
@@ -146,8 +156,14 @@ try {
     securityHeaders(from, await get(from, 301, to));
   }
   // En las de error, Server se queda (deploy/Caddyfile, header -Server).
-  for (const path of NOT_FOUND) {
-    securityHeaders(path, await get(path, 404), { server: false });
+  for (const [path, lang] of Object.entries(NOT_FOUND)) {
+    const res = await get(path, 404, undefined, origin, { body: true });
+    securityHeaders(path, res, { server: false });
+    if (!res.body.includes(`<html lang="${lang}"`)) {
+      errors.push(
+        `${path}: 404 sin la página en ${lang} (dist/${lang === "es" ? "" : `${lang}/`}404.html).`,
+      );
+    }
   }
   securityHeaders("/ con contraseña", await get("/", 401, undefined, locked), {
     server: false,
@@ -187,17 +203,17 @@ async function waitFor(url) {
   throw new Error(`Caddy no arranca:\n${log}`);
 }
 
-async function get(path, status, location, base = origin) {
+async function get(path, status, location, base = origin, { body } = {}) {
   checked++;
   const res = await fetch(base + path, { redirect: "manual" });
-  await res.body?.cancel();
+  const text = body ? await res.text() : (await res.body?.cancel(), "");
   const got = res.headers.get("location");
   if (res.status !== status || (location !== undefined && got !== location)) {
     errors.push(
       `${path}: ${res.status}${got ? ` → ${got}` : ""}, debería ser ${status}${location ? ` → ${location}` : ""}.`,
     );
   }
-  return res;
+  return { headers: res.headers, body: text };
 }
 
 function securityHeaders(path, res, { server = true } = {}) {

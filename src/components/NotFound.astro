@@ -1,0 +1,54 @@
+---
+import type { Locale } from "../i18n/locales";
+import { useTranslations } from "../i18n/ui";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { existingLinks } from "../lib/collection";
+import { pagePath } from "../lib/pages";
+
+// Página 404 de cada idioma (src/pages/404.astro y src/pages/en/404.astro).
+// Sin URL propia: ni canonical, ni hreflang, ni JSON-LD. Caddy la sirve con
+// estado 404 en cualquier ruta que no exista (deploy/Caddyfile).
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+const links = [
+  { label: t("notFound.home"), url: pagePath(locale, "") },
+  ...(
+    await existingLinks(locale, [
+      "precios",
+      "como-lo-hacemos",
+      "negocios",
+      "benidorm",
+    ])
+  ).map(({ key, url }) => ({ label: t(`nav.${key}`), url })),
+];
+---
+
+<BaseLayout
+  lang={locale}
+  title={t("notFound.title")}
+  description={t("notFound.description")}
+  canonical={false}
+>
+  <div class="mx-auto max-w-3xl px-4 py-16">
+    <h1 class="text-3xl font-bold">{t("notFound.h1")}</h1>
+    <p class="mt-4">{t("notFound.body")}</p>
+    <ul class="mt-4 list-disc pl-6">
+      {links.map((link) => (
+        <li>
+          <a
+            href={link.url}
+            class="inline-flex min-h-11 items-center underline underline-offset-4"
+          >
+            {link.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</BaseLayout>

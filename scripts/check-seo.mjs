@@ -9,9 +9,11 @@
 //   con parentOrganization, sin FAQPage, URLs absolutas existentes y migas
 //   que acaban en la página.
 // La 404 no lleva canonical, hreflang ni JSON-LD.
+// - sitemap.xml: solo páginas de dist/ que no son 404, con lastmod válido; con
+//   SITE_ENV=production, todas.
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { checkSeo } from "../src/lib/seo-check.ts";
+import { checkSeo, checkSitemap } from "../src/lib/seo-check.ts";
 import { SITE } from "../src/lib/site.ts";
 
 const files = (await readdir("dist", { recursive: true })).map((file) =>
@@ -33,10 +35,24 @@ if (pages.length === 0) {
 
 const errors = checkSeo(pages, { site: SITE, files: new Set(files) });
 
+const sitemap = await readFile(join("dist", "sitemap.xml"), "utf8").catch(
+  () => undefined,
+);
+if (sitemap === undefined) errors.push("dist/sitemap.xml no existe.");
+else {
+  errors.push(
+    ...checkSitemap(sitemap, {
+      site: SITE,
+      pages: pages.map((page) => page.file),
+      production: process.env.SITE_ENV === "production",
+    }).map((message) => `dist/sitemap.xml: ${message}`),
+  );
+}
+
 if (errors.length > 0) {
   console.error(`SEO: ${errors.length} problemas:`);
   for (const error of errors) console.error(`  ${error}`);
   process.exit(1);
 }
 
-console.log(`SEO: ${pages.length} páginas correctas.`);
+console.log(`SEO: ${pages.length} páginas y sitemap.xml correctos.`);

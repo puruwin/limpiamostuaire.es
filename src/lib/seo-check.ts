@@ -7,7 +7,7 @@ import { defaultLocale, locales, type Locale } from "../i18n/locales.ts";
 export const TITLE_MAX = 60;
 export const DESCRIPTION_MAX = 155;
 
-/** Páginas sin URL propia: sin canonical ni hreflang (la 404 llega en M1.7). */
+/** Páginas sin URL propia (las 404): sin canonical, hreflang, JSON-LD ni sitemap. */
 const noCanonical = /(^|\/)404\.html$/;
 
 export interface HtmlFile {
@@ -413,5 +413,71 @@ function checkJsonLd(
     }
   }
 
+  return errors;
+}
+
+/**
+ * Errores de dist/sitemap.xml (src/lib/sitemap.ts). `pages` son los HTML de
+ * dist/. Cada <loc> es una URL absoluta del sitio, sin repetir, de una página
+ * que existe y no es una 404, con un lastmod YYYY-MM-DD válido. En producción,
+ * además, están todas las páginas; fuera no se exige, porque los borradores
+ * se generan pero no van al sitemap.
+ */
+export function checkSitemap(
+  xml: string,
+  {
+    site,
+    pages,
+    production,
+  }: { site: string; pages: readonly string[]; production: boolean },
+): string[] {
+  const errors: string[] = [];
+  if (
+    !/<urlset\b[^>]*xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9"/.test(
+      xml,
+    )
+  ) {
+    errors.push("sin <urlset> con el xmlns de sitemaps.org.");
+  }
+
+  const urls = new Set(
+    pages
+      .filter((file) => !noCanonical.test(file))
+      .map((file) => `${site}${urlPath(file)}`),
+  );
+  const seen = new Set<string>();
+  for (const [, body] of xml.matchAll(/<url>([\s\S]*?)<\/url>/g)) {
+    const loc = decode(/<loc>([^<]*)<\/loc>/.exec(body!)?.[1]?.trim() ?? "");
+    const lastmod = /<lastmod>([^<]*)<\/lastmod>/.exec(body!)?.[1]?.trim();
+    if (!loc) {
+      errors.push("<url> sin <loc>.");
+      continue;
+    }
+    if (seen.has(loc)) errors.push(`${loc} repetida.`);
+    seen.add(loc);
+    if (!loc.startsWith(`${site}/`)) {
+      errors.push(`${loc} no es una URL absoluta de ${site}.`);
+    } else if (!urls.has(loc)) {
+      errors.push(`${loc} no es una página de dist/ (o es una 404).`);
+    }
+    // "2026-02-30" pasa la regex pero Date lo corre al 2 de marzo.
+    const date = new Date(lastmod ?? "");
+    if (
+      !lastmod ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(lastmod) ||
+      Number.isNaN(date.getTime()) ||
+      date.toISOString().slice(0, 10) !== lastmod
+    ) {
+      errors.push(
+        `${loc}: lastmod ${JSON.stringify(lastmod ?? null)}, debería ser YYYY-MM-DD.`,
+      );
+    }
+  }
+
+  if (production) {
+    for (const url of urls) {
+      if (!seen.has(url)) errors.push(`falta ${url}.`);
+    }
+  }
   return errors;
 }
