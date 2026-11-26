@@ -15,6 +15,7 @@
     "check:robots": "node scripts/check-robots.mjs",
     "check:csp": "node scripts/check-csp.mjs",
     "check:caddy": "node scripts/check-caddy.mjs",
+    "check:seo": "node scripts/check-seo.mjs",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check ."

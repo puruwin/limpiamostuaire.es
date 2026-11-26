@@ -6,6 +6,7 @@ import type { Locale } from "./locales.ts";
 const es = {
   "site.name": "Limpiamos tu aire",
   "a11y.skipToContent": "Saltar al contenido",
+  "seo.ogImageAlt": "Logo de Limpiamos tu aire",
 
   "nav.label": "Menú principal",
   "nav.open": "Abrir el menú",
@@ -45,6 +46,7 @@ export type UiKey = keyof typeof es;
 const en = {
   "site.name": "Limpiamos tu aire",
   "a11y.skipToContent": "Skip to content",
+  "seo.ogImageAlt": "Limpiamos tu aire logo",
 
   "nav.label": "Main menu",
   "nav.open": "Open menu",

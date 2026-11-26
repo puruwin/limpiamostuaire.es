@@ -31,6 +31,7 @@ jobs:
       - run: npm run build
       - run: npm run check:robots
       - run: npm run check:csp
+      - run: npm run check:seo
       # Cabeceras, caché y redirecciones de deploy/Caddyfile, con Caddy real.
       # Versión fijada y verificada con el checksums.txt de la release.
       - name: Instalar Caddy

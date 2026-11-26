@@ -165,6 +165,18 @@ def main():
         pad = 4
         (out / nombre).write_text(svg(w + 2 * pad, h, cuerpo, tit, -pad, y0))
 
+    # —— Imagen para compartir (Open Graph), 1200×630: logo sobre fondo ——
+    # La miniatura pequeña (WhatsApp, Telegram) recorta un cuadrado por el
+    # centro: el logo cabe en él (540 px de ancho dentro de 630).
+    cuerpo, w, y0, h = lockup(ACENTO, TINTA, TINTA)
+    OG_W, OG_H = 1200, 630
+    e = 540 / w
+    ox = (OG_W - w * e) / 2
+    oy = (OG_H - h * e) / 2 - y0 * e
+    og = f'<rect width="{OG_W}" height="{OG_H}" fill="{FONDO}"/>'
+    og += f'<g transform="translate({ox:g} {oy:g}) scale({e:g})">{cuerpo}</g>'
+    (out / "og.svg").write_text(svg(OG_W, OG_H, og, "Limpiamos tu aire"))
+
     # —— Símbolo suelto ——
     def simbolo_svg(color, fondo=None, redondo=False, trazo=REMOLINO_TRAZO, margen=0.0, d=REMOLINO):
         lado = 48.0

@@ -20,6 +20,9 @@ resvg -w 512 "$L/icono-cuadrado.svg" "$L/png/icono-512.png"
 resvg -w 1024 "$L/icono-redondo.svg" "$L/png/icono-redondo-1024.png"
 resvg -w 1200 "$L/logo-horizontal.svg" "$L/png/logo-horizontal-1200.png"
 resvg -w 1200 "$L/logo-horizontal-invertido.svg" "$L/png/logo-horizontal-invertido-1200.png"
+# Open Graph por defecto: se sirve tal cual desde public/ (Seo.astro)
+resvg -w 1200 "$L/og.svg" "$L/png/og-1200x630.png"
+cp "$L/png/og-1200x630.png" "$B/../public/og.png"
 
 # Ti&Di
 resvg -w 1200 "$T/wordmark.svg" "$T/png/wordmark-1200.png"

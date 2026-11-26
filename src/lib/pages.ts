@@ -1,4 +1,9 @@
-import { locales, localePrefix, type Locale } from "../i18n/locales.ts";
+import {
+  defaultLocale,
+  locales,
+  localePrefix,
+  type Locale,
+} from "../i18n/locales.ts";
 
 /** Lo mínimo de una entrada de la colección `pages` que hace falta para validar. */
 export interface PageEntry {
@@ -96,4 +101,23 @@ export function languageLinks(
       pagePath(locale, ""),
     current: locale === current,
   }));
+}
+
+/**
+ * Enlaces hreflang de la página `translationKey`: una entrada por cada idioma
+ * en el que existe (la propia incluida) y `x-default` a la española. Al
+ * contrario que languageLinks, no cae a la home: solo equivalentes reales.
+ */
+export function alternateLinks(
+  entries: PageEntry[],
+  translationKey: string,
+): { hreflang: Locale | "x-default"; url: string }[] {
+  const links: { hreflang: Locale | "x-default"; url: string }[] = [];
+  for (const locale of locales) {
+    const url = pageUrlByKey(entries, locale, translationKey);
+    if (url) links.push({ hreflang: locale, url });
+  }
+  const fallback = links.find((link) => link.hreflang === defaultLocale);
+  if (fallback) links.push({ hreflang: "x-default", url: fallback.url });
+  return links;
 }
