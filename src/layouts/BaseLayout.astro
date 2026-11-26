@@ -1,6 +1,9 @@
 ---
 import "../styles/global.css";
 import { Font } from "astro:assets";
+import Footer from "../components/Footer.astro";
+import Header from "../components/Header.astro";
+import WhatsAppFloat from "../components/WhatsAppFloat.astro";
 import type { Locale } from "../i18n/locales";
 import { useTranslations } from "../i18n/ui";
 import { isIndexable } from "../lib/site-env";
@@ -9,9 +12,11 @@ interface Props {
   lang: Locale;
   title: string;
   description?: string;
+  /** Para el menú (página actual) y el selector de idioma. */
+  translationKey?: string | undefined;
 }
 
-const { lang, title, description } = Astro.props;
+const { lang, title, description, translationKey } = Astro.props;
 const t = useTranslations(lang);
 ---
 
@@ -29,16 +34,23 @@ const t = useTranslations(lang);
     <Font cssVariable="--font-figtree" preload />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
+    <!-- Marca que hay JS, para plegar el menú móvil sin parpadeo. -->
+    <script is:inline>
+      document.documentElement.classList.add("js");
+    </script>
   </head>
-  <body class="bg-fondo font-sans text-tinta antialiased">
+  <body class="flex min-h-screen flex-col bg-fondo font-sans text-tinta antialiased">
     <a
       href="#contenido"
-      class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:rounded focus:bg-papel focus:px-4 focus:py-2"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:z-50 focus:left-2 focus:rounded focus:bg-papel focus:px-4 focus:py-2"
     >
       {t("a11y.skipToContent")}
     </a>
-    <main id="contenido">
+    <Header locale={lang} translationKey={translationKey} />
+    <main id="contenido" class="flex-1">
       <slot />
     </main>
+    <Footer locale={lang} />
+    <WhatsAppFloat locale={lang} />
   </body>
 </html>

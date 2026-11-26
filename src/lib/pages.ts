@@ -1,4 +1,4 @@
-import { localePrefix, type Locale } from "../i18n/locales.ts";
+import { locales, localePrefix, type Locale } from "../i18n/locales.ts";
 
 /** Lo mínimo de una entrada de la colección `pages` que hace falta para validar. */
 export interface PageEntry {
@@ -66,4 +66,34 @@ export function validatePages(
   }
 
   return errors;
+}
+
+/** URL de la página `translationKey` en `locale`, o undefined si no existe. */
+export function pageUrlByKey(
+  entries: PageEntry[],
+  locale: Locale,
+  translationKey: string,
+): string | undefined {
+  const entry = entries.find(
+    (e) => e.data.locale === locale && e.data.translationKey === translationKey,
+  );
+  return entry ? pagePath(locale, entry.data.slug) : undefined;
+}
+
+/**
+ * Enlaces del selector de idioma: la página equivalente en cada idioma o, si
+ * no existe en ese idioma, su home.
+ */
+export function languageLinks(
+  entries: PageEntry[],
+  current: Locale,
+  translationKey?: string,
+): { locale: Locale; url: string; current: boolean }[] {
+  return locales.map((locale) => ({
+    locale,
+    url:
+      (translationKey && pageUrlByKey(entries, locale, translationKey)) ||
+      pagePath(locale, ""),
+    current: locale === current,
+  }));
 }

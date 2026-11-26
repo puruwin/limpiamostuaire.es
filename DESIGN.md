@@ -27,7 +27,7 @@ typography:
 
 # Design System: Limpiamos tu aire
 
-<!-- Identidad decidida en la entrevista de M0.6 (25-11-2026). Los componentes, la escala tipográfica y el modo oscuro se fijan en M1.4. -->
+<!-- Identidad decidida en la entrevista de M0.6 (25-11-2026). Componentes fijados en M1.4 (26-11-2026). -->
 
 ## Jerarquía de marcas
 
@@ -54,6 +54,26 @@ Contrastes comprobados: `tinta`/`fondo` 12,4:1 · `tinta`/`suave` 11,5:1 · `tin
 
 - **Figtree** (OFL) para todo: wordmark y web. Pesos 400 (texto), 500 («tu aire» en el wordmark, subtítulos) y 700 (titulares, «limpiamos»). En M1.1 se autoaloja como variable desde `brand/fuentes/Figtree.ttf` (o `@fontsource-variable/figtree`); no se carga desde Google Fonts.
 - **Fredoka Bold** solo existe dentro del wordmark de Ti&Di, ya trazado. La web no la carga.
+
+## Componentes (M1.4)
+
+- **Sin modo oscuro.** La web usa siempre la paleta clara (decidido en M1.4).
+- **Escala:** la de Tailwind. Texto a `text-base` (16 px), titulares en 700 y `h1` de `text-3xl` en adelante.
+- **Cabecera** (`src/components/Header.astro`), sobre `fondo`:
+  - Una franja con el teléfono (`tel:`) y el selector de idioma, siempre a la vista.
+  - Debajo, el logo horizontal (24 px de alto en móvil y 32 px desde `sm`), el menú y el botón de WhatsApp en `tinta`, este último solo desde `md`.
+  - Ti&Di no va en la cabecera.
+- **Menú:** Precios · Cómo lo hacemos · Negocios · Benidorm · Sobre nosotros. Solo salen las páginas que ya existen.
+  - Por debajo de `lg` se pliega tras un botón con `aria-expanded`; Escape lo cierra.
+  - Sin JS queda desplegado. Es el único JS del sitio.
+- **Selector de idioma:** banderas de ES y EN que llevan a la página equivalente o, si no existe, a la home del idioma. El nombre accesible del idioma va en ese idioma. La activa lleva un subrayado en `acento`.
+- **Pie** (`Footer.astro`), sobre `tinta` con el logo invertido:
+  - Contacto (NAP de `src/data/business.ts`) y «En Benidorm te atiende» + wordmark blanco de Ti&Di, que enlaza a `/benidorm/` cuando exista.
+  - Servicios, zonas y legales.
+  - Texto en `fondo`; hover y foco en `agua-clara`.
+- **WhatsApp flotante:** solo en móvil (`< md`). Círculo de 56 px en `tinta` con icono y anillo en `agua-clara`, para que se vea también sobre el pie. El pie deja 96 px abajo para que no tape nada.
+- **Zonas de toque:** todo enlace o botón mide al menos 44 × 44 px (`min-h-11`), también las banderas y los enlaces del pie.
+- **Foco:** `outline` de 2 px en `acento-texto` con 2 px de separación; en el pie, `agua-clara`.
 
 ## Logo de Limpiamos tu aire
 

@@ -1,0 +1,88 @@
+---
+import type { Locale } from "../i18n/locales";
+import { useTranslations } from "../i18n/ui";
+import { getLanguageLinks } from "../lib/collection";
+
+interface Props {
+  locale: Locale;
+  translationKey?: string | undefined;
+}
+
+const { locale, translationKey } = Astro.props;
+const t = useTranslations(locale);
+const links = await getLanguageLinks(locale, translationKey);
+---
+
+<nav aria-label={t("lang.switcher")}>
+  <ul class="flex items-center">
+    {links.map((link) => (
+      <li>
+        <a
+          href={link.url}
+          hreflang={link.locale}
+          lang={link.locale}
+          aria-current={link.current ? "true" : undefined}
+          class="bandera inline-flex min-h-11 min-w-11 items-center justify-center rounded hover:bg-suave"
+        >
+          {/* Solo la bandera a la vista: el nombre accesible es el del
+                idioma, en ese idioma («Español», «English»). */}
+          <span class="sr-only">
+            {useTranslations(link.locale)(`lang.${link.locale}`)}
+          </span>
+          {link.locale === "es" ? (
+            <svg viewBox="0 0 3 2" aria-hidden="true">
+              <rect width="3" height="2" fill="#aa151b" />
+              <rect y="0.5" width="3" height="1" fill="#f1bf00" />
+            </svg>
+          ) : (
+            <svg
+              viewBox="0 0 60 30"
+              preserveAspectRatio="xMidYMid slice"
+              aria-hidden="true"
+            >
+              <clipPath id="bandera-uk-aspas">
+                <path d="M30 15h30v15zv15h-30zh-30v-15zv-15h30z" />
+              </clipPath>
+              <rect width="60" height="30" fill="#012169" />
+              <path d="M0 0l60 30m0-30L0 30" stroke="#fff" stroke-width="6" />
+              <path
+                d="M0 0l60 30m0-30L0 30"
+                clip-path="url(#bandera-uk-aspas)"
+                stroke="#c8102e"
+                stroke-width="4"
+              />
+              <path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10" />
+              <path d="M30 0v30M0 15h60" stroke="#c8102e" stroke-width="6" />
+            </svg>
+          )}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+  /* Las dos banderas al mismo tamaño (3:2), con un filo para que el amarillo
+     no se pierda sobre el fondo. La activa, subrayada en acento. */
+  .bandera {
+    position: relative;
+  }
+
+  .bandera svg {
+    display: block;
+    inline-size: 1.5rem;
+    block-size: 1rem;
+    border-radius: 2px;
+    box-shadow: 0 0 0 1px rgb(18 49 63 / 0.2);
+  }
+
+  .bandera[aria-current="true"]::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0.625rem;
+    inset-block-end: 0.375rem;
+    block-size: 2px;
+    border-radius: 1px;
+    background: var(--color-acento);
+  }
+</style>
