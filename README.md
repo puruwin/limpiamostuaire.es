@@ -122,7 +122,7 @@ Un `.mdx` usa los bloques de `src/components/bloques/` sin importarlos: la ruta 
 | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | `<Seccion id titulo tono>`                                                                | Sección con su `h2`. `tono`: `fondo` (por defecto), `suave` o `tinta`                        |
 | `<Rejilla>` + `<Tarjeta titulo>`                                                          | Tarjetas en 2 columnas desde `md`                                                            |
-| `<PreciosDesde />`                                                                        | «Desde» de casa y de negocio, más el precio de lanzamiento si sigue vigente                  |
+| `<PreciosDesde />`, `<PreciosDesde segmento="negocio" />`                                 | «Desde» de casa y de negocio (o solo el del segmento), más el lanzamiento si es de casa      |
 | `<TablaPrecios />`                                                                        | Tarifa entera de casa y negocio: 1–3 splits, el adicional y los suplementos                  |
 | `<Lanzamiento detalle />`                                                                 | Precio de lanzamiento; con `detalle`, también el precio de los demás splits                  |
 | `<Ejemplo segmento="vivienda" splits={3} exteriores={1} />`                               | Presupuesto con líneas y total (`fueraDeZona` opcional); en casa, también con el lanzamiento |
@@ -134,7 +134,7 @@ Un `.mdx` usa los bloques de `src/components/bloques/` sin importarlos: la ruta 
 | `<EnlacePagina clave="precios">texto</EnlacePagina>`                                      | Enlace a otra página del idioma; no sale nada mientras no exista                             |
 | `<Contacto titulo>`                                                                       | Bloque final sobre tinta con WhatsApp, teléfono y horario                                    |
 
-El precio de lanzamiento (`lanzamiento` en `src/data/tarifa.ts`) sale solo si el día del build, en hora de Madrid, es su fecha de fin o anterior. Pasada esa fecha, hace falta un despliegue para que desaparezca. Con el lanzamiento, el primer split sale a su precio y cada uno de los demás al del split adicional (`presupuesto()` en `tarifa.ts`). Las `description` de la home y de precios llevan precios escritos a mano: si cambia la tarifa, cámbialas también.
+El precio de lanzamiento (`lanzamiento` en `src/data/tarifa.ts`) sale solo si el día del build, en hora de Madrid, es su fecha de fin o anterior. Pasada esa fecha, hace falta un despliegue para que desaparezca. Con el lanzamiento, el primer split sale a su precio y cada uno de los demás al del split adicional (`presupuesto()` en `tarifa.ts`). Las `description` de la home, precios y negocios llevan precios escritos a mano: si cambia la tarifa, cámbialas también.
 
 El build falla en cualquier entorno si dos páginas del mismo idioma comparten ruta o `translationKey`, o si el `locale` no coincide con la carpeta. Un campo que falte o no cumpla el esquema también (un `title` de más de 60 caracteres o una `description` de más de 155, por ejemplo).
 

@@ -1,31 +1,43 @@
 ---
+import { lanzamiento, type Segment } from "../../data/tarifa";
 import { asLocale } from "../../lib/current-locale";
 import { useTranslations } from "../../i18n/ui";
 import Lanzamiento from "./Lanzamiento.astro";
 import PrecioDesde from "./PrecioDesde.astro";
 
-// El «desde» de casa y de negocio, con el precio de lanzamiento. La tabla
-// completa va en /precios/ (docs/seo/keywords.md: el precio solo allí).
+// El «desde» de casa y de negocio, con el precio de lanzamiento. Con
+// `segmento`, solo el de ese segmento (y el lanzamiento solo si es el suyo).
+// La tabla completa va en /precios/ (docs/seo/keywords.md: el precio solo
+// allí).
+interface Props {
+  segmento?: Segment;
+}
+
+const { segmento } = Astro.props;
 const locale = asLocale(Astro.currentLocale);
 const t = useTranslations(locale);
+const titulos = {
+  vivienda: t("price.home"),
+  negocio: t("price.business"),
+} as const satisfies Record<Segment, string>;
+const segmentos: readonly Segment[] = segmento
+  ? [segmento]
+  : ["vivienda", "negocio"];
+const conLanzamiento = segmentos.includes(lanzamiento.segment);
 ---
 
 <div class="space-y-4">
-  <div class="grid gap-4 sm:grid-cols-2">
-    <div class="rounded-2xl bg-papel p-6">
-      <PrecioDesde
-        locale={locale}
-        segment="vivienda"
-        titulo={t("price.home")}
-      />
-    </div>
-    <div class="rounded-2xl bg-papel p-6">
-      <PrecioDesde
-        locale={locale}
-        segment="negocio"
-        titulo={t("price.business")}
-      />
-    </div>
+  <div
+    class:list={[
+      "grid gap-4",
+      segmentos.length > 1 ? "sm:grid-cols-2" : "max-w-md",
+    ]}
+  >
+    {segmentos.map((s) => (
+      <div class="rounded-2xl bg-papel p-6">
+        <PrecioDesde locale={locale} segment={s} titulo={titulos[s]} />
+      </div>
+    ))}
   </div>
-  <Lanzamiento locale={locale} />
+  {conLanzamiento && <Lanzamiento locale={locale} />}
 </div>
