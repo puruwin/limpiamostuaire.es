@@ -1,8 +1,8 @@
 // Comprueba el teléfono y WhatsApp de cada página de dist/ (reglas en
 // src/lib/contact-check.ts):
 // - tel: y wa.me con el número de src/data/business.ts.
-// - El texto de WhatsApp, el de la página en su idioma (casa, negocio o
-//   conductos) en la cabecera, el botón flotante y las CTA.
+// - El texto de WhatsApp, el de la página en su idioma (casa, negocio,
+//   apartamento o conductos) en la cabecera, el botón flotante y las CTA.
 // - Teléfono y WhatsApp en la cabecera, el botón flotante y, en las
 //   plantillas home, pagina y operador, al menos una CTA.
 // La página de cada URL sale del frontmatter de src/content/pages/.

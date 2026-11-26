@@ -40,6 +40,8 @@ const es = {
     "Hola, quiero pedir presupuesto para limpiar mi aire acondicionado.",
   "whatsapp.greeting.negocio":
     "Hola, quiero pedir presupuesto para limpiar los aires acondicionados de mi negocio.",
+  "whatsapp.greeting.apartamento":
+    "Hola, quiero pedir presupuesto para limpiar el aire acondicionado de mi apartamento turístico.",
   "whatsapp.greeting.conductos":
     "Hola, quiero pedir presupuesto para limpiar los conductos de mi aire acondicionado.",
 
@@ -157,6 +159,8 @@ const en = {
     "Hi, I'd like a quote for cleaning my air conditioner.",
   "whatsapp.greeting.negocio":
     "Hi, I'd like a quote for cleaning the air conditioners at my business.",
+  "whatsapp.greeting.apartamento":
+    "Hi, I'd like a quote for cleaning the air conditioning in my holiday let.",
   "whatsapp.greeting.conductos":
     "Hi, I'd like a quote for cleaning my air conditioning ducts.",
 

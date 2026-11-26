@@ -186,6 +186,7 @@ El teléfono sale de `business.phone` (`src/data/business.ts`): `tel:+3460896221
 | Página (`translationKey`) | Saludo (`whatsapp.greeting.*` de `ui.ts`) |
 | ------------------------- | ----------------------------------------- |
 | `negocios`                | `negocio`                                 |
+| `apartamentos-turisticos` | `apartamento`                             |
 | `conductos`               | `conductos`                               |
 | Las demás y las 404       | `casa`                                    |
 

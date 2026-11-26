@@ -47,6 +47,7 @@ const check = (file: string, page: string) =>
 
 test("saludo de WhatsApp por página: negocio, conductos y casa por defecto", () => {
   assert.equal(whatsappTopic("negocios"), "negocio");
+  assert.equal(whatsappTopic("apartamentos-turisticos"), "apartamento");
   assert.equal(whatsappTopic("conductos"), "conductos");
   assert.equal(whatsappTopic("precios"), "casa");
   assert.equal(whatsappTopic(undefined), "casa");

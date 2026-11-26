@@ -51,7 +51,12 @@ export function telHref(): string {
 }
 
 /** Tema del saludo de WhatsApp: qué pide quien escribe. */
-export const whatsappTopics = ["casa", "negocio", "conductos"] as const;
+export const whatsappTopics = [
+  "casa",
+  "negocio",
+  "apartamento",
+  "conductos",
+] as const;
 export type WhatsAppTopic = (typeof whatsappTopics)[number];
 
 /**
@@ -60,6 +65,7 @@ export type WhatsAppTopic = (typeof whatsappTopics)[number];
  */
 const topicByPage: Readonly<Record<string, WhatsAppTopic>> = {
   negocios: "negocio",
+  "apartamentos-turisticos": "apartamento",
   conductos: "conductos",
 };
 
