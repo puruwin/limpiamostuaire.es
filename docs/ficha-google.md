@@ -9,7 +9,7 @@ Textos listos para copiar a la ficha de Google Business Profile. Redactados el 2
 | Nombre | `Ti&Di` (sin palabras clave) |
 | Tipo | Negocio de área de servicio, con la dirección de Benidorm **oculta** |
 | Teléfono | +34 608 96 22 13 |
-| Web | `https://limpiamostuaire.es/benidorm/?utm_source=google&utm_medium=organic&utm_campaign=gbp` (mientras no exista `/benidorm/`, la home con la misma UTM) |
+| Web | `https://limpiamostuaire.es/benidorm/?utm_source=google&utm_medium=organic&utm_campaign=gbp` (`/benidorm/` existe desde M2.6; antes, la home con la misma UTM) |
 | Horario | Lunes a viernes, 8:00–20:00. Sábado y domingo, cerrado |
 | Abierto desde | Noviembre de 2026 |
 | Zonas de servicio | Benidorm, Finestrat, La Vila Joiosa, La Nucía, Polop, Callosa d'en Sarrià, Calp, Altea |

@@ -1,0 +1,46 @@
+---
+import { business } from "../../data/business";
+import { resenas } from "../../data/resenas";
+import { useTranslations } from "../../i18n/ui";
+import { asLocale } from "../../lib/current-locale";
+
+// Reseñas reales de la ficha de Google (src/data/resenas.ts), con enlace a
+// la ficha. Sin reseñas, no pinta nada: va dentro de otra sección para no
+// romper la alternancia de fondos.
+const locale = asLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+const fecha = new Intl.DateTimeFormat(locale === "es" ? "es-ES" : "en-GB", {
+  month: "long",
+  year: "numeric",
+  timeZone: "UTC",
+});
+---
+
+{resenas.length > 0 && (
+  <div class="mt-10">
+    <h3 class="text-xl font-bold">{t("reviews.title")}</h3>
+    <ul class="mt-4 grid list-none gap-4 p-0 md:grid-cols-2">
+      {resenas.map((resena) => (
+        <li class="mt-0">
+          <figure class="h-full rounded-2xl bg-papel p-5">
+            <blockquote lang={resena.idioma}>
+              <p>{resena.texto}</p>
+            </blockquote>
+            <figcaption class="mt-3 text-sm font-medium">
+              {`${resena.autor} · ${fecha.format(new Date(`${resena.fecha}T00:00:00Z`))}`}
+            </figcaption>
+          </figure>
+        </li>
+      ))}
+    </ul>
+    <p class="mt-4">
+      <a
+        href={business.googleBusinessUrl}
+        class="inline-flex min-h-11 items-center gap-1 font-semibold text-acento-texto underline underline-offset-4 hover:text-tinta"
+      >
+        {t("reviews.more")}
+        <span aria-hidden="true">→</span>
+      </a>
+    </p>
+  </div>
+)}

@@ -96,6 +96,12 @@ Contrastes comprobados: `tinta`/`fondo` 12,4:1 · `tinta`/`suave` 11,5:1 · `tin
 - **Pasos con foto** (`Pasos` y `Paso`): la misma lista numerada de la home, con un `h3` por paso y, desde `md`, la foto a la derecha en 4:3. Mientras no haya fotos propias (M0.4), un hueco con borde discontinuo.
 - **Sin tutorial:** se cuenta qué hacemos y por qué, sin productos, herramientas ni tiempos de espera.
 
+## Página del operador (M2.6)
+
+- **Plantilla `operador`** (`src/templates/Operador.astro`), para `/benidorm/` y las de futuros operadores (M7.2): la cabecera de la home con la tarjeta del operador en lugar del precio. Los datos salen de `src/data/operador.ts` y `business.ts`.
+- **Tarjeta del operador:** `papel` con una franja superior de 8 px en `calido`. Avatar redondo de 80 px con anillo `calido`, «En Benidorm te atiende» y el wordmark de Ti&Di debajo. Después, quiénes son, teléfono, horario y municipios. En móvil va entre la entradilla y los botones.
+- **Reseñas** (`Resenas`): tarjetas `papel` con el texto tal cual, nombre de pila y mes. Van dentro de la sección de trabajos y no salen mientras no haya.
+
 ## Logo de Limpiamos tu aire
 
 - **Símbolo:** una «l» cuya cola termina en un remolino de aire. Es un trazo con remate redondo; en el lockup su grosor es un 15 % mayor que el asta de la «l» de Figtree Bold y mide 1,55 veces su altura.

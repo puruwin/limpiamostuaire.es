@@ -1,9 +1,10 @@
 ---
 import Logo from "../../brand/limpiamostuaire/logo-horizontal-invertido.svg";
-import TidiWordmark from "../../brand/tidi/wordmark-blanco.svg";
 import { business, telHref } from "../data/business";
+import { operador } from "../data/operador";
 import type { Locale } from "../i18n/locales";
 import { useTranslations } from "../i18n/ui";
+import { fill } from "../lib/format";
 import { existingLinks, urlOf } from "../lib/collection";
 
 interface Props {
@@ -27,7 +28,8 @@ const legal = await existingLinks(locale, [
   "privacidad",
   "cookies",
 ]);
-const benidormUrl = await urlOf(locale, "benidorm");
+const operadorUrl = await urlOf(locale, operador.pagina);
+const TidiWordmark = operador.wordmarkBlanco;
 const year = new Date().getFullYear();
 
 // Sobre tinta: texto en fondo y enlaces con zona de toque de 44 px.
@@ -56,10 +58,13 @@ const linkClass =
         <p>{`${business.locality} (${business.region})`}</p>
       </address>
       <p class="mt-6 flex flex-wrap items-center gap-x-3 gap-y-1">
-        <span>{t("footer.operator")}</span>
-        {benidormUrl ? (
+        <span>
+          {fill(t("operator.servedBy"), { locality: operador.localidad })}
+        </span>
+        {operadorUrl ? (
           <a
-            href={benidormUrl}
+            href={operadorUrl}
+            aria-label={operador.nombre}
             class="inline-flex min-h-11 items-center rounded"
           >
             <TidiWordmark class="h-6 w-auto" />

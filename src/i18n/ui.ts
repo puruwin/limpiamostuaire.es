@@ -44,7 +44,6 @@ const es = {
   "lang.en": "English",
 
   "footer.contact": "Contacto",
-  "footer.operator": "En Benidorm te atiende",
   "footer.hours": "De lunes a viernes, de 8:00 a 20:00",
   "footer.areas": "Zonas",
   "footer.areasIntro": "Limpiamos aires acondicionados en",
@@ -88,6 +87,15 @@ const es = {
   "quote.total": "Total",
 
   "areas.label": "Municipios donde trabajamos",
+
+  "operator.servedBy": "En {locality} te atiende",
+  "operator.team": "Somos",
+  "operator.phone": "Teléfono y WhatsApp",
+  "operator.hours": "Horario",
+  "operator.areas": "Municipios",
+
+  "reviews.title": "Lo que dicen nuestros clientes",
+  "reviews.more": "Todas las reseñas en Google",
 
   "works.before": "Antes",
   "works.after": "Después",
@@ -140,7 +148,6 @@ const en = {
   "lang.en": "English",
 
   "footer.contact": "Contact",
-  "footer.operator": "In Benidorm, your local team is",
   "footer.hours": "Monday to Friday, 8:00 to 20:00",
   "footer.areas": "Areas",
   "footer.areasIntro": "We clean air conditioners in",
@@ -185,6 +192,15 @@ const en = {
   "quote.total": "Total",
 
   "areas.label": "Towns we cover",
+
+  "operator.servedBy": "In {locality}, your local team is",
+  "operator.team": "We are",
+  "operator.phone": "Phone and WhatsApp",
+  "operator.hours": "Hours",
+  "operator.areas": "Towns",
+
+  "reviews.title": "What our customers say",
+  "reviews.more": "All our reviews on Google",
 
   "works.before": "Before",
   "works.after": "After",
