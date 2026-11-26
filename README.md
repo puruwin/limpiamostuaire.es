@@ -209,7 +209,7 @@ La página de cada URL la saca del frontmatter de `src/content/pages/`.
 
 ## Medición
 
-Umami Cloud (M3.3, `src/lib/umami.ts`): sin cookies ni IP, como cuentan la política de privacidad y la de cookies. `BaseLayout` carga el script si hay `PUBLIC_UMAMI_WEBSITE_ID`, y con `data-domains` solo envía datos desde `limpiamostuaire.es`: staging y local lo cargan pero no cuentan. Además de las visitas (con sus UTM), tres eventos:
+Umami Cloud (M3.3, `src/lib/umami.ts`): sin cookies ni IP, como cuentan la política de privacidad y la de cookies. `BaseLayout` carga el script si hay `PUBLIC_UMAMI_WEBSITE_ID`, y con `data-domains` solo envía datos desde `limpiamostuaire.es`: staging y local lo cargan pero no cuentan. Envía a `UMAMI_HOST` (`data-host-url`), que es también el único destino de Umami en `connect-src` de la CSP. Además de las visitas (con sus UTM), tres eventos:
 
 | Evento       | Cuándo                                          | `idioma`    | `pagina`                                          | `ubicacion`                    |
 | ------------ | ----------------------------------------------- | ----------- | ------------------------------------------------- | ------------------------------ |

@@ -14,6 +14,13 @@ import { SITE } from "./site.ts";
 export const UMAMI_SCRIPT = "https://cloud.umami.is/script.js";
 
 /**
+ * Adónde envía el script las visitas y los eventos (data-host-url). Fijo, y
+ * el mismo en connect-src (astro.config.mjs): si Umami cambia el de por
+ * defecto, la CSP no lo bloquea sin avisar.
+ */
+export const UMAMI_HOST = "https://gateway.umami.is";
+
+/**
  * Único host que envía datos (data-domains): staging, local y cualquier copia
  * cargan el script pero no cuentan visitas.
  */

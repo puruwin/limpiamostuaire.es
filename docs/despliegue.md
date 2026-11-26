@@ -53,7 +53,7 @@ En todas las respuestas (snippet `lta_headers` de [`deploy/Caddyfile`](../deploy
 
 La CSP va en dos partes, que el navegador aplica a la vez:
 
-- **En cada página**, un `<meta http-equiv="content-security-policy">` que genera Astro (`security.csp` en [`astro.config.mjs`](../astro.config.mjs)): `default-src 'self'` y `script-src`/`style-src` con el hash de cada `<script>` y `<style>` inline, sin `'unsafe-inline'`. Ya permite Umami Cloud (`cloud.umami.is`, M3.3) y Turnstile (`challenges.cloudflare.com`, M3.2). Va en el HTML porque los hashes cambian con cada build y Caddy no los conoce.
+- **En cada página**, un `<meta http-equiv="content-security-policy">` que genera Astro (`security.csp` en [`astro.config.mjs`](../astro.config.mjs)): `default-src 'self'` y `script-src`/`style-src` con el hash de cada `<script>` y `<style>` inline, sin `'unsafe-inline'`. Ya permite Umami Cloud (el script de `cloud.umami.is` y los envíos a `gateway.umami.is`, M3.3, en `src/lib/umami.ts`) y Turnstile (`challenges.cloudflare.com`, M3.2). Va en el HTML porque los hashes cambian con cada build y Caddy no los conoce.
 - **En la cabecera**, lo que un `<meta>` no puede llevar (`frame-ancestors`) y lo que no depende de la página.
 
 `npm run check:csp` falla si una página no tiene su `<meta>`, si `script-src` lleva `'unsafe-inline'` o `'unsafe-eval'`, si algún `<script>` o `<style>` inline no tiene su hash, o si aparece un atributo `style=""` u `on…=""` (la CSP los bloquea sin avisar). Un dominio externo nuevo (un mapa, un vídeo) se añade en `security.csp` de `astro.config.mjs`.
@@ -391,6 +391,8 @@ Qué se mide y cómo: [README](../README.md#medición). El ID del sitio va en el
 3. Comprobar que el HTML lo lleva: `curl -s https://limpiamostuaire.es/ | grep -o 'data-website-id="[^"]*"'`.
 4. Abrir `https://limpiamostuaire.es/benidorm/?utm_source=google&utm_medium=organic&utm_campaign=gbp` (la web de la [ficha de Google](ficha-google.md)) sin bloqueador y pulsar el teléfono de la cabecera y el WhatsApp de una CTA. En Umami, en tiempo real, tienen que salir la visita, la UTM (*UTM*: `google` / `organic` / `gbp`) y los eventos `telefono` y `whatsapp` con `idioma`, `pagina` y `ubicacion`.
 5. Un envío real del formulario desde `/benidorm/` → evento `formulario` con `pagina=/benidorm/`.
+
+Si no llega nada: en la consola del navegador, un error de CSP en `connect-src` quiere decir que el script envía a un host distinto de `UMAMI_HOST` (`src/lib/umami.ts`); en *Red*, la petición a `/api/send` tiene que dar 200.
 
 ## Lanzamiento (M5.2)
 
