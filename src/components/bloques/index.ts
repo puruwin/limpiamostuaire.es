@@ -13,6 +13,7 @@ import Seccion from "./Seccion.astro";
 import Suplemento from "./Suplemento.astro";
 import TablaPrecios from "./TablaPrecios.astro";
 import Tarjeta from "./Tarjeta.astro";
+import Titular from "./Titular.astro";
 import Trabajos from "./Trabajos.astro";
 
 // Bloques que las páginas .mdx usan sin importarlos: la ruta dinámica se los
@@ -33,5 +34,6 @@ export const bloques = {
   Suplemento,
   TablaPrecios,
   Tarjeta,
+  Titular,
   Trabajos,
 };

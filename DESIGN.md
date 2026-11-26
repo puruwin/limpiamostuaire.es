@@ -102,6 +102,12 @@ Contrastes comprobados: `tinta`/`fondo` 12,4:1 · `tinta`/`suave` 11,5:1 · `tin
 - **Tarjeta del operador:** `papel` con una franja superior de 8 px en `calido`. Avatar redondo de 80 px con anillo `calido`, «En Benidorm te atiende» y el wordmark de Ti&Di debajo. Después, quiénes son, teléfono, horario y municipios. En móvil va entre la entradilla y los botones.
 - **Reseñas** (`Resenas`): tarjetas `papel` con el texto tal cual, nombre de pila y mes. Van dentro de la sección de trabajos y no salen mientras no haya.
 
+## Páginas legales (M2.8)
+
+- **Plantilla `legal`** (`src/templates/Legal.astro`), para el aviso legal, la privacidad y las cookies: H1, «Última actualización» con la fecha de `updated` y el texto en una columna de lectura (`max-w-3xl`), sin bloques ni botones.
+- **Tablas:** bordes de `tinta` al 15 % y cabecera en `suave`. En el móvil se desplazan en horizontal dentro de la columna.
+- **Titular:** el bloque `<Titular />` saca nombre, NIF y domicilio de `business.titular` y el contacto de `business.ts`, así el aviso legal y la privacidad dicen lo mismo.
+
 ## Logo de Limpiamos tu aire
 
 - **Símbolo:** una «l» cuya cola termina en un remolino de aire. Es un trazo con remate redondo; en el lockup su grosor es un 15 % mayor que el asta de la «l» de Figtree Bold y mide 1,55 veces su altura.

@@ -104,6 +104,14 @@ const es = {
 
   "steps.photo": "Foto del paso",
   "steps.pending": "{{PENDIENTE: foto propia de este paso (M0.4)}}",
+
+  "legal.updated": "Última actualización: {date}.",
+  "legal.holder": "Titular",
+  "legal.tradeNames": "Nombres comerciales",
+  "legal.nif": "NIF",
+  "legal.address": "Domicilio",
+  "legal.email": "Email",
+  "legal.phone": "Teléfono",
 };
 
 export type UiKey = keyof typeof es;
@@ -209,6 +217,14 @@ const en = {
 
   "steps.photo": "Photo of this step",
   "steps.pending": "{{PENDIENTE: our own photo of this step (M0.4)}}",
+
+  "legal.updated": "Last updated: {date}.",
+  "legal.holder": "Owner",
+  "legal.tradeNames": "Trading names",
+  "legal.nif": "Tax ID (NIF)",
+  "legal.address": "Address",
+  "legal.email": "Email",
+  "legal.phone": "Phone",
 };
 
 export const ui = { es, en } satisfies Record<Locale, Record<UiKey, string>>;

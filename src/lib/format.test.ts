@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { diaYMes, euros, fill, lista, plural } from "./format.ts";
+import { diaYMes, euros, fechaLarga, fill, lista, plural } from "./format.ts";
 
 const NBSP = " ";
 
@@ -24,6 +24,12 @@ test("lista: con «y» y «and»", () => {
 test("diaYMes: sin desfase de zona horaria", () => {
   assert.equal(diaYMes("es", "2026-12-23"), "23 de diciembre");
   assert.equal(diaYMes("en", "2026-12-23"), "23 December");
+});
+
+test("fechaLarga: con año y sin desfase de zona horaria", () => {
+  const date = new Date("2026-11-26");
+  assert.equal(fechaLarga("es", date), "26 de noviembre de 2026");
+  assert.equal(fechaLarga("en", date), "26 November 2026");
 });
 
 test("fill: sustituye y falla si falta un valor", () => {

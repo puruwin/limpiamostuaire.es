@@ -6,6 +6,7 @@ import { routeParam, validatePages } from "../lib/pages";
 import { SITE_ENV } from "../lib/site-env";
 import Basica from "../templates/Basica.astro";
 import Home from "../templates/Home.astro";
+import Legal from "../templates/Legal.astro";
 import Operador from "../templates/Operador.astro";
 import Pagina from "../templates/Pagina.astro";
 
@@ -33,6 +34,7 @@ const { Content } = await render(page);
 const templates = {
   basica: Basica,
   home: Home,
+  legal: Legal,
   pagina: Pagina,
   operador: Operador,
 };
