@@ -23,7 +23,7 @@ Dos capas, las dos obligatorias fuera de producción:
 1. **Meta robots** (en el HTML): `BaseLayout` añade `<meta name="robots" content="noindex, nofollow">` salvo con `SITE_ENV=production`. Sin variable vale `development`, así que un build olvidado nunca sale indexable. Un valor que no sea `production`, `provisional`, `staging` o `development` hace fallar el build. `npm run check:robots` comprueba `dist/` contra el `SITE_ENV` del build.
 2. **Cabecera `X-Robots-Tag: noindex, nofollow`** (en Caddy): la llevan `staging.` siempre y el apex hasta el lanzamiento. Cubre también lo que no es HTML (PDF, imágenes).
 
-No se usa `Disallow` en `robots.txt` para esto: si Google no puede rastrear, no ve el `noindex`.
+No se usa `Disallow` en `robots.txt` para esto: si Google no puede rastrear, no ve el `noindex`. `robots.txt` es el mismo en todos los entornos (permite todo y enlaza el sitemap) y `check:robots` falla si lleva `Disallow` fuera de producción.
 
 `provisional` existe porque el dominio ya apunta al VPS: `main` se publica en el apex desde ya, pero hasta M5.2 la web está a medias y no debe indexarse.
 
@@ -62,8 +62,9 @@ La CSP va en dos partes, que el navegador aplica a la vez:
 - Sin barra final → con barra, 301 (`trailingSlash: 'always'` de Astro).
 - `www.limpiamostuaire.es/<ruta>` → `https://limpiamostuaire.es/<ruta>` con 301.
 - `http://` → `https://`: lo hace Caddy solo (308).
+- Lo que no existe → 404 con la página de su idioma (`handle_errors 404`): `/en/…` sirve `en/404.html` y el resto `404.html`. `/404.html` y `/en/404.html` pedidas directamente también dan 404. La 401 de staging no cambia.
 
-`npm run check:caddy` valida el Caddyfile entero y levanta Caddy en local sobre `dist/` para comprobar cabeceras, caché y redirecciones. Necesita el binario: `caddy` en el `PATH` o `CADDY=/ruta/caddy` (en Arch, `pacman -S caddy`). En el CI se instala solo.
+`npm run check:caddy` valida el Caddyfile entero y levanta Caddy en local sobre `dist/` para comprobar cabeceras, caché, redirecciones y las 404. Necesita el binario: `caddy` en el `PATH` o `CADDY=/ruta/caddy` (en Arch, `pacman -S caddy`). En el CI se instala solo.
 
 ## Puesta en marcha (una vez)
 

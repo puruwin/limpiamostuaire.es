@@ -1,8 +1,12 @@
-// Comprueba que el meta robots de dist/ corresponde a SITE_ENV: con
-// "production" ninguna página lleva noindex; con cualquier otro valor (o
-// ninguno), todas. robots.txt y las 404 llegan en M1.7.
+// Comprueba la indexación de dist/ según SITE_ENV (docs/despliegue.md#indexación):
+// - Meta robots: con "production" ninguna página lleva noindex; con cualquier
+//   otro valor (o ninguno), todas, las 404 incluidas.
+// - robots.txt: existe y enlaza ${SITE}/sitemap.xml. Fuera de producción, sin
+//   ningún Disallow (si Google no rastrea, no ve el noindex); en producción,
+//   nunca Disallow: / (bloquearía la web entera).
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { SITE } from "../src/lib/site.ts";
 
 const siteEnv = process.env.SITE_ENV || "development";
 const indexable = siteEnv === "production";
@@ -27,6 +31,30 @@ for (const file of files) {
   }
 }
 
+const robots = await readFile(join("dist", "robots.txt"), "utf8").catch(
+  () => undefined,
+);
+if (robots === undefined) {
+  errors.push("dist/robots.txt no existe.");
+} else {
+  const lines = robots.split(/\r?\n/).map((line) => line.trim());
+  const sitemap = `Sitemap: ${SITE}/sitemap.xml`;
+  if (!lines.includes(sitemap)) {
+    errors.push(`dist/robots.txt: falta «${sitemap}».`);
+  }
+  for (const line of lines) {
+    const disallow = /^disallow:\s*(.*)$/i.exec(line)?.[1]?.trim();
+    if (!disallow) continue;
+    if (!indexable) {
+      errors.push(
+        `dist/robots.txt: «${line}» fuera de producción; lo que impide indexar es el noindex.`,
+      );
+    } else if (disallow === "/") {
+      errors.push(`dist/robots.txt: «${line}» bloquea la web entera.`);
+    }
+  }
+}
+
 if (errors.length > 0) {
   console.error(`SITE_ENV=${siteEnv}: ${errors.length} problemas:`);
   for (const error of errors) console.error(`  ${error}`);
@@ -34,5 +62,5 @@ if (errors.length > 0) {
 }
 
 console.log(
-  `SITE_ENV=${siteEnv}: ${files.length} páginas ${indexable ? "indexables" : "con noindex"}.`,
+  `SITE_ENV=${siteEnv}: ${files.length} páginas ${indexable ? "indexables" : "con noindex"} y robots.txt sin bloqueos.`,
 );

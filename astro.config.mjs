@@ -3,13 +3,16 @@ import { defineConfig, envField, fontProviders } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 import { defaultLocale, locales } from "./src/i18n/locales.ts";
 import productionGuards from "./src/integrations/production-guards.ts";
+import statusPages from "./src/integrations/status-pages.ts";
 import { SITE } from "./src/lib/site.ts";
 
 export default defineConfig({
   site: SITE,
   output: "static",
-  // Con SITE_ENV=production, ningún {{PENDIENTE en dist/ (README#guardas-de-producción).
-  integrations: [productionGuards()],
+  // statusPages: la 404 en inglés como en/404.html, no en/404/index.html.
+  // productionGuards: con SITE_ENV=production, ningún {{PENDIENTE en dist/
+  // (README#guardas-de-producción).
+  integrations: [statusPages(), productionGuards()],
   trailingSlash: "always",
   build: {
     format: "directory",

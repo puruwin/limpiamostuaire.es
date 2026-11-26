@@ -51,7 +51,27 @@
 	}
 	redir @no_slash {path}/{?query} permanent
 
+	# Las páginas 404 (src/pages/404.astro, en/404.astro) no son URLs: pedidas
+	# directamente también dan 404, con su página.
+	@status_pages path /404.html /en/404.html
+	error @status_pages 404
+
 	file_server
+
+	# Lo que no existe → 404 con la página de su idioma. Solo los 404: la 401
+	# de staging sigue igual. Las cabeceras de lta_headers se conservan
+	# (check:caddy lo comprueba).
+	handle_errors 404 {
+		encode zstd gzip
+		handle /en/* {
+			rewrite * /en/404.html
+			file_server
+		}
+		handle {
+			rewrite * /404.html
+			file_server
+		}
+	}
 }
 
 # --- Sitios --- (check:caddy prueba solo lo anterior a esta línea)

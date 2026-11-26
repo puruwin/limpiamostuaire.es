@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { checkSeo, localeOf, urlPath, type HtmlFile } from "./seo-check.ts";
+import {
+  checkSeo,
+  checkSitemap,
+  localeOf,
+  urlPath,
+  type HtmlFile,
+} from "./seo-check.ts";
 
 const site = "https://example.com";
 const files = new Set(["og.png"]);
@@ -348,4 +354,33 @@ test("JSON-LD: las migas acaban en la página", () => {
     check([page(`${site}/otra/`)])[0]!,
     /BreadcrumbList acaba en "https:\/\/example.com\/otra\/"/,
   );
+});
+
+const sitemap = (...urls: [string, string?][]) =>
+  `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.map(([loc, lastmod = "2026-11-25"]) => `<url><loc>${loc}</loc><lastmod>${lastmod}</lastmod></url>`).join("\n")}
+</urlset>`;
+const distPages = ["index.html", "en/index.html", "404.html", "en/404.html"];
+const sm = (xml: string, production = false) =>
+  checkSitemap(xml, { site, pages: distPages, production });
+
+test("sitemap: páginas de dist/, sin 404 ni repetidas", () => {
+  assert.deepEqual(sm(sitemap([`${site}/`], [`${site}/en/`]), true), []);
+  assert.match(sm(sitemap([`${site}/404.html`]))[0]!, /o es una 404/);
+  assert.match(sm(sitemap([`${site}/precios/`]))[0]!, /no es una página/);
+  assert.match(sm(sitemap(["https://otro.es/"]))[0]!, /no es una URL absoluta/);
+  assert.match(sm(sitemap([`${site}/`], [`${site}/`]))[0]!, /repetida/);
+  assert.match(sm("<urlset></urlset>")[0]!, /xmlns/);
+});
+
+test("sitemap: lastmod YYYY-MM-DD válido", () => {
+  assert.match(sm(sitemap([`${site}/`, "2026-13-01"]))[0]!, /lastmod/);
+  assert.match(sm(sitemap([`${site}/`, "2026-02-30"]))[0]!, /lastmod/);
+  assert.match(sm(sitemap([`${site}/`, "2026-11-25T10:00"]))[0]!, /lastmod/);
+});
+
+test("sitemap: en producción están todas las páginas", () => {
+  assert.deepEqual(sm(sitemap([`${site}/`])), []);
+  assert.deepEqual(sm(sitemap([`${site}/`]), true), [`falta ${site}/en/.`]);
 });
