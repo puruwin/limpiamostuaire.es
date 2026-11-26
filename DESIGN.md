@@ -91,6 +91,11 @@ Contrastes comprobados: `tinta`/`fondo` 12,4:1 · `tinta`/`suave` 11,5:1 · `tin
 - **Tabla de precios:** sobre `papel`, con el número de splits en la primera columna y casa y negocio a la derecha, con el IVA debajo de cada título. Cifras en 700 alineadas a la derecha y filas separadas por `tinta` al 15 %. Los suplementos van debajo, tras una franja en `suave`.
 - **Ejemplo de presupuesto:** dentro de una tarjeta, una línea por concepto y el total en 2xl. En casa, mientras dure el lanzamiento, el total con él en una banda `calido`.
 
+## Cómo lo hacemos (M2.3)
+
+- **Pasos con foto** (`Pasos` y `Paso`): la misma lista numerada de la home, con un `h3` por paso y, desde `md`, la foto a la derecha en 4:3. Mientras no haya fotos propias (M0.4), un hueco con borde discontinuo.
+- **Sin tutorial:** se cuenta qué hacemos y por qué, sin productos, herramientas ni tiempos de espera.
+
 ## Logo de Limpiamos tu aire
 
 - **Símbolo:** una «l» cuya cola termina en un remolino de aire. Es un trazo con remate redondo; en el lockup su grosor es un 15 % mayor que el asta de la «l» de Figtree Bold y mide 1,55 veces su altura.

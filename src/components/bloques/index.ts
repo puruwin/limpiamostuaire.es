@@ -3,6 +3,8 @@ import Ejemplo from "./Ejemplo.astro";
 import EnlacePagina from "./EnlacePagina.astro";
 import Lanzamiento from "./Lanzamiento.astro";
 import Municipios from "./Municipios.astro";
+import Paso from "./Paso.astro";
+import Pasos from "./Pasos.astro";
 import PreciosDesde from "./PreciosDesde.astro";
 import Pregunta from "./Pregunta.astro";
 import Rejilla from "./Rejilla.astro";
@@ -20,6 +22,8 @@ export const bloques = {
   EnlacePagina,
   Lanzamiento,
   Municipios,
+  Paso,
+  Pasos,
   PreciosDesde,
   Pregunta,
   Rejilla,
