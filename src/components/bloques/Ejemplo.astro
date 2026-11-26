@@ -1,0 +1,98 @@
+---
+import {
+  lanzamiento,
+  lanzamientoVigente,
+  precio,
+  presupuesto,
+  suplementos,
+  type Concepto,
+  type LineaPresupuesto,
+  type Segment,
+} from "../../data/tarifa";
+import { useTranslations, type UiKey } from "../../i18n/ui";
+import { asLocale } from "../../lib/current-locale";
+import { diaYMes, euros, fill, plural } from "../../lib/format";
+
+// Ejemplo de presupuesto con la tarifa: una línea por concepto y el total. En
+// casa, mientras dure el precio de lanzamiento, también el total con él.
+interface Props {
+  segmento: Segment;
+  splits: number;
+  exteriores?: number;
+  fueraDeZona?: boolean;
+}
+
+const { segmento, splits, exteriores, fueraDeZona } = Astro.props;
+const locale = asLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+const encargo = { segment: segmento, splits, exteriores, fueraDeZona };
+const normal = presupuesto(encargo);
+const conLanzamiento =
+  segmento === lanzamiento.segment && lanzamientoVigente()
+    ? presupuesto({ ...encargo, conLanzamiento: true })
+    : undefined;
+
+const claves: Record<Concepto, Record<"one" | "other", UiKey>> = {
+  splits: { one: "quote.splits.one", other: "quote.splits.other" },
+  lanzamiento: { one: "quote.launch", other: "quote.launch" },
+  adicionales: { one: "quote.additional.one", other: "quote.additional.other" },
+  exteriores: { one: "quote.outdoor.one", other: "quote.outdoor.other" },
+  fueraDeZona: { one: "quote.outside", other: "quote.outside" },
+};
+const unitario: Partial<Record<Concepto, number>> = {
+  adicionales: precio(segmento, "adicional").price,
+  exteriores: suplementos.exteriorSinAltura,
+};
+const concepto = (linea: LineaPresupuesto) =>
+  fill(t(claves[linea.concepto][plural(locale, linea.cantidad)]), {
+    count: String(linea.cantidad),
+    price: euros(locale, unitario[linea.concepto] ?? 0),
+  });
+const iva = normal.vatIncluded ? t("price.vatIncluded") : t("price.plusVat");
+const celda = "py-2";
+---
+
+<table class="w-full border-collapse text-left">
+  <thead class="sr-only">
+    <tr>
+      <th scope="col">{t("quote.concept")}</th>
+      <th scope="col">{t("quote.amount")}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {normal.lineas.map((linea) => (
+      <tr class="border-b border-tinta/15">
+        <th scope="row" class:list={[celda, "pr-3 font-normal"]}>
+          {concepto(linea)}
+        </th>
+        <td class:list={[celda, "text-right font-medium whitespace-nowrap"]}>
+          {euros(locale, linea.importe)}
+        </td>
+      </tr>
+    ))}
+  </tbody>
+  <tfoot>
+    <tr>
+      <th scope="row" class:list={[celda, "pr-3 pt-3"]}>
+        <span class="block text-lg font-bold">{t("quote.total")}</span>
+        <span class="block text-sm font-medium">{iva}</span>
+      </th>
+      <td
+        class:list={[
+          celda,
+          "pt-3 text-right text-2xl font-bold whitespace-nowrap",
+        ]}
+      >
+        {euros(locale, normal.total)}
+      </td>
+    </tr>
+  </tfoot>
+</table>
+{conLanzamiento && (
+  <p class="rounded-xl bg-calido px-4 py-3 text-tinta">
+    {fill(t("launch.example"), {
+      date: diaYMes(locale, lanzamiento.hasta),
+      total: euros(locale, conLanzamiento.total),
+    })}
+  </p>
+)}

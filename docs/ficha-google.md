@@ -99,7 +99,7 @@ Esta tarifa sustituye a la de la issue M2.2. La web la toma de `src/data/tarifa.
 | Fuera de los 8 municipios | +18 € | +15 € |
 | Unidad exterior accesible sin altura | +20 € | +20 € |
 
-**Precio de lanzamiento:** 1 split en casa a 59 € (IVA incluido), sin pedir reseña a cambio. Válido hasta el 23/12/26. En la ficha está publicado como *Oferta* con esa fecha de fin, no en la descripción del servicio.
+**Precio de lanzamiento:** 1 split en casa a 59 € (IVA incluido), sin pedir reseña a cambio. Válido hasta el 23/12/26. Con más splits en la misma visita, el primero sale a 59 € y cada uno de los demás a 55 € (decidido el 26/11/26). En la ficha está publicado como *Oferta* con esa fecha de fin, no en la descripción del servicio.
 
 Sin IVA, la tarifa de casa es 69 / 125 / 175 / +45 € (+15 € de desplazamiento). En la ficha y en la web, a los particulares se les muestra siempre el precio con IVA (obligatorio por la normativa de consumidores).
 

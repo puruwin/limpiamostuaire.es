@@ -62,6 +62,30 @@ const es = {
   "price.business": "En negocios",
   "launch.title": "Precio de lanzamiento",
   "launch.body": "{price} un split en casa, IVA incluido, hasta el {date}.",
+  "launch.more":
+    "Si limpiamos más de uno en la misma visita, cada uno de los demás sale a {price}.",
+  "launch.example": "Hasta el {date}, con el precio de lanzamiento: {total}.",
+
+  "table.caption": "Precio de una visita según el número de splits",
+  "table.concept": "Splits en la misma visita",
+  "table.splits.one": "1 split",
+  "table.splits.other": "{count} splits",
+  "table.additional": "Cada split más, a partir del cuarto",
+  "table.extras": "Suplementos",
+  "table.outdoor": "Unidad exterior sin trabajar en altura, cada una",
+  "table.outside": "Fuera de nuestros municipios, por visita",
+
+  "quote.concept": "Concepto",
+  "quote.amount": "Importe",
+  "quote.splits.one": "Limpieza de 1 split",
+  "quote.splits.other": "Limpieza de {count} splits",
+  "quote.launch": "Primer split, a precio de lanzamiento",
+  "quote.additional.one": "1 split más, a {price}",
+  "quote.additional.other": "{count} splits más, a {price} cada uno",
+  "quote.outdoor.one": "1 unidad exterior, a {price}",
+  "quote.outdoor.other": "{count} unidades exteriores, a {price} cada una",
+  "quote.outside": "Desplazamiento fuera de nuestros municipios",
+  "quote.total": "Total",
 
   "areas.label": "Municipios donde trabajamos",
 
@@ -132,6 +156,30 @@ const en = {
   "launch.title": "Launch price",
   "launch.body":
     "{price} for one split unit at home, VAT included, until {date}.",
+  "launch.more":
+    "If we clean more than one on the same visit, each of the others is {price}.",
+  "launch.example": "Until {date}, with the launch price: {total}.",
+
+  "table.caption": "Price of one visit by number of split units",
+  "table.concept": "Split units on the same visit",
+  "table.splits.one": "1 split unit",
+  "table.splits.other": "{count} split units",
+  "table.additional": "Each extra unit, from the fourth on",
+  "table.extras": "Extras",
+  "table.outdoor": "Outdoor unit reachable without working at height, each",
+  "table.outside": "Outside our towns, per visit",
+
+  "quote.concept": "Item",
+  "quote.amount": "Amount",
+  "quote.splits.one": "Cleaning of 1 split unit",
+  "quote.splits.other": "Cleaning of {count} split units",
+  "quote.launch": "First split unit, at the launch price",
+  "quote.additional.one": "1 more split unit, at {price}",
+  "quote.additional.other": "{count} more split units, at {price} each",
+  "quote.outdoor.one": "1 outdoor unit, at {price}",
+  "quote.outdoor.other": "{count} outdoor units, at {price} each",
+  "quote.outside": "Travel outside our towns",
+  "quote.total": "Total",
 
   "areas.label": "Towns we cover",
 
