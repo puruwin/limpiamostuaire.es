@@ -51,7 +51,8 @@ export function localeOf(path: string): Locale {
   );
 }
 
-function decode(text: string): string {
+/** Entidades HTML de texto y atributos (las que emite Astro y las numéricas). */
+export function decode(text: string): string {
   const named: Record<string, string> = {
     amp: "&",
     lt: "<",

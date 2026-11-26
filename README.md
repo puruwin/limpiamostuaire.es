@@ -11,21 +11,22 @@ Sitio estático en español e inglés hecho con [Astro](https://astro.build), Ty
 
 ## Comandos
 
-| Comando                | Qué hace                                                          |
-| ---------------------- | ----------------------------------------------------------------- |
-| `npm ci`               | Instala las dependencias exactas de `package-lock.json`           |
-| `npm run dev`          | Servidor de desarrollo en `http://localhost:4321/`                |
-| `npm run build`        | Genera el sitio estático en `dist/`                               |
-| `npm run preview`      | Sirve `dist/` en local para revisarlo                             |
-| `npm run check`        | Tipos de Astro y TypeScript (`astro check`), claves de `ui.ts`    |
-| `npm test`             | Tests con `node --test` (`src/**/*.test.ts`)                      |
-| `npm run check:robots` | Meta robots de `dist/` y `robots.txt` según `SITE_ENV`            |
-| `npm run check:csp`    | CSP de cada página de `dist/`: hashes, sin `unsafe-inline`        |
-| `npm run check:caddy`  | `deploy/Caddyfile` con Caddy real: cabeceras, caché, 301 y 404    |
-| `npm run check:seo`    | SEO de `dist/`: H1, title, canonical, hreflang, JSON-LD y sitemap |
-| `npm run lint`         | ESLint (TypeScript, Astro y accesibilidad)                        |
-| `npm run format`       | Formatea con Prettier (incluye el orden de clases de Tailwind)    |
-| `npm run format:check` | Comprueba el formato sin tocar ficheros                           |
+| Comando                | Qué hace                                                           |
+| ---------------------- | ------------------------------------------------------------------ |
+| `npm ci`               | Instala las dependencias exactas de `package-lock.json`            |
+| `npm run dev`          | Servidor de desarrollo en `http://localhost:4321/`                 |
+| `npm run build`        | Genera el sitio estático en `dist/`                                |
+| `npm run preview`      | Sirve `dist/` en local para revisarlo                              |
+| `npm run check`        | Tipos de Astro y TypeScript (`astro check`), claves de `ui.ts`     |
+| `npm test`             | Tests con `node --test` (`src/**/*.test.ts`)                       |
+| `npm run check:robots` | Meta robots de `dist/` y `robots.txt` según `SITE_ENV`             |
+| `npm run check:csp`    | CSP de cada página de `dist/`: hashes, sin `unsafe-inline`         |
+| `npm run check:caddy`  | `deploy/Caddyfile` con Caddy real: cabeceras, caché, 301 y 404     |
+| `npm run check:seo`    | SEO de `dist/`: H1, title, canonical, hreflang, JSON-LD y sitemap  |
+| `npm run check:claims` | Sin desinfección ni claims biocidas (ROESB) ni fotos hechas con IA |
+| `npm run lint`         | ESLint (TypeScript, Astro y accesibilidad)                         |
+| `npm run format`       | Formatea con Prettier (incluye el orden de clases de Tailwind)     |
+| `npm run format:check` | Comprueba el formato sin tocar ficheros                            |
 
 Los `check:*` van después de `npm run build`. `check:caddy` necesita el binario de Caddy (`caddy` en el `PATH` o `CADDY=/ruta/caddy`).
 
@@ -51,6 +52,7 @@ src/
   lib/collection.ts        Acceso a la colección para los componentes y claves del menú y del pie
   lib/pendientes.ts        Búsqueda de {{PENDIENTE en un directorio
   lib/seo-check.ts         Reglas de check:seo sobre el HTML de dist/
+  lib/claims-check.ts      Reglas de check:claims: claims biocidas en dist/ e imágenes con C2PA de IA
   lib/sitemap.ts           URLs y XML de sitemap.xml (lastmod desde updated)
   lib/site.ts              Origen de producción (site de Astro, canonical y check:seo)
   lib/site-env.ts          SITE_ENV e isIndexable
@@ -144,6 +146,15 @@ La 404 no lleva JSON-LD. Para validar a mano, pega el HTML de `dist/index.html` 
 - `/robots.txt` es igual en todos los entornos: permite todo y enlaza el sitemap. Nunca lleva `Disallow` fuera de producción, porque lo que impide indexar es el `noindex` ([`docs/despliegue.md`](docs/despliegue.md#indexación)). `check:robots` lo comprueba.
 - La 404 de cada idioma (`src/components/NotFound.astro`) sale en `dist/404.html` y `dist/en/404.html`. Caddy la sirve con estado 404 en cualquier ruta que no exista: la inglesa bajo `/en/`, la española en el resto.
 - IndexNow (Bing, Copilot): clave y comando de envío en [`docs/seo/indexnow.md`](docs/seo/indexnow.md). Solo tras el lanzamiento.
+
+## Publicidad e imágenes permitidas
+
+No estamos inscritos en el ROESB, así que no podemos anunciar desinfección ni ningún efecto biocida. Las fotos de trabajos tienen que ser reales. `npm run check:claims` (reglas en `src/lib/claims-check.ts`) lo comprueba en cualquier entorno:
+
+- **Texto de `dist/`**, en español e inglés, también `alt`, `meta` y JSON-LD; sin tildes ni mayúsculas que valgan. Falla con: desinfección (y desinfectar, desinfectante…), antibacteriano, antimicrobiano, antiviral, antifúngico, bactericida, fungicida, virucida, germicida, legionela, 99,9 %, esterilizar, higienizar, «elimina / mata / acaba con» bacterias, virus, gérmenes, hongos, moho o ácaros, «libre de bacterias» y sus equivalentes en inglés (disinfect, antibacterial, sanitize, kills germs, germ-free…). Describir el problema sí se puede («la suciedad favorece el moho y las bacterias»); prometer que lo eliminamos, no. Lo que hacemos es limpiar: desmontar, lavar a presión y retirar la suciedad.
+- **Imágenes y vídeos de `src/` y `public/`**: ninguno con C2PA o XMP `trainedAlgorithmicMedia` o `compositeWithTrainedAlgorithmicMedia` (generado o retocado con IA). Los logos e ilustraciones de marca van en una carpeta `marca/` (o son `favicon`, `logo.png` y `og.png` de `public/`) y no se miran. Se comprueban las fuentes porque Astro quita los metadatos al optimizar. Una imagen sin metadatos pasa: la regla para descuidos, no sustituye a usar fotos propias (M0.4).
+
+El error da el fichero, la regla, la palabra y el contexto.
 
 ## Guardas de producción
 
