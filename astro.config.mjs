@@ -71,6 +71,10 @@ export default defineConfig({
         "form-action 'self'",
       ],
       scriptDirective: {
+        // Astro no calcula el hash de los <script is:inline>: el de la clase
+        // .js de BaseLayout.astro (menú móvil, M1.4) va a mano. Si se toca ese
+        // script, check:csp falla y dice qué hash falta.
+        hashes: ["sha256-ZnYJX5ypMaaAhxxWhSEjbMkhO2A9yPmbzEQH3LFaITA="],
         resources: [
           "'self'",
           "https://cloud.umami.is",

@@ -7,10 +7,15 @@ interface Props {
 }
 
 const { page } = Astro.props;
-const { locale, title, description, h1 } = page.data;
+const { locale, title, description, h1, translationKey } = page.data;
 ---
 
-<BaseLayout lang={locale} title={title} description={description}>
+<BaseLayout
+  lang={locale}
+  title={title}
+  description={description}
+  translationKey={translationKey}
+>
   <div class="mx-auto max-w-3xl px-4 py-16">
     <h1 class="text-3xl font-bold">{h1}</h1>
     <div class="mt-4">

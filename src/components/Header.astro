@@ -1,0 +1,150 @@
+---
+import Logo from "../../brand/limpiamostuaire/logo-horizontal.svg";
+import Icon from "./Icon.astro";
+import LanguageSwitcher from "./LanguageSwitcher.astro";
+import { business, telHref, whatsappHref } from "../data/business";
+import type { Locale } from "../i18n/locales";
+import { useTranslations } from "../i18n/ui";
+import { existingLinks } from "../lib/collection";
+import { pagePath } from "../lib/pages";
+
+interface Props {
+  locale: Locale;
+  translationKey?: string | undefined;
+}
+
+const { locale, translationKey } = Astro.props;
+const t = useTranslations(locale);
+
+// Menú principal. Solo salen las páginas que ya existen en el idioma; el
+// resto (conductos, apartamentos, legales) va en el pie.
+const menu = await existingLinks(locale, [
+  "precios",
+  "como-lo-hacemos",
+  "negocios",
+  "benidorm",
+  "sobre-nosotros",
+]);
+---
+
+<header class="border-b border-tinta/10 bg-fondo">
+  {/* Franja superior: teléfono e idioma, siempre a la vista. */}
+  <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 text-sm">
+    <a
+      href={telHref()}
+      class="inline-flex min-h-11 items-center gap-2 font-semibold hover:text-acento-texto hover:underline"
+    >
+      <Icon name="phone" class="size-4 text-acento" />
+      <span>
+        <span class="sr-only">{t("header.call")}: </span>
+        {business.phone.display}
+      </span>
+    </a>
+    <LanguageSwitcher locale={locale} translationKey={translationKey} />
+  </div>
+
+  <div class="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 px-4 pb-3 lg:flex-nowrap">
+    <a
+      href={pagePath(locale, "")}
+      class="mr-auto inline-flex min-h-11 items-center rounded"
+    >
+      <Logo class="h-6 w-auto sm:h-8" />
+    </a>
+
+    {menu.length > 0 && (
+      <nav
+        id="menu-principal"
+        aria-label={t("nav.label")}
+        class="menu order-last w-full lg:order-none lg:w-auto"
+      >
+        <ul class="flex flex-col py-2 lg:flex-row lg:items-center lg:gap-1 lg:py-0">
+          {menu.map((item) => (
+            <li>
+              <a
+                href={item.url}
+                aria-current={item.key === translationKey ? "page" : undefined}
+                class="flex min-h-11 items-center rounded-full px-3 font-medium hover:bg-suave aria-[current=page]:bg-suave aria-[current=page]:font-bold"
+              >
+                {t(`nav.${item.key}`)}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    )}
+
+    {/* En móvil, el WhatsApp es el botón flotante (WhatsAppFloat). */}
+    <a
+      href={whatsappHref(locale)}
+      class="hidden min-h-11 items-center gap-2 rounded-full bg-tinta px-4 font-semibold text-fondo hover:bg-acento-texto md:inline-flex"
+    >
+      <Icon name="whatsapp" />
+      {t("header.whatsapp")}
+    </a>
+
+    {menu.length > 0 && (
+      <button
+        type="button"
+        class="menu-button group min-h-11 min-w-11 items-center justify-center rounded-full hover:bg-suave"
+        aria-controls="menu-principal"
+        aria-expanded="false"
+        aria-label={t("nav.open")}
+        data-menu-button
+        data-label-open={t("nav.open")}
+        data-label-close={t("nav.close")}
+      >
+        <Icon name="menu" class="size-7 group-aria-expanded:hidden" />
+        <Icon name="close" class="hidden size-7 group-aria-expanded:block" />
+      </button>
+    )}
+  </div>
+</header>
+
+<style>
+  /* Sin JS el menú queda siempre desplegado y el botón no se muestra. */
+  .menu-button {
+    display: none;
+  }
+
+  @media (width < 64rem) {
+    :global(.js) .menu-button {
+      display: inline-flex;
+    }
+
+    :global(.js) .menu:not([data-open]) {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  // Abrir y cerrar el menú en móvil. Es el único JS del sitio.
+  const button =
+    document.querySelector<HTMLButtonElement>("[data-menu-button]");
+  const menu = document.getElementById("menu-principal");
+
+  if (button && menu) {
+    const isOpen = () => button.getAttribute("aria-expanded") === "true";
+    const setOpen = (open: boolean) => {
+      button.setAttribute("aria-expanded", String(open));
+      button.setAttribute(
+        "aria-label",
+        (open ? button.dataset.labelClose : button.dataset.labelOpen) ?? "",
+      );
+      menu.toggleAttribute("data-open", open);
+    };
+
+    button.addEventListener("click", () => setOpen(!isOpen()));
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && isOpen()) {
+        setOpen(false);
+        button.focus();
+      }
+    });
+    window
+      .matchMedia("(min-width: 64rem)")
+      .addEventListener("change", (event) => {
+        if (event.matches) setOpen(false);
+      });
+  }
+</script>

@@ -1,0 +1,123 @@
+---
+import Logo from "../../brand/limpiamostuaire/logo-horizontal-invertido.svg";
+import TidiWordmark from "../../brand/tidi/wordmark-blanco.svg";
+import { business, telHref } from "../data/business";
+import type { Locale } from "../i18n/locales";
+import { useTranslations } from "../i18n/ui";
+import { existingLinks, urlOf } from "../lib/collection";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+
+const pages = await existingLinks(locale, [
+  "precios",
+  "como-lo-hacemos",
+  "negocios",
+  "conductos",
+  "apartamentos-turisticos",
+  "benidorm",
+  "sobre-nosotros",
+]);
+const legal = await existingLinks(locale, [
+  "aviso-legal",
+  "privacidad",
+  "cookies",
+]);
+const benidormUrl = await urlOf(locale, "benidorm");
+const year = new Date().getFullYear();
+
+// Sobre tinta: texto en fondo y enlaces con zona de toque de 44 px.
+const linkClass =
+  "inline-flex min-h-11 items-center underline-offset-4 hover:text-agua-clara hover:underline";
+---
+
+<footer class="pie bg-tinta pb-24 text-fondo md:pb-0">
+  <div class="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:grid-cols-2 lg:grid-cols-3">
+    <div>
+      <Logo class="h-7 w-auto" />
+      <h2 class="mt-6 text-base font-bold">{t("footer.contact")}</h2>
+      <address class="mt-2 not-italic">
+        <p class="sr-only">{business.brand}</p>
+        <p>
+          <a href={telHref()} class={linkClass}>
+            {business.phone.display}
+          </a>
+        </p>
+        <p>
+          <a href={`mailto:${business.email}`} class={linkClass}>
+            {business.email}
+          </a>
+        </p>
+        <p class="mt-2">{t("footer.hours")}</p>
+        <p>{`${business.locality} (${business.region})`}</p>
+      </address>
+      <p class="mt-6 flex flex-wrap items-center gap-x-3 gap-y-1">
+        <span>{t("footer.operator")}</span>
+        {benidormUrl ? (
+          <a
+            href={benidormUrl}
+            class="inline-flex min-h-11 items-center rounded"
+          >
+            <TidiWordmark class="h-6 w-auto" />
+          </a>
+        ) : (
+          <TidiWordmark class="h-6 w-auto" />
+        )}
+      </p>
+    </div>
+
+    {pages.length > 0 && (
+      <div>
+        <h2 class="text-base font-bold">{t("footer.pages")}</h2>
+        <ul class="mt-2">
+          {pages.map((link) => (
+            <li>
+              <a href={link.url} class={linkClass}>
+                {t(`nav.${link.key}`)}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    <div>
+      <h2 class="text-base font-bold">{t("footer.areas")}</h2>
+      <p class="mt-2">
+        {`${t("footer.areasIntro")} ${business.areaServed.join(", ")}.`}
+      </p>
+    </div>
+  </div>
+
+  <div class="border-t border-fondo/20">
+    <div class="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-4 text-sm sm:flex-row sm:items-center sm:justify-between">
+      {legal.length > 0 && (
+        <nav aria-label={t("footer.legal")}>
+          <ul class="flex flex-wrap gap-x-6">
+            {legal.map((link) => (
+              <li>
+                <a href={link.url} class={linkClass}>
+                  {t(`nav.${link.key}`)}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
+      <p class="py-3">
+        © {year} {business.brand}
+      </p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  /* Foco visible sobre tinta. */
+  .pie :focus-visible {
+    outline-color: var(--color-agua-clara);
+  }
+</style>

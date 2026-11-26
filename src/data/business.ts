@@ -1,0 +1,45 @@
+import type { Locale } from "../i18n/locales.ts";
+import { useTranslations } from "../i18n/ui.ts";
+
+// Datos del negocio: única fuente para la cabecera, el pie y los datos
+// estructurados (M1.6). Tienen que coincidir carácter a carácter con la ficha
+// de Google de Ti&Di (docs/ficha-google.md): si cambian allí, se cambian aquí.
+// Negocio de área de servicio con la dirección oculta: solo localidad.
+export const business = {
+  brand: "Limpiamos tu aire",
+  /** Operador en Benidorm; no va en la cabecera (DESIGN.md). */
+  operator: "Ti&Di",
+  phone: { display: "+34 608 96 22 13", e164: "+34608962213" },
+  email: "hola@limpiamostuaire.es",
+  locality: "Benidorm",
+  region: "Alicante",
+  /** Lunes a viernes; sábado y domingo, cerrado. */
+  hours: {
+    days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    opens: "08:00",
+    closes: "20:00",
+  },
+  areaServed: [
+    "Benidorm",
+    "Finestrat",
+    "La Vila Joiosa",
+    "La Nucía",
+    "Polop",
+    "Callosa d'en Sarrià",
+    "Calp",
+    "Altea",
+  ],
+} as const;
+
+export function telHref(): string {
+  return `tel:${business.phone.e164}`;
+}
+
+/**
+ * Enlace a WhatsApp con el saludo genérico en el idioma de la página. El
+ * saludo por página llega en M3.1 (parámetro `greeting`).
+ */
+export function whatsappHref(locale: Locale, greeting?: string): string {
+  const text = greeting ?? useTranslations(locale)("whatsapp.greeting");
+  return `https://wa.me/${business.phone.e164.slice(1)}?text=${encodeURIComponent(text)}`;
+}

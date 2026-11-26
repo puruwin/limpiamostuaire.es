@@ -41,9 +41,12 @@ src/
   content/pages/es/, en/   Un Markdown por página e idioma
   i18n/locales.ts          Idiomas: es en la raíz, en en /en/
   i18n/ui.ts               Cadenas de interfaz de los 2 idiomas
-  layouts/BaseLayout.astro Esqueleto HTML común: fuente, favicon, robots, salto al contenido y <main>
+  layouts/BaseLayout.astro Esqueleto HTML común: fuente, favicon, robots, salto al contenido, cabecera, <main>, pie y WhatsApp flotante
+  components/              Cabecera, pie, selector de idioma, WhatsApp flotante e iconos
+  data/business.ts         Datos del negocio (NAP, horario, zonas): única fuente, igual que la ficha de Google
   integrations/            Guarda de {{PENDIENTE sobre dist/ en producción
-  lib/pages.ts             URL de cada página y validación de la colección
+  lib/pages.ts             URL de cada página, equivalentes por idioma y validación de la colección
+  lib/collection.ts        Acceso a la colección para los componentes y claves del menú y del pie
   lib/pendientes.ts        Búsqueda de {{PENDIENTE en un directorio
   lib/site-env.ts          SITE_ENV e isIndexable
   pages/[...path].astro    Ruta dinámica que genera todas las páginas de la colección
@@ -91,8 +94,9 @@ Cuerpo en Markdown.
 
 1. Crea `src/content/pages/es/<nombre>.md` y `src/content/pages/en/<nombre>.md` con el mismo `translationKey` y el `slug` traducido. El nombre del fichero no afecta a la URL.
 2. Para una plantilla nueva, crea `src/templates/<Nombre>.astro` (recibe `page` y el cuerpo por `<slot />`), añádela al `z.enum` de `template` en `src/content.config.ts` y al mapa `templates` de `src/pages/[...path].astro`.
-3. Si la página necesita textos de interfaz nuevos, añade la clave a `es` y a `en` en `src/i18n/ui.ts`.
-4. `npm run check && npm run build`.
+3. Las páginas del menú y del pie aparecen solas en cuanto existen, si usan estas `translationKey`: `precios`, `como-lo-hacemos`, `negocios`, `benidorm` y `sobre-nosotros` (menú y pie); `conductos` y `apartamentos-turisticos` (solo pie); `aviso-legal`, `privacidad` y `cookies` (barra legal). Están en `navKeys` (`src/lib/collection.ts`).
+4. Si la página necesita textos de interfaz nuevos, añade la clave a `es` y a `en` en `src/i18n/ui.ts`.
+5. `npm run check && npm run build`.
 
 El build falla en cualquier entorno si dos páginas del mismo idioma comparten ruta o `translationKey`, o si el `locale` no coincide con la carpeta. Un campo que falte o no cumpla el esquema también.
 

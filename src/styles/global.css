@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
-/* Paleta «Mar y arena» y tipografía de DESIGN.md. Componentes, escala y modo
-   oscuro: M1.4. */
+/* Paleta «Mar y arena», tipografía y componentes de DESIGN.md. Sin modo
+   oscuro (M1.4). */
 @theme {
   --font-sans: var(--font-figtree), system-ui, sans-serif;
 
@@ -15,4 +15,11 @@
   --color-suave: #e2eeec;
   --color-agua-clara: #9fd3dc;
   --color-papel: #ffffff;
+}
+
+/* Foco visible en todo el sitio (DESIGN.md#componentes). El pie, sobre tinta,
+   lo cambia a agua-clara. */
+:focus-visible {
+  outline: 2px solid var(--color-acento-texto);
+  outline-offset: 2px;
 }

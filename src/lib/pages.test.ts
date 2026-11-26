@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  languageLinks,
   pagePath,
+  pageUrlByKey,
   routeParam,
   validatePages,
   type PageEntry,
@@ -73,4 +75,36 @@ test("borradores: solo bloquean en producción", () => {
   const pages = [page("es/a", { draft: true })];
   assert.deepEqual(validatePages(pages, { production: false }), []);
   assert.match(validatePages(pages, { production: true })[0]!, /draft: true/);
+});
+
+test("URL de una página por translationKey", () => {
+  const pages = [
+    page("es/precios", { translationKey: "precios" }),
+    page("en/prices", { translationKey: "precios" }),
+  ];
+  assert.equal(pageUrlByKey(pages, "es", "precios"), "/precios/");
+  assert.equal(pageUrlByKey(pages, "en", "precios"), "/en/prices/");
+  assert.equal(pageUrlByKey(pages, "es", "benidorm"), undefined);
+});
+
+test("el selector lleva a la equivalente o a la home del idioma", () => {
+  const pages = [
+    page("es/inicio", { slug: "", translationKey: "inicio" }),
+    page("en/home", { slug: "", translationKey: "inicio" }),
+    page("es/precios", { translationKey: "precios" }),
+    page("en/prices", { translationKey: "precios" }),
+    page("es/benidorm", { translationKey: "benidorm" }),
+  ];
+  assert.deepEqual(languageLinks(pages, "es", "precios"), [
+    { locale: "es", url: "/precios/", current: true },
+    { locale: "en", url: "/en/prices/", current: false },
+  ]);
+  assert.deepEqual(languageLinks(pages, "es", "benidorm"), [
+    { locale: "es", url: "/benidorm/", current: true },
+    { locale: "en", url: "/en/", current: false },
+  ]);
+  assert.deepEqual(languageLinks(pages, "en"), [
+    { locale: "es", url: "/", current: false },
+    { locale: "en", url: "/en/", current: true },
+  ]);
 });
