@@ -1,0 +1,43 @@
+---
+import { Image } from "astro:assets";
+import { fotosPasos, type PasoId } from "../../data/pasos";
+import { useTranslations } from "../../i18n/ui";
+import { asLocale } from "../../lib/current-locale";
+
+// Un paso de <Pasos>: título, texto y la foto propia de ese paso
+// (src/data/pasos.ts). Sin foto, un hueco con un {{PENDIENTE (M0.4).
+interface Props {
+  titulo: string;
+  foto: PasoId;
+}
+
+const { titulo, foto } = Astro.props;
+const locale = asLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+const imagen = fotosPasos[foto];
+---
+
+<li class="mt-10 first:mt-0">
+  <div class="grid gap-4 md:grid-cols-2 md:gap-8">
+    <div class="space-y-3">
+      <h3 class="text-xl font-bold">{titulo}</h3>
+      <slot />
+    </div>
+    {imagen ? (
+      <Image
+        src={imagen.src}
+        alt={imagen.alt[locale]}
+        widths={[360, 720]}
+        sizes="(min-width: 48rem) 24rem, calc(100vw - 5rem)"
+        class="aspect-[4/3] w-full rounded-2xl object-cover"
+      />
+    ) : (
+      <figure>
+        <div class="flex aspect-[4/3] items-center justify-center rounded-2xl border-2 border-dashed border-tinta/30 bg-papel font-bold">
+          {t("steps.photo")}
+        </div>
+        <figcaption class="mt-2 text-sm">{t("steps.pending")}</figcaption>
+      </figure>
+    )}
+  </div>
+</li>

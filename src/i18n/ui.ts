@@ -93,6 +93,9 @@ const es = {
   "works.after": "Después",
   "works.pending":
     "{{PENDIENTE: fotos de antes y después de trabajos reales, con municipio (M0.4)}}",
+
+  "steps.photo": "Foto del paso",
+  "steps.pending": "{{PENDIENTE: foto propia de este paso (M0.4)}}",
 };
 
 export type UiKey = keyof typeof es;
@@ -187,6 +190,9 @@ const en = {
   "works.after": "After",
   "works.pending":
     "{{PENDIENTE: before and after photos of real jobs, with the town (M0.4)}}",
+
+  "steps.photo": "Photo of this step",
+  "steps.pending": "{{PENDIENTE: our own photo of this step (M0.4)}}",
 };
 
 export const ui = { es, en } satisfies Record<Locale, Record<UiKey, string>>;

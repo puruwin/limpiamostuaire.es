@@ -49,6 +49,7 @@ src/
   data/business.ts         Datos del negocio (NAP, horario, zonas): única fuente, igual que la ficha de Google
   data/tarifa.ts           Tarifa de casa y negocio, suplementos y precio de lanzamiento: única fuente para el schema y las páginas
   data/trabajos.ts         Fotos de antes y después de trabajos reales (M0.4)
+  data/pasos.ts            Pasos de la limpieza de un split y la foto propia de cada uno (M0.4)
   integrations/            Guarda de {{PENDIENTE sobre dist/ en producción y en/404.html en su sitio
   lib/pages.ts             URL de cada página, equivalentes por idioma y validación de la colección
   lib/format.ts            Euros, listas y fechas en el idioma de la página
@@ -128,6 +129,7 @@ Un `.mdx` usa los bloques de `src/components/bloques/` sin importarlos: la ruta 
 | `<Suplemento tipo="exterior" />`, `<Suplemento tipo="fueraDeZona" segmento="vivienda" />` | Importe del suplemento, dentro de una frase                                                  |
 | `<Municipios />`, `<Municipios chips />`                                                  | Los municipios de `business.ts`, en la frase («A, B y C») o como lista                       |
 | `<Trabajos />`                                                                            | Antes y después de `src/data/trabajos.ts`; sin trabajos, un `{{PENDIENTE`                    |
+| `<Pasos>` + `<Paso titulo foto="turbina">`                                                | Pasos numerados con la foto de cada uno (`src/data/pasos.ts`); sin foto, un `{{PENDIENTE`    |
 | `<Pregunta titulo>`                                                                       | Pregunta frecuente plegable (sin JS ni `FAQPage`)                                            |
 | `<EnlacePagina clave="precios">texto</EnlacePagina>`                                      | Enlace a otra página del idioma; no sale nada mientras no exista                             |
 | `<Contacto titulo>`                                                                       | Bloque final sobre tinta con WhatsApp, teléfono y horario                                    |

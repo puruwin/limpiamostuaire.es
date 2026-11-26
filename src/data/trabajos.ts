@@ -12,7 +12,7 @@ import type { Locale } from "../i18n/locales.ts";
 // Mientras la lista esté vacía, el bloque enseña un {{PENDIENTE, que bloquea
 // el build de producción.
 
-interface Foto {
+export interface Foto {
   src: ImageMetadata;
   alt: Record<Locale, string>;
 }
