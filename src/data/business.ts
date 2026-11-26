@@ -18,7 +18,7 @@ export const business = {
   titular: {
     nombre: "David Pérez Martínez",
     nif: "49234343Z",
-    domicilio: "Calle Serreta 19, 03502 Polop (Alicante), España",
+    domicilio: "Calle Serreta 19, 03520 Polop (Alicante), España",
   },
   phone: { display: "+34 608 96 22 13", e164: "+34608962213" },
   email: "hola@limpiamostuaire.es",
