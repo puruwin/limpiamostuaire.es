@@ -32,7 +32,7 @@ Las páginas de resultado del formulario (`/contacto/enviado/`, `/contacto/error
 
 ### Qué bloquea el build de producción
 
-Con `SITE_ENV=production` el build falla si hay una página con `draft: true`, un `{{PENDIENTE` en cualquier fichero de `dist/` ([README](../README.md#guardas-de-producción)) o falta `PUBLIC_TURNSTILE_SITE_KEY` (el formulario usaría la clave de pruebas). El CI no llega a desplegar. Con `provisional` no bloquea: hasta M5.2 `main` publica la web a medias.
+Con `SITE_ENV=production` el build falla si hay una página con `draft: true`, un `{{PENDIENTE` en cualquier fichero de `dist/` ([README](../README.md#guardas-de-producción)) o falta `PUBLIC_TURNSTILE_SITE_KEY` (el formulario usaría la clave de pruebas) o `PUBLIC_UMAMI_WEBSITE_ID` (no se mediría nada). El CI no llega a desplegar. Con `provisional` no bloquea: hasta M5.2 `main` publica la web a medias.
 
 ### Cabeceras y CSP
 
@@ -381,6 +381,16 @@ vps# curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:4311/api/presupue
 ```
 
 Luego, un envío real desde `limpiamostuaire.es/contacto/`, que llega a `hola@`.
+
+## Medición con Umami (M3.3)
+
+Qué se mide y cómo: [README](../README.md#medición). El ID del sitio va en el HTML (no es secreto), como variable del repo. Sin ella, el build no carga Umami; el de producción falla.
+
+1. En [Umami Cloud](https://cloud.umami.is/), *Settings → Websites → Add website*: nombre «limpiamostuaire.es», dominio `limpiamostuaire.es`. Copiar el *Website ID*.
+2. `gh variable set UMAMI_WEBSITE_ID --body <website id>` y un push a `main` (staging carga el script, pero `data-domains` no le deja enviar).
+3. Comprobar que el HTML lo lleva: `curl -s https://limpiamostuaire.es/ | grep -o 'data-website-id="[^"]*"'`.
+4. Abrir `https://limpiamostuaire.es/benidorm/?utm_source=google&utm_medium=organic&utm_campaign=gbp` (la web de la [ficha de Google](ficha-google.md)) sin bloqueador y pulsar el teléfono de la cabecera y el WhatsApp de una CTA. En Umami, en tiempo real, tienen que salir la visita, la UTM (*UTM*: `google` / `organic` / `gbp`) y los eventos `telefono` y `whatsapp` con `idioma`, `pagina` y `ubicacion`.
+5. Un envío real del formulario desde `/benidorm/` → evento `formulario` con `pagina=/benidorm/`.
 
 ## Lanzamiento (M5.2)
 

@@ -66,6 +66,14 @@ export default defineConfig({
         access: "public",
         default: TURNSTILE_TEST_SITE_KEY,
       }),
+      // ID del sitio en Umami Cloud (M3.3). Sin valor, la web no carga
+      // Umami; el build de producción no lo admite
+      // (src/integrations/production-guards.ts).
+      PUBLIC_UMAMI_WEBSITE_ID: envField.string({
+        context: "server",
+        access: "public",
+        optional: true,
+      }),
     },
   },
   security: {

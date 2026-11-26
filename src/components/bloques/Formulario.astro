@@ -63,6 +63,7 @@ const messages = {
 };
 
 const config = {
+  locale,
   sentUrl: quoteResultPaths[locale].sent,
   other: OTHER_MUNICIPALITY,
   places,
@@ -465,6 +466,8 @@ const yesNoQuestions = [
 </style>
 
 <script>
+  import type { UmamiEvent, UmamiEventData } from "../../lib/umami";
+
   type Messages = Record<
     | "required"
     | "choose"
@@ -488,6 +491,7 @@ const yesNoQuestions = [
     string
   >;
   interface Config {
+    locale: UmamiEventData["idioma"];
     sentUrl: string;
     other: string;
     places: string[];
@@ -496,10 +500,15 @@ const yesNoQuestions = [
   }
   type Field = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
   type Turnstile = { reset: (widget?: Element) => void };
+  type Umami = {
+    track: (event: UmamiEvent, data: UmamiEventData) => Promise<unknown>;
+  };
 
   const TURNSTILE_FIELD = "cf-turnstile-response";
   /** Lo que se espera al token si se pulsa enviar antes de que llegue. */
   const TURNSTILE_WAIT_MS = 30_000;
+  /** Lo que se espera a Umami antes de ir a la página de enviado. */
+  const UMAMI_WAIT_MS = 1_000;
 
   const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -758,6 +767,31 @@ const yesNoQuestions = [
       return true;
     }
 
+    // Evento «formulario» de Umami (M3.3, src/lib/umami.ts), con la página de
+    // origen. Se espera un poco a que salga: al cambiar de página se perdería.
+    // Sin Umami (bloqueado, o en local sin ID), nada.
+    async function trackSent() {
+      const umami = (window as unknown as { umami?: Umami }).umami;
+      if (!umami) return;
+      const origin = field("origen");
+      const data: UmamiEventData = {
+        idioma: config.locale,
+        pagina:
+          origin instanceof HTMLInputElement && origin.value
+            ? origin.value
+            : location.pathname,
+        ubicacion: "formulario",
+      };
+      try {
+        await Promise.race([
+          umami.track("formulario", data),
+          new Promise((resolve) => setTimeout(resolve, UMAMI_WAIT_MS)),
+        ]);
+      } catch {
+        // Si Umami falla, el envío ya está hecho: se sigue.
+      }
+    }
+
     let sending = false;
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -794,6 +828,7 @@ const yesNoQuestions = [
           error?: string;
         } | null;
         if (response.ok && data?.ok) {
+          await trackSent();
           location.assign(config.sentUrl);
           return;
         }

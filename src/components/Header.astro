@@ -7,6 +7,7 @@ import type { Locale } from "../i18n/locales";
 import { useTranslations } from "../i18n/ui";
 import { existingLinks } from "../lib/collection";
 import { pagePath } from "../lib/pages";
+import { contactAttrs } from "../lib/umami";
 
 interface Props {
   locale: Locale;
@@ -32,7 +33,7 @@ const menu = await existingLinks(locale, [
   <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 text-sm">
     <a
       href={telHref()}
-      data-contacto="cabecera"
+      {...contactAttrs("telefono", "cabecera", locale, Astro.url.pathname)}
       class="inline-flex min-h-11 items-center gap-2 font-semibold hover:text-acento-texto hover:underline"
     >
       <Icon name="phone" class="size-4 text-acento" />
@@ -77,7 +78,7 @@ const menu = await existingLinks(locale, [
     {/* En móvil, el WhatsApp es el botón flotante (WhatsAppFloat). */}
     <a
       href={whatsappHref(locale, translationKey)}
-      data-contacto="cabecera"
+      {...contactAttrs("whatsapp", "cabecera", locale, Astro.url.pathname)}
       class="hidden min-h-11 items-center gap-2 rounded-full bg-tinta px-4 font-semibold text-fondo hover:bg-acento-texto md:inline-flex"
     >
       <Icon name="whatsapp" />
