@@ -4,14 +4,21 @@ import { business, telHref, whatsappHref } from "../../data/business";
 import type { Locale } from "../../i18n/locales";
 import { useTranslations } from "../../i18n/ui";
 
-// WhatsApp (principal) y teléfono. `tono` según el fondo de debajo.
+// WhatsApp (principal) y teléfono de una CTA. `translationKey`, la de la
+// página, elige el saludo de WhatsApp. `tono` según el fondo de debajo.
 interface Props {
   locale: Locale;
+  translationKey: string;
   tono?: "claro" | "oscuro";
   class?: string;
 }
 
-const { locale, tono = "claro", class: className } = Astro.props;
+const {
+  locale,
+  translationKey,
+  tono = "claro",
+  class: className,
+} = Astro.props;
 const t = useTranslations(locale);
 const base =
   "inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-6 font-semibold";
@@ -29,11 +36,19 @@ const estilos = {
 ---
 
 <div class:list={["flex flex-col gap-3 sm:flex-row sm:flex-wrap", className]}>
-  <a href={whatsappHref(locale)} class:list={[base, estilos.principal]}>
+  <a
+    href={whatsappHref(locale, translationKey)}
+    data-contacto="cta"
+    class:list={[base, estilos.principal]}
+  >
     <Icon name="whatsapp" />
     {t("cta.whatsapp")}
   </a>
-  <a href={telHref()} class:list={[base, estilos.secundario]}>
+  <a
+    href={telHref()}
+    data-contacto="cta"
+    class:list={[base, estilos.secundario]}
+  >
     <Icon name="phone" />
     {`${t("cta.call")} ${business.phone.display}`}
   </a>

@@ -86,6 +86,15 @@ export function pageUrlByKey(
   return entry ? pagePath(locale, entry.data.slug) : undefined;
 }
 
+/** translationKey de la página con esa URL, o undefined si no hay ninguna. */
+export function translationKeyByPath(
+  entries: PageEntry[],
+  path: string,
+): string | undefined {
+  return entries.find((e) => pagePath(e.data.locale, e.data.slug) === path)
+    ?.data.translationKey;
+}
+
 /**
  * Enlaces del selector de idioma: la página equivalente en cada idioma o, si
  * no existe en ese idioma, su home.

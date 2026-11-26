@@ -1,5 +1,6 @@
 ---
 import { useTranslations } from "../../i18n/ui";
+import { translationKeyAt } from "../../lib/collection";
 import { asLocale } from "../../lib/current-locale";
 import Botones from "./Botones.astro";
 import Seccion from "./Seccion.astro";
@@ -12,10 +13,17 @@ interface Props {
 const { titulo } = Astro.props;
 const locale = asLocale(Astro.currentLocale);
 const t = useTranslations(locale);
+// Los bloques de MDX no reciben la página: se busca por su URL.
+const translationKey = await translationKeyAt(Astro.url.pathname);
 ---
 
 <Seccion id="contacto" titulo={titulo} tono="tinta">
   <slot />
-  <Botones locale={locale} tono="oscuro" class="mt-6" />
+  <Botones
+    locale={locale}
+    translationKey={translationKey}
+    tono="oscuro"
+    class="mt-6"
+  />
   <p>{t("footer.hours")}.</p>
 </Seccion>

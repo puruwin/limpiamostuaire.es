@@ -11,22 +11,23 @@ Sitio estático en español e inglés hecho con [Astro](https://astro.build), Ty
 
 ## Comandos
 
-| Comando                | Qué hace                                                           |
-| ---------------------- | ------------------------------------------------------------------ |
-| `npm ci`               | Instala las dependencias exactas de `package-lock.json`            |
-| `npm run dev`          | Servidor de desarrollo en `http://localhost:4321/`                 |
-| `npm run build`        | Genera el sitio estático en `dist/`                                |
-| `npm run preview`      | Sirve `dist/` en local para revisarlo                              |
-| `npm run check`        | Tipos de Astro y TypeScript (`astro check`), claves de `ui.ts`     |
-| `npm test`             | Tests con `node --test` (`src/**/*.test.ts`)                       |
-| `npm run check:robots` | Meta robots de `dist/` y `robots.txt` según `SITE_ENV`             |
-| `npm run check:csp`    | CSP de cada página de `dist/`: hashes, sin `unsafe-inline`         |
-| `npm run check:caddy`  | `deploy/Caddyfile` con Caddy real: cabeceras, caché, 301 y 404     |
-| `npm run check:seo`    | SEO de `dist/`: H1, title, canonical, hreflang, JSON-LD y sitemap  |
-| `npm run check:claims` | Sin desinfección ni claims biocidas (ROESB) ni fotos hechas con IA |
-| `npm run lint`         | ESLint (TypeScript, Astro y accesibilidad)                         |
-| `npm run format`       | Formatea con Prettier (incluye el orden de clases de Tailwind)     |
-| `npm run format:check` | Comprueba el formato sin tocar ficheros                            |
+| Comando                 | Qué hace                                                           |
+| ----------------------- | ------------------------------------------------------------------ |
+| `npm ci`                | Instala las dependencias exactas de `package-lock.json`            |
+| `npm run dev`           | Servidor de desarrollo en `http://localhost:4321/`                 |
+| `npm run build`         | Genera el sitio estático en `dist/`                                |
+| `npm run preview`       | Sirve `dist/` en local para revisarlo                              |
+| `npm run check`         | Tipos de Astro y TypeScript (`astro check`), claves de `ui.ts`     |
+| `npm test`              | Tests con `node --test` (`src/**/*.test.ts`)                       |
+| `npm run check:robots`  | Meta robots de `dist/` y `robots.txt` según `SITE_ENV`             |
+| `npm run check:csp`     | CSP de cada página de `dist/`: hashes, sin `unsafe-inline`         |
+| `npm run check:caddy`   | `deploy/Caddyfile` con Caddy real: cabeceras, caché, 301 y 404     |
+| `npm run check:seo`     | SEO de `dist/`: H1, title, canonical, hreflang, JSON-LD y sitemap  |
+| `npm run check:claims`  | Sin desinfección ni claims biocidas (ROESB) ni fotos hechas con IA |
+| `npm run check:contact` | Teléfono y WhatsApp de cada página: número, saludo y sitios        |
+| `npm run lint`          | ESLint (TypeScript, Astro y accesibilidad)                         |
+| `npm run format`        | Formatea con Prettier (incluye el orden de clases de Tailwind)     |
+| `npm run format:check`  | Comprueba el formato sin tocar ficheros                            |
 
 Los `check:*` van después de `npm run build`. `check:caddy` necesita el binario de Caddy (`caddy` en el `PATH` o `CADDY=/ruta/caddy`).
 
@@ -59,6 +60,7 @@ src/
   lib/pendientes.ts        Búsqueda de {{PENDIENTE en un directorio
   lib/seo-check.ts         Reglas de check:seo sobre el HTML de dist/
   lib/claims-check.ts      Reglas de check:claims: claims biocidas en dist/ e imágenes con C2PA de IA
+  lib/contact-check.ts     Reglas de check:contact: teléfono y WhatsApp de cada página
   lib/sitemap.ts           URLs y XML de sitemap.xml (lastmod desde updated)
   lib/site.ts              Origen de producción (site de Astro, canonical y check:seo)
   lib/site-env.ts          SITE_ENV e isIndexable
@@ -176,6 +178,27 @@ La 404 no lleva JSON-LD. Para validar a mano, pega el HTML de `dist/index.html` 
 - `/robots.txt` es igual en todos los entornos: permite todo y enlaza el sitemap. Nunca lleva `Disallow` fuera de producción, porque lo que impide indexar es el `noindex` ([`docs/despliegue.md`](docs/despliegue.md#indexación)). `check:robots` lo comprueba.
 - La 404 de cada idioma (`src/components/NotFound.astro`) sale en `dist/404.html` y `dist/en/404.html`. Caddy la sirve con estado 404 en cualquier ruta que no exista: la inglesa bajo `/en/`, la española en el resto.
 - IndexNow (Bing, Copilot): clave y comando de envío en [`docs/seo/indexnow.md`](docs/seo/indexnow.md). Solo tras el lanzamiento.
+
+## Teléfono y WhatsApp
+
+El teléfono sale de `business.phone` (`src/data/business.ts`): `tel:+34608962213` y `https://wa.me/34608962213?text=…`. El texto con el que se abre el chat depende del idioma y de la página (`whatsappHref(locale, translationKey)`):
+
+| Página (`translationKey`) | Saludo (`whatsapp.greeting.*` de `ui.ts`) |
+| ------------------------- | ----------------------------------------- |
+| `negocios`                | `negocio`                                 |
+| `apartamentos-turisticos` | `apartamento`                             |
+| `conductos`               | `conductos`                               |
+| Las demás y las 404       | `casa`                                    |
+
+Una página nueva con su propio saludo se añade en `topicByPage` de `business.ts` y en las dos lenguas de `ui.ts`.
+
+WhatsApp y teléfono van en tres sitios, marcados con `data-contacto`: la cabecera (`cabecera`), el botón flotante de móvil (`flotante`) y los botones de cada CTA (`cta`, componente `Botones`: el bloque `<Contacto>` y las cabeceras de las plantillas `home` y `operador`). `npm run check:contact` (reglas en `src/lib/contact-check.ts`) lo comprueba en `dist/`:
+
+- Todos los `tel:` son el teléfono del negocio, y todos los enlaces a WhatsApp, `https://wa.me/<número>?text=` con el saludo de la página. Un enlace a `api.whatsapp.com` o sin texto falla.
+- Cada página tiene teléfono y WhatsApp en la cabecera y un solo botón flotante. `data-contacto="cabecera"` solo dentro de `<header>`.
+- Las plantillas `home`, `pagina` y `operador` llevan al menos una CTA, y cada CTA, los dos botones.
+
+La página de cada URL la saca del frontmatter de `src/content/pages/`.
 
 ## Publicidad e imágenes permitidas
 

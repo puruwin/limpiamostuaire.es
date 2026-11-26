@@ -6,15 +6,17 @@ import { useTranslations } from "../i18n/ui";
 
 interface Props {
   locale: Locale;
+  translationKey?: string | undefined;
 }
 
-const { locale } = Astro.props;
+const { locale, translationKey } = Astro.props;
 const t = useTranslations(locale);
 ---
 
 {/* Solo en móvil: en escritorio el botón de WhatsApp va en la cabecera. */}
 <a
-  href={whatsappHref(locale)}
+  href={whatsappHref(locale, translationKey)}
+  data-contacto="flotante"
   aria-label={t("header.whatsappLabel")}
   class="fixed right-4 bottom-4 z-40 inline-flex size-14 items-center justify-center rounded-full bg-tinta text-agua-clara ring-2 ring-agua-clara shadow-[0_10px_24px_-8px_rgb(18_49_63/0.6)] hover:bg-acento-texto hover:text-papel md:hidden"
 >
