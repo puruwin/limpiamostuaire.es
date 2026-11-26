@@ -2,7 +2,12 @@
 import { business } from "../data/business";
 import { ogLocale, type Locale } from "../i18n/locales";
 import { useTranslations } from "../i18n/ui";
-import { getAlternateLinks, getBreadcrumbTrail } from "../lib/collection";
+import { operador } from "../data/operador";
+import {
+  getAlternateLinks,
+  getBreadcrumbTrail,
+  urlOf,
+} from "../lib/collection";
 import { SITE } from "../lib/site";
 import {
   buildGraph,
@@ -58,6 +63,7 @@ const jsonLd = canonical
           : [],
         withService:
           translationKey !== undefined && serviceKeys.includes(translationKey),
+        operatorUrl: await urlOf(lang, operador.pagina),
       }),
     )
   : undefined;

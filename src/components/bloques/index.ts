@@ -8,6 +8,7 @@ import Pasos from "./Pasos.astro";
 import PreciosDesde from "./PreciosDesde.astro";
 import Pregunta from "./Pregunta.astro";
 import Rejilla from "./Rejilla.astro";
+import Resenas from "./Resenas.astro";
 import Seccion from "./Seccion.astro";
 import Suplemento from "./Suplemento.astro";
 import TablaPrecios from "./TablaPrecios.astro";
@@ -27,6 +28,7 @@ export const bloques = {
   PreciosDesde,
   Pregunta,
   Rejilla,
+  Resenas,
   Seccion,
   Suplemento,
   TablaPrecios,

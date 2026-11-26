@@ -31,6 +31,7 @@ export const business = {
     "Polop",
     "Callosa d'en Sarrià",
     "Calp",
+    "L'Alfàs del Pi",
     "Altea",
   ],
 } as const;

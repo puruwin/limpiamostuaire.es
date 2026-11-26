@@ -49,6 +49,14 @@ test("marca y operador enlazados, con los datos de business", () => {
   assert.equal(hours.opens, business.hours.opens);
 });
 
+test("LocalBusiness con la url de la página del operador, o la home", () => {
+  const tidi = (input: Partial<GraphInput>) =>
+    find(graph(input), "LocalBusiness")!;
+  assert.equal(tidi({}).url, `${SITE}/`);
+  assert.equal(tidi({ locale: "en" }).url, `${SITE}/en/`);
+  assert.equal(tidi({ operatorUrl: "/benidorm/" }).url, `${SITE}/benidorm/`);
+});
+
 test("WebSite y WebPage en el idioma de la página", () => {
   const nodes = graph({ locale: "en", url: `${SITE}/en/` });
   const website = find(nodes, "WebSite")!;

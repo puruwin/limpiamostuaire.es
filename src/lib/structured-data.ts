@@ -11,7 +11,7 @@ import { SITE } from "./site.ts";
 // Sin FAQPage: Google retiró ese resultado enriquecido.
 
 /** Páginas que llevan el Service con la tarifa. */
-export const serviceKeys: readonly string[] = ["inicio", "precios"];
+export const serviceKeys: readonly string[] = ["inicio", "precios", "benidorm"];
 
 export interface GraphInput {
   locale: Locale;
@@ -21,6 +21,8 @@ export interface GraphInput {
   /** Migas con rutas relativas ("/", "/precios/"); vacío en la home. */
   breadcrumbs: readonly { name: string; url: string }[];
   withService: boolean;
+  /** Ruta de la página del operador en el idioma ("/benidorm/"), si existe: url del LocalBusiness. Sin ella, la home. */
+  operatorUrl?: string | undefined;
 }
 
 type Node = Record<string, unknown>;
@@ -41,6 +43,7 @@ export function buildGraph({
   title,
   breadcrumbs,
   withService,
+  operatorUrl,
 }: GraphInput): { "@context": string; "@graph": Node[] } {
   const t = useTranslations(locale);
   const home = absolute(`${localePrefix(locale)}/`);
@@ -87,7 +90,8 @@ export function buildGraph({
       "@id": ids.localBusiness,
       name: business.operator,
       parentOrganization: { "@id": ids.organization },
-      url: home,
+      // La página a la que enlaza su ficha de Google.
+      url: operatorUrl ? absolute(operatorUrl) : home,
       image: absolute("/og.png"),
       telephone: business.phone.e164,
       email: business.email,

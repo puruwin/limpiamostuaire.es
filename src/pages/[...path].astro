@@ -6,6 +6,7 @@ import { routeParam, validatePages } from "../lib/pages";
 import { SITE_ENV } from "../lib/site-env";
 import Basica from "../templates/Basica.astro";
 import Home from "../templates/Home.astro";
+import Operador from "../templates/Operador.astro";
 import Pagina from "../templates/Pagina.astro";
 
 // Genera todas las páginas de la colección `pages` (src/content/pages/).
@@ -29,7 +30,12 @@ interface Props {
 
 const { page } = Astro.props;
 const { Content } = await render(page);
-const templates = { basica: Basica, home: Home, pagina: Pagina };
+const templates = {
+  basica: Basica,
+  home: Home,
+  pagina: Pagina,
+  operador: Operador,
+};
 const Template = templates[page.data.template];
 ---
 

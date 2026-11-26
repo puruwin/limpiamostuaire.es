@@ -9,10 +9,10 @@ Textos listos para copiar a la ficha de Google Business Profile. Redactados el 2
 | Nombre | `Ti&Di` (sin palabras clave) |
 | Tipo | Negocio de área de servicio, con la dirección de Benidorm **oculta** |
 | Teléfono | +34 608 96 22 13 |
-| Web | `https://limpiamostuaire.es/benidorm/?utm_source=google&utm_medium=organic&utm_campaign=gbp` (mientras no exista `/benidorm/`, la home con la misma UTM) |
+| Web | `https://limpiamostuaire.es/benidorm/?utm_source=google&utm_medium=organic&utm_campaign=gbp` (`/benidorm/` existe desde M2.6; antes, la home con la misma UTM) |
 | Horario | Lunes a viernes, 8:00–20:00. Sábado y domingo, cerrado |
 | Abierto desde | Noviembre de 2026 |
-| Zonas de servicio | Benidorm, Finestrat, La Vila Joiosa, La Nucía, Polop, Callosa d'en Sarrià, Calp, Altea |
+| Zonas de servicio | Benidorm, Finestrat, La Vila Joiosa, La Nucía, Polop, Callosa d'en Sarrià, Calp, L'Alfàs del Pi, Altea (L'Alfàs añadido el 26-11-2026) |
 
 ### Categoría
 
@@ -22,9 +22,9 @@ Textos listos para copiar a la ficha de Google Business Profile. Redactados el 2
 
 Nombre, categoría y zonas tienen que estar cerrados **antes** de pulsar «Verificar».
 
-## Descripción (717/750 caracteres)
+## Descripción (733/750 caracteres)
 
-> En Ti&Di somos Tamar y David, un matrimonio con base en Benidorm que se dedica a la limpieza en profundidad de aires acondicionados para viviendas y negocios. No nos quedamos en el filtro: desmontamos el split, protegemos la pared y los muebles y lavamos a presión la batería y la turbina con una funda que recoge el agua sucia. Al terminar te enviamos fotos del antes y el después y dejamos la zona limpia. Cada equipo lleva unos 60 minutos. Trabajamos en Benidorm, Finestrat, La Vila Joiosa, La Nucía, Polop, Callosa d'en Sarrià, Calp y Altea, de lunes a viernes de 8:00 a 20:00. Te atendemos en español, inglés y valenciano. Pago con Bizum o en efectivo. Pídenos presupuesto por WhatsApp con una foto de tu equipo.
+> En Ti&Di somos Tamar y David, un matrimonio con base en Benidorm que se dedica a la limpieza en profundidad de aires acondicionados para viviendas y negocios. No nos quedamos en el filtro: desmontamos el split, protegemos la pared y los muebles y lavamos a presión la batería y la turbina con una funda que recoge el agua sucia. Al terminar te enviamos fotos del antes y el después y dejamos la zona limpia. Cada equipo lleva unos 60 minutos. Trabajamos en Benidorm, Finestrat, La Vila Joiosa, La Nucía, Polop, Callosa d'en Sarrià, Calp, L'Alfàs del Pi y Altea, de lunes a viernes de 8:00 a 20:00. Te atendemos en español, inglés y valenciano. Pago con Bizum o en efectivo. Pídenos presupuesto por WhatsApp con una foto de tu equipo.
 
 La descripción no lleva precios, enlaces ni teléfono, porque Google lo desaconseja. Los precios van en *Servicios*.
 
@@ -96,7 +96,7 @@ Esta tarifa sustituye a la de la issue M2.2. La web la toma de `src/data/tarifa.
 | 2 splits | 150 € | 200 € |
 | 3 splits | 210 € | 260 € |
 | Cada split adicional | +55 € | +55 € |
-| Fuera de los 8 municipios | +18 € | +15 € |
+| Fuera de los 9 municipios | +18 € | +15 € |
 | Unidad exterior accesible sin altura | +20 € | +20 € |
 
 **Precio de lanzamiento:** 1 split en casa a 59 € (IVA incluido), sin pedir reseña a cambio. Válido hasta el 23/12/26. Con más splits en la misma visita, el primero sale a 59 € y cada uno de los demás a 55 € (decidido el 26/11/26). En la ficha está publicado como *Oferta* con esa fecha de fin, no en la descripción del servicio.

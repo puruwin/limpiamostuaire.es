@@ -1,0 +1,93 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { Image } from "astro:assets";
+import Botones from "../components/bloques/Botones.astro";
+import { business, telHref } from "../data/business";
+import { operador } from "../data/operador";
+import { useTranslations } from "../i18n/ui";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { fill, lista } from "../lib/format";
+
+// Página de un operador local (/benidorm/, destino de su ficha de Google): H1,
+// entradilla y botones, con la tarjeta «En <localidad> te atiende <operador>»
+// a la vista sin hacer scroll. Los datos salen de src/data/operador.ts y
+// business.ts; debajo, los bloques del .mdx.
+interface Props {
+  page: CollectionEntry<"pages">;
+}
+
+const { page } = Astro.props;
+const { locale, title, description, h1, lead, translationKey } = page.data;
+const t = useTranslations(locale);
+const Wordmark = operador.wordmark;
+
+const datos = [
+  { termino: t("operator.team"), valor: lista(locale, operador.equipo) },
+  {
+    termino: t("operator.phone"),
+    valor: business.phone.display,
+    href: telHref(),
+  },
+  { termino: t("operator.hours"), valor: t("footer.hours") },
+  { termino: t("operator.areas"), valor: lista(locale, business.areaServed) },
+];
+---
+
+<BaseLayout
+  lang={locale}
+  title={title}
+  description={description}
+  translationKey={translationKey}
+>
+  <section class="bg-fondo">
+    <div class="mx-auto grid max-w-6xl gap-6 px-4 pt-6 pb-12 sm:pt-10 lg:grid-cols-[3fr_2fr] lg:gap-x-12 lg:py-16">
+      <div>
+        <h1 class="text-3xl leading-tight font-bold sm:text-4xl lg:text-5xl">
+          {h1}
+        </h1>
+        {lead && <p class="mt-4 text-lg sm:text-xl">{lead}</p>}
+      </div>
+      <section
+        aria-labelledby="operador-titulo"
+        class="self-start rounded-2xl border-t-8 border-calido bg-papel p-5 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-center lg:p-6"
+      >
+        <div class="flex items-center gap-4">
+          <Image
+            src={operador.avatar.src}
+            alt={operador.avatar.alt[locale]}
+            width={80}
+            height={80}
+            densities={[1, 2]}
+            class="size-20 shrink-0 rounded-full ring-4 ring-calido"
+          />
+          <h2 id="operador-titulo" class="text-lg font-bold">
+            {fill(t("operator.servedBy"), { locality: operador.localidad })}
+            <span class="sr-only">{` ${operador.nombre}`}</span>
+            <Wordmark aria-hidden="true" class="mt-1 block h-8 w-auto" />
+          </h2>
+        </div>
+        <dl class="mt-5 space-y-3">
+          {datos.map(({ termino, valor, href }) => (
+            <div>
+              <dt class="text-sm font-bold">{termino}</dt>
+              <dd>
+                {href ? (
+                  <a
+                    href={href}
+                    class="inline-flex min-h-11 items-center font-semibold text-acento-texto underline underline-offset-4 hover:text-tinta"
+                  >
+                    {valor}
+                  </a>
+                ) : (
+                  valor
+                )}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+      <Botones locale={locale} />
+    </div>
+  </section>
+  <slot />
+</BaseLayout>

@@ -212,7 +212,7 @@ Prácticamente no hay datos: en Alicante, 60 búsquedas al mes entre todas. Solo
 
 | Página | Búsqueda principal | Secundarias | Title propuesto (≤ 60) | H1 propuesto |
 |---|---|---|---|---|
-| `/benidorm/` (M2.6, destino de la ficha) | limpieza aire acondicionado benidorm | limpieza split benidorm · aire acondicionado benidorm · los 7 municipios (en el texto, no en páginas aparte) | Limpieza de aire acondicionado en Benidorm · Ti&Di | Limpieza de aire acondicionado en Benidorm y alrededores |
+| `/benidorm/` (M2.6, destino de la ficha) | limpieza aire acondicionado benidorm | limpieza split benidorm · aire acondicionado benidorm · los 8 municipios de alrededor (en el texto, no en páginas aparte) | Limpieza de aire acondicionado en Benidorm · Ti&Di | Limpieza de aire acondicionado en Benidorm y alrededores |
 | `/` (M2.1) | limpieza aire acondicionado | limpieza split aire acondicionado · limpieza de aire acondicionado · marca | Limpieza de aire acondicionado a fondo · Limpiamos tu aire | Limpiamos tu aire acondicionado por dentro |
 | `/precios/` (M2.2) | precio limpieza aire acondicionado | limpieza aire acondicionado precio · cuánto cuesta limpiar un split (PAA) | Precio de limpieza de aire acondicionado · Tarifa por split | Cuánto cuesta limpiar un aire acondicionado |
 | `/como-lo-hacemos/` (M2.3) | limpieza profunda aire acondicionado | cómo se limpia un aire acondicionado por dentro (PAA) · limpieza split | Limpieza profunda de split: cómo lo hacemos | Así limpiamos tu split, paso a paso |

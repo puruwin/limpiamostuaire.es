@@ -50,6 +50,8 @@ src/
   data/tarifa.ts           Tarifa de casa y negocio, suplementos y precio de lanzamiento: única fuente para el schema y las páginas
   data/trabajos.ts         Fotos de antes y después de trabajos reales (M0.4)
   data/pasos.ts            Pasos de la limpieza de un split y la foto propia de cada uno (M0.4)
+  data/operador.ts         Operador local (Ti&Di): equipo, logo, avatar y su página (/benidorm/)
+  data/resenas.ts          Reseñas reales de la ficha de Google, con permiso
   integrations/            Guarda de {{PENDIENTE sobre dist/ en producción y en/404.html en su sitio
   lib/pages.ts             URL de cada página, equivalentes por idioma y validación de la colección
   lib/format.ts            Euros, listas y fechas en el idioma de la página
@@ -99,7 +101,7 @@ slug: precios # sin barras; "" para la home. La URL sale de aquí: /precios/, /e
 title: Precio de limpieza de aire acondicionado · Tarifa por split # ≤ 60 caracteres, tal cual, sin sufijo de marca
 description: … # ≤ 155 caracteres
 h1: Precios
-template: pagina # plantilla de src/templates/: basica, home o pagina (H1, entradilla y bloques)
+template: pagina # plantilla de src/templates/: basica, home, pagina (H1, entradilla y bloques) u operador (pagina + tarjeta del operador)
 lead: … # opcional; entradilla bajo el H1 (plantillas home y pagina)
 draft: false # opcional; true = borrador
 updated: 2026-11-25
@@ -129,12 +131,13 @@ Un `.mdx` usa los bloques de `src/components/bloques/` sin importarlos: la ruta 
 | `<Suplemento tipo="exterior" />`, `<Suplemento tipo="fueraDeZona" segmento="vivienda" />` | Importe del suplemento, dentro de una frase                                                  |
 | `<Municipios />`, `<Municipios chips />`                                                  | Los municipios de `business.ts`, en la frase («A, B y C») o como lista                       |
 | `<Trabajos />`                                                                            | Antes y después de `src/data/trabajos.ts`; sin trabajos, un `{{PENDIENTE`                    |
+| `<Resenas />`                                                                             | Reseñas de `src/data/resenas.ts` y enlace a la ficha; sin reseñas, nada                      |
 | `<Pasos>` + `<Paso titulo foto="turbina">`                                                | Pasos numerados con la foto de cada uno (`src/data/pasos.ts`); sin foto, un `{{PENDIENTE`    |
 | `<Pregunta titulo>`                                                                       | Pregunta frecuente plegable (sin JS ni `FAQPage`)                                            |
 | `<EnlacePagina clave="precios">texto</EnlacePagina>`                                      | Enlace a otra página del idioma; no sale nada mientras no exista                             |
 | `<Contacto titulo>`                                                                       | Bloque final sobre tinta con WhatsApp, teléfono y horario                                    |
 
-El precio de lanzamiento (`lanzamiento` en `src/data/tarifa.ts`) sale solo si el día del build, en hora de Madrid, es su fecha de fin o anterior. Pasada esa fecha, hace falta un despliegue para que desaparezca. Con el lanzamiento, el primer split sale a su precio y cada uno de los demás al del split adicional (`presupuesto()` en `tarifa.ts`). Las `description` de la home, precios y negocios llevan precios escritos a mano: si cambia la tarifa, cámbialas también.
+El precio de lanzamiento (`lanzamiento` en `src/data/tarifa.ts`) sale solo si el día del build, en hora de Madrid, es su fecha de fin o anterior. Pasada esa fecha, hace falta un despliegue para que desaparezca. Con el lanzamiento, el primer split sale a su precio y cada uno de los demás al del split adicional (`presupuesto()` en `tarifa.ts`). Las `description` de la home, precios, negocios y Benidorm llevan precios escritos a mano: si cambia la tarifa, cámbialas también.
 
 El build falla en cualquier entorno si dos páginas del mismo idioma comparten ruta o `translationKey`, o si el `locale` no coincide con la carpeta. Un campo que falte o no cumpla el esquema también (un `title` de más de 60 caracteres o una `description` de más de 155, por ejemplo).
 
@@ -150,8 +153,8 @@ El build falla en cualquier entorno si dos páginas del mismo idioma comparten r
 
 - `WebSite` y `WebPage` con `inLanguage`.
 - `Organization` «Limpiamos tu aire», con `logo` (`public/logo.png`).
-- `LocalBusiness` «Ti&Di», con `parentOrganization` hacia la marca, teléfono, correo, solo la localidad (la dirección está oculta), zonas, horario y `sameAs` a la ficha de Google.
-- En la home y en precios (`serviceKeys`), un `Service` con la tarifa de `src/data/tarifa.ts`.
+- `LocalBusiness` «Ti&Di», con `parentOrganization` hacia la marca, teléfono, correo, solo la localidad (la dirección está oculta), zonas, horario, `sameAs` a la ficha de Google y `url` a la página del operador (`/benidorm/`, la que enlaza la ficha) o, si no existe en el idioma, a la home.
+- En la home, precios y Benidorm (`serviceKeys`), un `Service` con la tarifa de `src/data/tarifa.ts`.
 - Fuera de la home, `BreadcrumbList` con las páginas que existen en el camino del slug.
 
 No lleva `FAQPage`, porque Google retiró ese resultado. Todo sale de `src/data/`: un dato nuevo del negocio se cambia allí, no en el JSON.
